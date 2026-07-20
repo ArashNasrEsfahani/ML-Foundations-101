@@ -5,6 +5,8 @@ import {
   isChapterUnlocked,
   isSectionUnlocked,
   isBossUnlocked,
+  isFinalUnlocked,
+  isFreeMode,
 } from '../src/state/unlock';
 
 const mk = (id: string, sections: string[], softPrereq?: string): Chapter => ({
@@ -63,6 +65,49 @@ describe('unlock rules', () => {
     s.bosses['ch01'] = { attempts: 1, best: 12, passed: true };
     expect(isChapterUnlocked(s, chapters, 'ch03')).toBe(true);
     expect(isChapterUnlocked(s, chapters, 'ch04')).toBe(false);
+  });
+
+  it('free mode opens every chapter, section, boss and the final exam', () => {
+    const s = freshSave();
+    s.mode = 'free';
+    expect(isFreeMode(s)).toBe(true);
+    for (const c of chapters) {
+      expect(isChapterUnlocked(s, chapters, c.id)).toBe(true);
+      expect(isBossUnlocked(s, chapters, c.id)).toBe(true);
+      for (const sec of c.sections)
+        expect(isSectionUnlocked(s, chapters, c.id, sec.id)).toBe(true);
+    }
+    expect(isFinalUnlocked(s, chapters)).toBe(true);
+  });
+
+  it('free mode still rejects things that do not exist', () => {
+    const s = freshSave();
+    s.mode = 'free';
+    expect(isChapterUnlocked(s, chapters, 'ch99')).toBe(false);
+    expect(isBossUnlocked(s, chapters, 'ch99')).toBe(false);
+    expect(isSectionUnlocked(s, chapters, 'ch01', 'nope')).toBe(false);
+  });
+
+  it('switching back to the journey restores the gates without losing progress', () => {
+    const s = freshSave();
+    s.mode = 'free';
+    s.xp = 250;
+    s.sections['s1'] = { done: true, at: 0, perfect: false };
+    expect(isChapterUnlocked(s, chapters, 'ch04')).toBe(true);
+
+    s.mode = 'journey';
+    expect(isChapterUnlocked(s, chapters, 'ch04')).toBe(false);
+    // the earned progress is untouched by the switch
+    expect(s.xp).toBe(250);
+    expect(s.sections['s1'].done).toBe(true);
+    // and work done while roaming still counts toward the gates
+    expect(isSectionUnlocked(s, chapters, 'ch01', 's2')).toBe(true);
+  });
+
+  it('defaults to the journey when no mode has been chosen', () => {
+    const s = freshSave();
+    expect(isFreeMode(s)).toBe(false);
+    expect(isChapterUnlocked(s, chapters, 'ch02')).toBe(false);
   });
 
   it("ch04 boss additionally requires ch02 passed", () => {

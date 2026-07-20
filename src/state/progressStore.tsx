@@ -50,6 +50,7 @@ type Action =
   | { type: 'hint'; hintId: string }
   | { type: 'setName'; name: string }
   | { type: 'setReducedMotion'; value: boolean }
+  | { type: 'setMode'; mode: 'journey' | 'free' }
   | { type: 'markUnlockSeen'; chapterIds: string[] }
   | { type: 'import'; save: SaveV1 }
   | { type: 'reset' }
@@ -179,6 +180,9 @@ function reducer(state: StoreState, action: Action): StoreState {
       return afterAward(state, { ...state.save, name: action.name }, 0);
     case 'setReducedMotion':
       return { ...state, save: { ...state.save, reducedMotion: action.value } };
+    case 'setMode':
+      // purely a gating change — earned progress is deliberately left alone
+      return { ...state, save: { ...state.save, mode: action.mode } };
     case 'markUnlockSeen': {
       const seen = new Set(state.save.seenUnlocked ?? []);
       let changed = false;

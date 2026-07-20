@@ -9,6 +9,7 @@ import {
   isBossUnlocked,
   isFinalUnlocked,
   chapterProgress,
+  isFreeMode,
 } from '../../state/unlock';
 import { SketchIcon } from '../sketch/SketchIcon';
 import { PaperCard } from '../sketch/PaperCard';
@@ -38,6 +39,8 @@ export function ChapterMap() {
   const { save, dispatch } = useProgress();
   const navigate = useNavigate();
 
+  const freeMode = isFreeMode(save);
+
   const unlockedIds = useMemo(
     () => chapters.filter((c) => isChapterUnlocked(save, chapters, c.id)).map((c) => c.id),
     [save],
@@ -53,6 +56,9 @@ export function ChapterMap() {
 
   useEffect(() => {
     if (unlockedIds.length === 0) return;
+    // free roam opens everything at once; recording that as "seen" would rob the
+    // unlock ceremony from anyone who later switches back to the journey
+    if (freeMode) return;
     const seen = new Set(save.seenUnlocked ?? []);
     const unseen = unlockedIds.filter((id) => !seen.has(id));
     if (unseen.length === 0) return;
@@ -61,7 +67,7 @@ export function ChapterMap() {
       setCelebrating([]);
     }, 1600);
     return () => clearTimeout(t);
-  }, [unlockedIds, save.seenUnlocked, dispatch]);
+  }, [unlockedIds, save.seenUnlocked, dispatch, freeMode]);
 
   const [openId, setOpenId] = useState<string | null>(() => {
     let last: string | null = null;
@@ -99,8 +105,36 @@ export function ChapterMap() {
         </p>
       </div>
 
+      {/* free roam is easy to forget you turned on, so say so plainly */}
+      {freeMode && (
+        <div
+          className="anim-rise"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            justifyContent: 'center',
+            marginBottom: 20,
+            fontSize: '0.88rem',
+            color: 'var(--graphite)',
+          }}
+        >
+          <SketchIcon name="flag" size={16} />
+          <span>
+            <strong style={{ color: 'var(--ink)' }}>Free roam</strong> — everything is open.
+          </span>
+          <button
+            className="ghost"
+            style={{ padding: '2px 12px', fontSize: '0.85rem' }}
+            onClick={() => dispatch({ type: 'setMode', mode: 'journey' })}
+          >
+            Switch to the full journey
+          </button>
+        </div>
+      )}
+
       {/* placement invitation — only while the course is still untouched */}
-      {!save.placement?.done && save.xp === 0 && (
+      {!freeMode && !save.placement?.done && save.xp === 0 && (
         <div className="anim-rise" style={{ marginBottom: 22, animationDelay: '90ms' }}>
           <PaperCard padding={18} seed={77}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>

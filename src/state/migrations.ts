@@ -15,6 +15,12 @@ export interface SaveV1 {
   reducedMotion?: boolean;
   /** chapters whose unlock animation has already played */
   seenUnlocked?: string[];
+  /**
+   * 'journey' (default) gates chapters behind the ones before them.
+   * 'free' opens everything at once. Switching is reversible and never
+   * touches earned progress — it only changes what is reachable.
+   */
+  mode?: 'journey' | 'free';
   /** chapters cleared by a test-out / placement quiz rather than by reading them */
   testedOut?: string[];
   /** placement check: whether it was taken (or explicitly declined) */

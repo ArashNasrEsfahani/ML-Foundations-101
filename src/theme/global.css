@@ -114,6 +114,24 @@ code {
   background: var(--dot);
 }
 
+/* header wordmark: full name where it fits, short form on phones */
+.hud-wordmark {
+  white-space: nowrap;
+}
+
+.hud-wordmark-short {
+  display: none;
+}
+
+@media (max-width: 620px) {
+  .hud-wordmark-full {
+    display: none;
+  }
+  .hud-wordmark-short {
+    display: inline;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

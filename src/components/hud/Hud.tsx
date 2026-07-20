@@ -79,8 +79,13 @@ export function Hud() {
             <span style={{ fontFamily: 'var(--font-hand)', fontSize: '1.2rem' }}>Map</span>
           </Link>
         ) : (
-          <span style={{ fontFamily: 'var(--font-hand)', fontSize: '1.45rem', fontWeight: 700 }}>
-            ML 101
+          <span
+            className="hud-wordmark"
+            style={{ fontFamily: 'var(--font-hand)', fontSize: '1.45rem', fontWeight: 700 }}
+          >
+            {/* the full name wraps to three lines on a phone, so shorten it there */}
+            <span className="hud-wordmark-full">Machine Learning 101</span>
+            <span className="hud-wordmark-short">ML 101</span>
           </span>
         )}
         <span style={{ flex: 1 }} />

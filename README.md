@@ -1,4 +1,4 @@
-# ML 101 — The Foundations of Machine Learning
+# Machine Learning 101 — The Foundations of Machine Learning
 
 A gamified, fully interactive web course that teaches the material of Andriy Burkov's
 *The Hundred-Page Machine Learning Book* — 11 chapters, 46 lessons, 21 hands-on
@@ -48,6 +48,17 @@ files so browsers cache them between visits, which is what you want on a real de
   run k-means and DBSCAN step by step, explore ROC curves, and more.
 - **A game layer**: XP and levels, checkpoint quizzes with instant feedback, chapter
   boss exams with eraser lives, badges, a cumulative final exam, and a certificate.
+
+## Two ways to learn
+
+Switch at any time in Settings, or from the banner on the map. Both share one
+save — your XP, badges and finished sections are identical either way, and the
+only thing that changes is what is reachable.
+
+- **Full journey** (default): chapters unlock as you finish the one before, and
+  boss exams gate the way forward. The course paces you.
+- **Free roam**: every chapter, widget and exam is open from the start. Wander
+  wherever you like, or dip in for the one topic you came for.
 
 ## Starting where you belong
 
