@@ -65,7 +65,7 @@ export function CertificatePage() {
             {save.name || '…'}
           </div>
           <p style={{ fontSize: '1.05rem', maxWidth: 460, margin: '18px auto 6px' }}>
-            has completed <strong>ML 101 — The Hundred-Page Course</strong>, passing every chapter
+            has completed <strong>ML 101 — The Foundations of Machine Learning</strong>, passing every chapter
             boss and the final exam, with {save.xp.toLocaleString()} XP earned along the way.
           </p>
           <div style={{ fontFamily: 'var(--font-hand)', fontSize: '1.2rem', color: 'var(--graphite)', marginTop: 14 }}>

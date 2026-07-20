@@ -1,4 +1,4 @@
-# ML 101 — The Hundred-Page Course
+# ML 101 — The Foundations of Machine Learning
 
 A gamified, fully interactive web course that teaches the material of Andriy Burkov's
 *The Hundred-Page Machine Learning Book* — 11 chapters, 46 lessons, 21 hands-on

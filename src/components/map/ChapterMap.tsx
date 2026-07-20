@@ -93,9 +93,9 @@ export function ChapterMap() {
           size={130}
           fallback={<SketchIcon name="book" size={72} strokeWidth={1.1} />}
         />
-        <h1 style={{ margin: '6px 0 2px' }}>The Hundred-Page Course</h1>
+        <h1 style={{ margin: '6px 0 2px' }}>The Foundations of Machine Learning</h1>
         <p style={{ color: 'var(--graphite)', margin: 0, fontSize: '0.95rem' }}>
-          machine learning, one pencil stroke at a time
+          one pencil stroke at a time
         </p>
       </div>
 
