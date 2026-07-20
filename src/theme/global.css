@@ -123,12 +123,88 @@ code {
   display: none;
 }
 
+/* header controls: round sketch buttons, sized as proper touch targets */
+.hud-bar {
+  gap: 10px;
+  padding: 10px 18px;
+}
+
+.hud-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* never let flex squash these out of round */
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: #fffdf8;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, transform 0.06s;
+}
+
+.hud-btn:hover {
+  background: var(--paper-2);
+  border-color: var(--ink);
+}
+
+.hud-btn:active {
+  transform: translateY(1px);
+}
+
+.hud-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px 9px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  background: #fffdf8;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, transform 0.06s;
+}
+
+.hud-back:hover {
+  background: var(--paper-2);
+  border-color: var(--ink);
+}
+
+.hud-back:active {
+  transform: translateY(1px);
+}
+
 @media (max-width: 620px) {
   .hud-wordmark-full {
     display: none;
   }
   .hud-wordmark-short {
     display: inline;
+  }
+  /* keep the row on one line on a phone without going below a 40px target */
+  .hud-bar {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+  .hud-btn {
+    width: 40px;
+    height: 40px;
+  }
+  /* the level name is what gives here — the number is the part worth keeping,
+     and the title is still on the medallion's tooltip */
+  .hud-level-title {
+    display: none;
+  }
+  .hud-level-medal {
+    width: 36px;
+    height: 36px;
+  }
+  .hud-xp-bar {
+    width: 64px;
+  }
+  .hud-back {
+    padding: 8px 12px 8px 9px;
   }
 }
 

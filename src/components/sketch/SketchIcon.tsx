@@ -69,9 +69,14 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   gear: (
+    // a real cog: ring + hub + eight nubs. Radial lines alone read as a sun
+    // once the icon is drawn large.
     <>
-      <circle cx="12" cy="12" r="3.2" />
-      <path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.4 5.6l1.9 1.8M16.7 16.6l1.9 1.8M18.6 5.5l-1.9 1.9M7.3 16.7l-1.9 1.8" />
+      <circle cx="12" cy="12" r="6.8" />
+      <circle cx="12" cy="12" r="2.8" />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
+        <path key={a} transform={`rotate(${a} 12 12)`} d="M18.4 10.3l2.4-.5.1 4.3-2.4-.4" />
+      ))}
     </>
   ),
   flag: (

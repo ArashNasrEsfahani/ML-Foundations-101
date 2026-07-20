@@ -277,7 +277,15 @@ export function ChapterMap() {
                     </div>
                     <div style={{ fontSize: '0.86rem', color: 'var(--graphite)' }}>{chapter.subtitle}</div>
                     {/* progress underline */}
-                    <svg width="160" height="8" aria-hidden style={{ marginTop: 4 }}>
+                    {/* viewBox + max-width so it shrinks instead of pushing the
+                        card wider than a phone screen */}
+                    <svg
+                      width="160"
+                      height="8"
+                      viewBox="0 0 160 8"
+                      aria-hidden
+                      style={{ marginTop: 4, maxWidth: '100%' }}
+                    >
                       <path d="M2 5 q 40 -3 78 0 t 78 0" stroke="var(--line)" strokeWidth="2" fill="none" strokeLinecap="round" />
                       <path
                         className="xp-underline"

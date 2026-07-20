@@ -56,27 +56,22 @@ export function Hud() {
   return (
     <>
       <header
+        className="hud-bar"
         style={{
           position: 'sticky',
           top: 0,
           zIndex: 20,
           display: 'flex',
           alignItems: 'center',
-          gap: 14,
-          padding: '10px 18px',
           background: 'color-mix(in srgb, var(--paper) 88%, transparent)',
           backdropFilter: 'blur(3px)',
           borderBottom: '1px solid var(--line)',
         }}
       >
         {!onMap ? (
-          <Link
-            to="/"
-            aria-label="Back to map"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}
-          >
-            <SketchIcon name="arrow-left" size={18} />
-            <span style={{ fontFamily: 'var(--font-hand)', fontSize: '1.2rem' }}>Map</span>
+          <Link to="/" aria-label="Back to map" className="hud-back">
+            <SketchIcon name="arrow-left" size={20} />
+            <span style={{ fontFamily: 'var(--font-hand)', fontSize: '1.3rem' }}>Map</span>
           </Link>
         ) : (
           <span
@@ -89,21 +84,28 @@ export function Hud() {
           </span>
         )}
         <span style={{ flex: 1 }} />
-        <Link to="/about" aria-label="About the book" title="About the book" style={{ display: 'inline-flex' }}>
-          <SketchIcon name="book" size={19} />
+        <Link to="/about" aria-label="About the book" title="About the book" className="hud-btn">
+          <SketchIcon name="book" size={24} />
         </Link>
-        <Link to="/badges" aria-label="Badges" style={{ display: 'inline-flex' }}>
-          <SketchIcon name="medal" size={19} />
+        <Link to="/badges" aria-label="Badges" title="Badges" className="hud-btn">
+          <SketchIcon name="medal" size={24} />
         </Link>
-        <Link to="/settings" aria-label="Settings" style={{ display: 'inline-flex' }}>
-          <SketchIcon name="gear" size={19} />
+        <Link to="/settings" aria-label="Settings" title="Settings" className="hud-btn">
+          <SketchIcon name="gear" size={25} />
         </Link>
         {/* level medallion */}
         <div
           title={`Level ${lvl} — ${levelTitle(lvl)}`}
           style={{ display: 'flex', alignItems: 'center', gap: 8 }}
         >
-          <svg key={`lvl-${levelPop}`} className={levelPop ? 'anim-pop' : undefined} width="34" height="34" viewBox="0 0 34 34" aria-hidden>
+          <svg
+            key={`lvl-${levelPop}`}
+            className={`hud-level-medal${levelPop ? ' anim-pop' : ''}`}
+            width="42"
+            height="42"
+            viewBox="0 0 34 34"
+            aria-hidden
+          >
             <circle
               cx="17"
               cy="17"
@@ -125,9 +127,9 @@ export function Hud() {
               {lvl}
             </text>
           </svg>
-          <div style={{ lineHeight: 1.1 }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--graphite)' }}>
-              {levelTitle(lvl)} ·{' '}
+          <div style={{ lineHeight: 1.15 }}>
+            <div style={{ fontSize: '0.78rem', color: 'var(--graphite)', whiteSpace: 'nowrap' }}>
+              <span className="hud-level-title">{levelTitle(lvl)} · </span>
               <span
                 key={`xp-${bump}`}
                 className={bump ? 'anim-bump' : undefined}
@@ -137,7 +139,7 @@ export function Hud() {
               </span>
             </div>
             {/* hand-drawn underline XP bar */}
-            <svg width="90" height="8" aria-hidden>
+            <svg className="hud-xp-bar" width="90" height="8" viewBox="0 0 90 8" aria-hidden>
               <path
                 d="M2 5 q 20 -2.5 44 0 t 42 0"
                 stroke="var(--line)"
