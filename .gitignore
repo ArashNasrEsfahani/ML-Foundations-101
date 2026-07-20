@@ -11,3 +11,6 @@ dist/
 # Pre-optimisation source images (~14 MB). The optimised PNGs the app actually
 # loads are committed; regenerate these with scripts/optimize_illustrations.py
 src/assets/illustrations/originals/
+
+# stray screenshots from local browser testing
+/map-home.jpeg
