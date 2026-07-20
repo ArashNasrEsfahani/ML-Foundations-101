@@ -1,0 +1,23 @@
+:root {
+  /* paper + ink — the whole app lives in this monochrome range */
+  --paper: #faf7f0;
+  --paper-2: #f3efe6;
+  --ink: #2a2a28;
+  --graphite: #7c7a74;
+  --dot: #d9d4c9;
+  --line: #c9c4b8;
+
+  /* feedback colors — used ONLY for correct / wrong answers */
+  --ok: #1e6b45;
+  --ok-bg: #e8f0ea;
+  --bad: #8e2f2f;
+  --bad-bg: #f4eaea;
+
+  --font-body: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --font-hand: 'Caveat', cursive;
+  --font-mono: 'Consolas', 'Menlo', monospace;
+
+  --radius: 6px;
+  --shadow: 0 1px 3px rgba(42, 42, 40, 0.08);
+  --maxw: 720px;
+}

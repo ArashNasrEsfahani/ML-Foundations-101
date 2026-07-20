@@ -1,0 +1,14 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import '@fontsource/caveat/700.css';
+import './theme/tokens.css';
+import './theme/global.css';
+import './theme/animations.css';
+import './theme/katex-overrides.css';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);

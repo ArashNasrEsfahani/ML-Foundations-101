@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.local
+.ml101-save.json
+.playwright-mcp/
+
+# The book itself is Andriy Burkov's copyrighted work and is deliberately not
+# redistributed here. Get it from https://themlbook.com/
+*.pdf
+
+# Pre-optimisation source images (~14 MB). The optimised PNGs the app actually
+# loads are committed; regenerate these with scripts/optimize_illustrations.py
+src/assets/illustrations/originals/
