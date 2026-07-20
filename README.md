@@ -24,14 +24,19 @@ npm install        # once
 npm run dev        # → http://localhost:5173
 ```
 
-## Build the single-file offline version
+## Build it
 
 ```bash
-npm run build      # → dist/index.html (one self-contained file)
+npm run build           # → dist/          for hosting (Vercel, Netlify, any static host)
+npm run build:offline   # → dist-offline/  one self-contained index.html
 ```
 
-`dist/index.html` works from a double-click (file://) — routing, math rendering,
-widgets and saved progress all function offline. Share the file freely.
+The offline build produces a single `index.html` that works from a double-click
+(`file://`) — routing, math rendering, widgets and saved progress all function with
+no server and no network. Share that file freely.
+
+The hosted build keeps JavaScript, CSS, fonts and images as separate content-hashed
+files so browsers cache them between visits, which is what you want on a real deploy.
 
 ## What's inside
 
@@ -68,8 +73,8 @@ your machine: progress lives in your own browser, so if this is deployed publicl
 every visitor simply keeps their own.
 
 Settings → **Export** copies your progress out as text and **Import** restores it,
-which is also how to carry progress between the dev server and the offline
-`dist/index.html` file.
+which is also how to carry progress between the dev server, a deployed copy, and the
+offline file — each is a separate origin, so each keeps its own progress.
 
 ---
 

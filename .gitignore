@@ -1,5 +1,7 @@
 node_modules/
 dist/
+dist-offline/
+.vercel
 *.local
 .ml101-save.json
 .playwright-mcp/

@@ -10,7 +10,7 @@ const SAVE_ROUTE = '/__ml101_save';
  * Dev-only save mirror. localStorage is scoped per exact origin, so a changed
  * port or cleared browser data reads as lost progress. This keeps a copy in
  * .ml101-save.json beside the project, which the app reconciles on boot.
- * Not part of the production build (Vercel/offline use localStorage only).
+ * Not part of any production build (hosted/offline use localStorage only).
  */
 function saveServer(): Plugin {
   const file = path.resolve(process.cwd(), '.ml101-save.json');
@@ -55,25 +55,44 @@ function saveServer(): Plugin {
   };
 }
 
-export default defineConfig({
-  base: './',
-  plugins: [react(), saveServer(), viteSingleFile()],
-  server: {
-    // dual-stack: this machine resolves `localhost` to ::1, while 127.0.0.1 is
-    // IPv4 — binding only one of them makes the app unreachable at the other,
-    // and each address is a separate localStorage origin.
-    host: '::',
-    port: 5173,
-    // never drift to another port: the origin change would orphan localStorage
-    strictPort: true,
-  },
-  preview: { host: '::', port: 4173, strictPort: true },
-  build: {
-    assetsInlineLimit: 100_000_000,
-    chunkSizeWarningLimit: 8000,
-  },
-  test: {
-    environment: 'node',
-    include: ['tests/**/*.spec.ts'],
-  },
-} as never);
+/**
+ * Two build targets:
+ *
+ *   vite build                  → dist/         normal split assets, for hosting
+ *   vite build --mode offline   → dist-offline/ one self-contained index.html
+ *
+ * Hosting wants separate, content-hashed files so the browser can cache them
+ * between visits; the offline copy wants everything inlined so it runs from a
+ * double-click. Inlining ~3.5 MB into the HTML would defeat caching entirely on
+ * a real deploy, which is why single-file is opt-in rather than the default.
+ */
+export default defineConfig(({ mode }) => {
+  const offline = mode === 'offline';
+
+  return {
+    // relative base keeps the offline file working from file:// — and is
+    // harmless when hosted, because routing is hash-based
+    base: './',
+    plugins: [react(), saveServer(), ...(offline ? [viteSingleFile()] : [])],
+    server: {
+      // dual-stack: this machine resolves `localhost` to ::1, while 127.0.0.1 is
+      // IPv4 — binding only one of them makes the app unreachable at the other,
+      // and each address is a separate localStorage origin.
+      host: '::',
+      port: 5173,
+      // never drift to another port: the origin change would orphan localStorage
+      strictPort: true,
+    },
+    preview: { host: '::', port: 4173, strictPort: true },
+    build: {
+      outDir: offline ? 'dist-offline' : 'dist',
+      // offline: inline everything. hosted: keep images as cacheable files.
+      assetsInlineLimit: offline ? 100_000_000 : 4096,
+      chunkSizeWarningLimit: 8000,
+    },
+    test: {
+      environment: 'node',
+      include: ['tests/**/*.spec.ts'],
+    },
+  };
+}) as never;
