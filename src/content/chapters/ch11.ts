@@ -77,14 +77,14 @@ export const ch11: Chapter = {
               id: 'ch11-q-next-3',
               prompt: 'How does a GAN learn to generate authentic-looking images?',
               choices: [
-                'A generator and a discriminator compete: one forges images, the other learns to detect fakes',
-                'It memorizes the training photos and replays them',
-                'It clusters images and outputs the centroids',
-                'A human labels each generated image as good or bad',
+                'Two networks compete: one forges images, the other spots fakes',
+                'A network memorizes the training photos and replays them with noise',
+                'A model clusters the training images and outputs each centroid',
+                'Human raters score each generated image and the model retrains',
               ],
               answer: 0,
               explain:
-                'The zero-sum game punishes the generator when its fake is caught and the discriminator when it is fooled — both improve together.',
+                'The generator and the discriminator play a zero-sum game: the generator is punished when its fake is caught, the discriminator when it is fooled — so each keeps sharpening the other. No human is in the loop, and nothing is memorized or averaged.',
             },
             {
               kind: 'tf',
@@ -100,10 +100,10 @@ export const ch11: Chapter = {
               id: 'ch11-q-next-5',
               prompt: 'Reinforcement learning is the natural fit when…',
               choices: [
-                'decisions are sequential and rewards accumulate over the long run',
-                'the dataset is a labeled table of examples',
-                'you need to visualize high-dimensional data',
-                'the ratings matrix is sparse',
+                'decisions are sequential and rewards arrive late',
+                'you have a labeled table and want one prediction per row',
+                'you need to visualize high-dimensional data on a flat plot',
+                'the rating matrix is sparse and you must fill the gaps',
               ],
               answer: 0,
               explain:

@@ -57,14 +57,14 @@ export const ch04: Chapter = {
               id: 'ch04-q-blocks-1',
               prompt: 'Which three parts make up any supervised learning algorithm?',
               choices: [
-                'A loss function, an optimization criterion built from it, and an optimization routine',
-                'A dataset, a GPU, and a Python library',
-                'A decision boundary, a margin, and a kernel',
-                'A training set, a validation set, and a test set',
+                'A loss function, an optimization criterion, and an optimization routine',
+                'A training set, a set of hyperparameters, and a stopping rule for training',
+                'A decision boundary, a margin around it, and a kernel that reshapes the space',
+                'A training set, a validation set, and a test set held back for the end',
               ],
               answer: 0,
               explain:
-                'The loss scores one example, the criterion aggregates the loss into a single objective, and the routine (e.g. gradient descent) searches for parameters that optimize it on the training data.',
+                'The loss scores one example, the criterion aggregates the loss into a single objective, and the routine (e.g. gradient descent) searches for parameters that optimize it on the training data. The three-way data split and the hyperparameters are things you bring *to* an algorithm; boundaries, margins and kernels belong to one particular family of them.',
             },
             {
               kind: 'match',
@@ -92,14 +92,14 @@ export const ch04: Chapter = {
               id: 'ch04-q-blocks-4',
               prompt: 'Gradient descent can be applied whenever the optimization criterion is…',
               choices: [
-                'differentiable — it has a gradient at (most of) its points',
-                'convex — otherwise the algorithm cannot run at all',
-                'built from exactly one training example',
-                'a count of classification errors',
+                'differentiable — a gradient exists at (almost) every point',
+                'convex — a non-convex criterion has no gradient to follow',
+                'already close to its minimum, so only small steps are needed',
+                'a count of misclassified examples, which descent minimizes directly',
               ],
               answer: 0,
               explain:
-                'Differentiability is what matters. On non-convex criteria (neural networks) it still runs — it just promises only a local minimum. An error count has no useful gradient.',
+                'Differentiability is what matters. Convexity is a separate property: on non-convex criteria (neural networks) gradient descent still runs — it just promises only a *local* minimum. A count of errors is a step function: its gradient is zero almost everywhere, so there is nothing to descend.',
             },
           ],
         },
@@ -261,14 +261,14 @@ for epoch in range(150):
               id: 'ch04-q-descent-2',
               prompt: 'One **epoch** of full-batch gradient descent means:',
               choices: [
-                'one complete pass over the training set, ending in one update of each parameter',
-                'one update based on a single randomly chosen example',
-                'reaching the global minimum once',
-                'testing one candidate value of $\\alpha$',
+                'one complete pass over the training set, ending in one update per parameter',
+                'one update of the parameters computed from a single randomly drawn training example',
+                'the moment the parameters stop changing and the loss reaches its minimum',
+                'one full pass over the validation set to measure the loss after training',
               ],
               answer: 0,
               explain:
-                'Epoch = the whole training set used once. A single-example update is the “stochastic” variant’s move, not an epoch.',
+                'Epoch = the whole training set used once, then one update of each parameter. A single-example update is the *stochastic* variant’s move. Convergence is what many epochs eventually produce, not what one epoch means, and epochs are counted over the training set — the validation set is never touched during training.',
             },
             {
               kind: 'tf',
@@ -283,14 +283,14 @@ for epoch in range(150):
               id: 'ch04-q-descent-4',
               prompt: 'Why does the update rule *subtract* the partial derivative?',
               choices: [
-                'The derivative points in the direction of growth, and we want the loss to shrink',
-                'Because $\\alpha$ is negative',
-                'To keep $w$ positive at all times',
-                'Because the loss is always negative',
+                'The derivative points toward growth, and we want the loss to shrink',
+                'The learning rate $\\alpha$ is defined to be negative, so subtracting adds the step',
+                'Subtracting keeps every parameter positive, which the model requires',
+                'The squared loss is always negative, so subtracting moves it up toward zero',
               ],
               answer: 0,
               explain:
-                'A derivative is a growth indicator. Stepping against it — downhill — is the entire idea of gradient *descent*.',
+                'A derivative is a growth indicator. Stepping against it — downhill — is the entire idea of gradient *descent*. $\\alpha$ is a positive step size; parameters are free to go negative; and a squared loss is never negative to begin with.',
             },
           ],
         },
@@ -344,24 +344,24 @@ for epoch in range(150):
               id: 'ch04-q-engineers-1',
               prompt: 'Why do practitioners use libraries like scikit-learn instead of writing algorithms themselves?',
               choices: [
-                'Library implementations are engineered for stability and efficiency; reimplementing them wastes effort',
-                'Hand-written learning algorithms are forbidden in production systems',
-                'Libraries guarantee higher accuracy on any dataset',
-                'Gradient descent is impossible to program by hand',
+                'Library implementations are engineered for numerical stability and efficiency',
+                'A hand-written implementation of a published algorithm cannot be used commercially',
+                'Library algorithms reach higher accuracy than the same algorithm written by hand',
+                'Optimizers like gradient descent are too intricate to program correctly by hand',
               ],
               answer: 0,
               explain:
-                'The algorithms are the same — the library versions are simply battle-tested, fast, and one line away.',
+                'The algorithms are the same — the library versions are simply battle-tested, fast, and one line away. They do not change the *accuracy* an algorithm can reach on your data, there is no legal barrier to writing your own, and gradient descent is famously a dozen lines of code. Effort, not capability, is the argument.',
             },
             {
               kind: 'multi',
               id: 'ch04-q-engineers-2',
               prompt: 'Which of these can update an existing model incrementally as new labeled data arrives? (pick all that apply)',
               choices: [
-                'Naïve Bayes',
+                'Naïve Bayes classifiers',
                 'scikit-learn’s `SGDClassifier`',
                 'a decision tree built with ID3',
-                'the `PassiveAggressiveRegressor` family',
+                'the `PassiveAggressive` family',
               ],
               answers: [0, 1, 3],
               explain:
@@ -382,7 +382,7 @@ for epoch in range(150):
               prompt: 'A feature “color” takes the values red, yellow, or green. Which algorithm can consume it *as is*?',
               choices: [
                 'decision tree learning',
-                'SVM',
+                'SVM with an RBF kernel',
                 'linear regression',
                 'kNN with Euclidean distance',
               ],
@@ -401,14 +401,14 @@ for epoch in range(150):
       id: 'ch04-boss-1',
       prompt: 'Every supervised learning algorithm is a combination of…',
       choices: [
-        'a loss function, an optimization criterion based on it, and a routine that optimizes the criterion using training data',
-        'a neural network, a GPU, and a large dataset',
-        'a training set, a margin, and a kernel',
-        'a hypothesis, an experiment, and a conclusion',
+        'a loss function, an optimization criterion, and a routine that optimizes it',
+        'a model architecture, a large dataset, and enough GPU time to converge',
+        'a training set, a decision boundary, and a kernel that separates the classes',
+        'a hypothesis, an experiment that tests it, and a conclusion drawn from both',
       ],
       answer: 0,
       explain:
-        'Loss → criterion → optimization routine: the three building blocks behind every algorithm in the book.',
+        'Loss → criterion → optimization routine: the three building blocks behind every algorithm in the book. Architecture and compute are engineering choices layered on top; boundaries and kernels describe one family; and the scientific method, tempting as the parallel is, is not what the chapter is decomposing.',
     },
     {
       kind: 'match',
@@ -429,12 +429,12 @@ for epoch in range(150):
       choices: [
         'kNN and decision tree learning',
         'linear and logistic regression',
-        'SVM and linear regression',
-        'Adam and RMSProp',
+        'SVM and polynomial regression',
+        'Naïve Bayes and linear regression',
       ],
       answer: 0,
       explain:
-        'Both are among the oldest ML algorithms, born of intuition; their formal optimization criteria were derived later to explain them.',
+        'Both are among the oldest ML algorithms, born of intuition; their formal optimization criteria were derived later to explain them. Every other pair here was *designed* around an explicit criterion — squared error, likelihood, or the margin.',
     },
     {
       kind: 'tf',
@@ -448,14 +448,14 @@ for epoch in range(150):
       id: 'ch04-boss-5',
       prompt: 'Gradient descent finds a minimum by…',
       choices: [
-        'starting at some point and repeatedly stepping proportional to the negative of the gradient',
-        'testing every possible parameter combination on a grid',
-        'solving a closed-form equation in one shot',
-        'randomly guessing parameters until the loss is zero',
+        'starting at some point and repeatedly stepping against the local gradient',
+        'evaluating every parameter combination on a grid and keeping the best',
+        'solving the criterion’s closed-form equation in a single algebraic step',
+        'sampling random parameter values until the loss stops improving',
       ],
       answer: 0,
       explain:
-        'It is an iterative routine: measure the local slope, step downhill, repeat until the parameters settle.',
+        'It is an iterative routine: measure the local slope, step *proportional to the negative of the gradient*, repeat until the parameters settle. Grids and random sampling ignore the slope entirely, and a closed form exists only for a few criteria — which is exactly why a general optimizer is needed.',
     },
     {
       kind: 'tf',
@@ -491,12 +491,13 @@ for epoch in range(150):
       prompt: 'In gradient descent, an **epoch** is…',
       choices: [
         'one use of the entire training set to update each parameter',
-        'one update from one random example',
-        'one full restart with re-initialized parameters',
-        'the moment the loss reaches zero',
+        'one update computed from a single randomly selected example',
+        'one restart of training from freshly re-initialized parameters',
+        'one halving of the learning rate once the loss stops falling',
       ],
       answer: 0,
-      explain: 'Full pass = one epoch; the derivatives are then recomputed with the updated parameters.',
+      explain:
+        'Full pass = one epoch; the derivatives are then recomputed with the updated parameters. The single-example update belongs to stochastic gradient descent, and neither re-initialization nor learning-rate schedules are part of what the word *epoch* counts.',
     },
     {
       kind: 'order',
@@ -516,14 +517,14 @@ for epoch in range(150):
       id: 'ch04-boss-11',
       prompt: 'You crank the learning rate α too high. What do you observe?',
       choices: [
-        'The loss grows epoch after epoch and the parameters shoot toward infinity',
-        'The loss shrinks faster than before, with no downside',
-        'Training stops early with the global optimum found',
-        'The gradient becomes exactly zero',
+        'The loss grows epoch after epoch and the parameters run off to infinity',
+        'The loss drops faster every epoch, since larger steps cover more ground',
+        'Training halts at the first epoch because the gradient becomes exactly zero',
+        'The parameters oscillate forever between two fixed values, never diverging',
       ],
       answer: 0,
       explain:
-        'Each step overshoots the valley and lands higher up the opposite wall — divergence, the signature failure of a too-large α.',
+        'Each step overshoots the valley and lands *higher* up the opposite wall — divergence, the signature failure of a too-large α. Bigger steps help only up to a point; past it the loss climbs, and nothing about a large α zeroes the gradient or pins the parameters to a stable cycle.',
     },
     {
       kind: 'tf',
@@ -537,14 +538,14 @@ for epoch in range(150):
       id: 'ch04-boss-13',
       prompt: 'How does minibatch stochastic gradient descent speed up plain gradient descent?',
       choices: [
-        'It approximates the gradient using small random subsets of the training data',
-        'It uses a larger learning rate that never diverges',
-        'It skips the parameter update in most epochs',
-        'It replaces the loss function with a simpler one',
+        'It estimates the gradient from small random subsets of the training data',
+        'It uses a much larger learning rate that is guaranteed never to diverge',
+        'It updates the parameters only every few epochs instead of every epoch',
+        'It swaps the squared loss for a cheaper loss that is faster to compute',
       ],
       answer: 0,
       explain:
-        'Small batches give cheap, noisy gradient estimates — a trade of exactness for speed that wins on large datasets.',
+        'Small batches give cheap, noisy gradient estimates — a trade of exactness for speed that wins on large datasets. SGD updates *more* often, not less, keeps the same loss function, and enjoys no immunity from divergence: α still has to be chosen with care.',
     },
     {
       kind: 'match',
@@ -571,14 +572,14 @@ for epoch in range(150):
       id: 'ch04-boss-16',
       prompt: 'scikit-learn is…',
       choices: [
-        'the most used open-source ML library in practice, written in Python and C',
-        'a proprietary cloud service for training neural networks',
-        'a visualization tool for loss landscapes',
-        'a database of pre-labeled datasets',
+        'the most widely used open-source ML library, written in Python and C',
+        'a proprietary cloud platform for training and serving neural networks',
+        'a visualization toolkit for plotting loss landscapes and decision boundaries',
+        'a public repository of pre-labeled datasets for benchmarking models',
       ],
       answer: 0,
       explain:
-        'A library = algorithms plus supporting tools, implemented with stability and efficiency in mind — so engineers rarely implement algorithms themselves.',
+        'A library = algorithms plus supporting tools, implemented with stability and efficiency in mind — so engineers rarely implement algorithms themselves. It is free and runs locally: no cloud subscription, no dataset catalogue, no plotting layer of its own.',
     },
     {
       kind: 'mcq',
@@ -600,13 +601,13 @@ for epoch in range(150):
       prompt: 'Given a feature vector, which model can natively return a score between 0 and 1 interpretable as confidence?',
       choices: [
         'logistic regression',
-        'plain SVM',
-        'kNN with Euclidean distance',
-        'none — no model outputs scores',
+        'a plain SVM',
+        'kNN with a distance metric',
+        'none of these models',
       ],
       answer: 0,
       explain:
-        'Logistic regression (and decision trees) yield 0–1 scores; plain SVM and kNN output only the class, though scores can be synthesized with extra tricks.',
+        'Logistic regression (and decision trees) yield 0–1 scores directly. Plain SVM and kNN name only the class, though scores can be synthesized for them with extra tricks — which is why “none” is wrong too.',
     },
     {
       kind: 'tf',
@@ -621,14 +622,14 @@ for epoch in range(150):
       id: 'ch04-boss-20',
       prompt: 'Linear regression has a closed-form solution, yet the book demonstrates gradient descent on it. Why is that a good choice?',
       choices: [
-        'Its convex, bowl-shaped criterion makes the descent easy to see — even though the closed form makes gradient descent unnecessary',
-        'Gradient descent is the only way to fit a regression line',
-        'The closed form only works for classification problems',
-        'Gradient descent finds a better line than the closed form',
+        'Its convex, bowl-shaped criterion makes every descent step easy to see',
+        'Gradient descent is the only practical way to fit a regression line',
+        'The closed-form solution exists only for classification problems',
+        'Gradient descent finds a better line than the closed-form solution',
       ],
       answer: 0,
       explain:
-        'A transparent problem is the best stage for demonstrating an optimizer — you can check every step against the known exact answer.',
+        'A transparent problem is the best stage for demonstrating an optimizer — one bowl, one minimum, and you can check every step against the known exact answer. Gradient descent is *not* needed here, and it cannot beat the closed form; that redundancy is precisely what makes it a safe demo.',
     },
   ],
 };

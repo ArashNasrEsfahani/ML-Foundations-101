@@ -93,14 +93,14 @@ export const ch05: Chapter = {
               id: 'ch05-q-features-1',
               prompt: 'Why is encoding red $=1$, yellow $=2$, green $=3$ a bad idea for an unordered category?',
               choices: [
-                'It invents an order between values, and the algorithm will chase a pattern that isn’t there',
-                'Learning algorithms cannot handle integers',
-                'It makes the feature vector three dimensions longer',
-                'The colors would be impossible to convert back',
+                'It invents an order, so the algorithm chases a pattern that isn’t there',
+                'Learning algorithms can only accept features that are already binary',
+                'It costs three extra dimensions that the model has to fit weights for',
+                'The original color names cannot be recovered from the encoded values',
               ],
               answer: 0,
               explain:
-                'Numbers are ordered; unordered categories aren’t. One-hot encoding spends extra dimensions precisely to avoid smuggling in a fake ordering.',
+                'Numbers are ordered; unordered categories aren’t. Writing 1/2/3 puts yellow “between” red and green, and the algorithm will hunt for a regularity that doesn’t exist. One-hot encoding *spends* three dimensions precisely to avoid smuggling in that fake ordering — the cost is the price, not the problem.',
             },
             {
               kind: 'numeric',
@@ -189,14 +189,14 @@ export const ch05: Chapter = {
               id: 'ch05-q-sets-2',
               prompt: 'What is the validation set for?',
               choices: [
-                'Choosing between learning algorithms and finding good hyperparameter values',
-                'Giving the algorithm extra examples to train on',
-                'Storing examples with missing features',
-                'Measuring how fast the model predicts',
+                'Choosing between learning algorithms and tuning hyperparameter values',
+                'Adding examples the algorithm can train on once the training set runs out',
+                'Holding the examples whose feature values are incomplete or missing',
+                'Reporting the final unbiased performance number before the model ships',
               ],
               answer: 0,
               explain:
-                'Validation is the workbench for model selection and tuning; the test set stays untouched for the final verdict.',
+                'Validation is the workbench for model selection and tuning. The final unbiased verdict is the *test* set’s job — using validation for it would report a number the model was tuned against. And no holdout set is ever fed back into training.',
             },
             {
               kind: 'tf',
@@ -212,9 +212,9 @@ export const ch05: Chapter = {
               prompt: 'Your dataset has 40 million labeled examples. A sensible split is:',
               choices: [
                 '95% training / 2.5% validation / 2.5% test',
-                '33% / 33% / 34% in equal parts',
+                '33% training / 33% validation / 34% test',
                 '15% training / 70% validation / 15% test',
-                '100% training — with this much data, holdouts are unnecessary',
+                '100% training — holdouts are unnecessary at this scale',
               ],
               answer: 0,
               explain:
@@ -275,13 +275,13 @@ export const ch05: Chapter = {
               prompt: 'Training error is very low, but validation error is much higher. Diagnosis?',
               choices: [
                 'Overfitting — the model learned the training set’s noise and quirks',
-                'Underfitting — the model is too simple',
-                'The validation set must be broken',
-                'Nothing — this is the ideal outcome',
+                'Underfitting — the model is too simple to capture the real pattern',
+                'A broken split — the validation set must have been drawn differently',
+                'A healthy fit — low training error is exactly what you are aiming for',
               ],
               answer: 0,
               explain:
-                'A big train-to-holdout gap is the signature of overfitting (high variance): great memory, poor generalization.',
+                'A big train-to-holdout gap is the signature of overfitting (high variance): great memory, poor generalization. Underfitting would show high error on *both* sets, and low training error alone is never the goal — a lookup table achieves it.',
             },
             {
               kind: 'tf',
@@ -309,14 +309,14 @@ export const ch05: Chapter = {
               id: 'ch05-q-fit-4',
               prompt: 'Which pair of moves addresses *underfitting*?',
               choices: [
-                'Use a more expressive model, or engineer features with more predictive power',
-                'Remove training examples, or delete features',
-                'Lower the polynomial degree, or add regularization',
-                'Shuffle the dataset again, or shrink the validation set',
+                'Use a more expressive model, or engineer features with more signal',
+                'Drop the noisiest training examples, or delete the weakest features',
+                'Lower the polynomial degree, or add a stronger regularization penalty',
+                'Reshuffle and re-split the data, or enlarge the validation set',
               ],
               answer: 0,
               explain:
-                'Underfitting means not enough capacity or not enough signal — so add capacity or add signal. The third option is medicine for the *opposite* disease.',
+                'Underfitting means not enough capacity or not enough signal — so add capacity or add signal. Cutting examples, cutting features, lowering the degree and regularizing all *reduce* capacity: they are medicine for the opposite disease. Reshuffling changes nothing about fit.',
             },
           ],
         },
@@ -380,14 +380,14 @@ export const ch05: Chapter = {
               id: 'ch05-q-reg-1',
               prompt: 'You want the model to automatically ignore most features. Which regularization?',
               choices: [
-                'L1 — it drives many weights to exactly zero, selecting features',
-                'L2 — it makes all weights slightly larger',
-                'Batch normalization',
-                'Any of them, they are interchangeable',
+                'L1 — it drives many weights to exactly zero, switching features off',
+                'L2 — it shrinks small weights all the way to zero the fastest',
+                'Batch normalization — it rescales each layer’s inputs to drop features',
+                'Any of them — all three penalties reduce the feature count equally',
               ],
               answer: 0,
               explain:
-                'L1’s corners push weights to exactly 0, yielding a sparse model. L2 only shrinks weights toward 0 without switching features off.',
+                'L1’s corners push weights to exactly 0, yielding a sparse model — feature selection for free. L2 shrinks weights smoothly *toward* zero but essentially never lands on it, so every feature stays in play, and batch normalization is a neural-network trick that removes nothing.',
             },
             {
               kind: 'tf',
@@ -403,13 +403,13 @@ export const ch05: Chapter = {
               prompt: 'What happens if the regularization strength $C$ is set extremely high?',
               choices: [
                 'Nearly all weights are crushed toward zero and the model underfits',
-                'The model overfits more aggressively',
-                'Training error reaches exactly zero',
-                'The model becomes non-linear',
+                'The penalty dominates, so the model fits the training noise even harder',
+                'Training error is driven to exactly zero on every training example',
+                'The decision surface bends, turning a linear model into a nonlinear one',
               ],
               answer: 0,
               explain:
-                'A huge $C$ makes the penalty dominate the loss: the cheapest solution is a near-empty model — very simple, very biased.',
+                'A huge $C$ makes the penalty dominate the loss: the cheapest solution is a near-empty model — very simple, very biased. Overfitting and a zero training error are what happens with *too little* regularization, and no amount of $C$ changes the model’s functional form.',
             },
             {
               kind: 'match',
@@ -523,9 +523,9 @@ export const ch05: Chapter = {
               prompt: 'When does accuracy become misleading?',
               choices: [
                 'When one class vastly outnumbers the other',
-                'When the model outputs probabilities',
+                'When the model outputs scores rather than labels',
                 'When the dataset was shuffled before splitting',
-                'When precision equals recall',
+                'When precision and recall are equal',
               ],
               answer: 0,
               explain:
@@ -559,12 +559,12 @@ export const ch05: Chapter = {
               choices: [
                 'Its score ranking is no better than random guessing',
                 'It classifies exactly half of the positives correctly',
-                'It is a perfect classifier',
-                'Its precision must also equal 0.5',
+                'It ranks every positive above every negative',
+                'Its precision and recall both equal 0.5 as well',
               ],
               answer: 0,
               explain:
-                'AUC 0.5 is the diagonal — the scores carry no ranking information. Perfect is 1.0; below 0.5 suggests the model is anti-correlated with the truth.',
+                'AUC 0.5 is the diagonal — the scores carry no ranking information at all. A perfect ranking (every positive above every negative) scores 1.0, and AUC pins down neither precision nor recall, both of which depend on the threshold you pick.',
             },
           ],
         },
@@ -608,14 +608,14 @@ export const ch05: Chapter = {
               id: 'ch05-q-tuning-1',
               prompt: 'What separates a hyperparameter from a parameter?',
               choices: [
-                'Parameters are learned by the algorithm from data; hyperparameters are set by the analyst before training',
-                'Hyperparameters are always integers',
-                'Parameters only exist in neural networks',
-                'There is no difference — the words are synonyms',
+                'Parameters are learned from data; hyperparameters are set by you',
+                'Hyperparameters must be whole numbers; parameters may be any real',
+                'Parameters exist only in neural networks; other models have none',
+                'Nothing — the two words name the same thing in different books',
               ],
               answer: 0,
               explain:
-                'The algorithm optimizes $\\mathbf{w}$ and $b$ for you; nobody optimizes $C$ or $\\alpha$ unless *you* run the search.',
+                'The algorithm optimizes $\\mathbf{w}$ and $b$ for you; nobody optimizes $C$ or $\\alpha$ unless *you* run the search. Hyperparameters are routinely real-valued ($\\alpha = 0.001$), and every model from linear regression up has parameters.',
             },
             {
               kind: 'numeric',
@@ -659,28 +659,28 @@ export const ch05: Chapter = {
       id: 'ch05-boss-1',
       prompt: 'One-hot encoding exists because…',
       choices: [
-        'unordered categories must not be mapped to ordered numbers like 1, 2, 3',
-        'learning algorithms cannot process more than 10 categories',
-        'binary features train faster than real-valued ones',
-        'it reduces the dimensionality of the feature vector',
+        'unordered categories must not be mapped onto ordered numbers',
+        'learning algorithms cannot process more than ten distinct categories',
+        'binary features are trained faster than real-valued features are',
+        'it reduces the dimensionality of the resulting feature vector',
       ],
       answer: 0,
       explain:
-        'Mapping red/yellow/green to 1/2/3 invents an order the data doesn’t have, tempting the algorithm to fit a phantom pattern. One-hot spends dimensions to stay truthful.',
+        'Mapping red/yellow/green to 1/2/3 invents an order the data doesn’t have, tempting the algorithm to fit a phantom pattern. One-hot spends dimensions to stay truthful — note it *raises* dimensionality rather than lowering it, and speed is not the argument.',
     },
     {
       kind: 'mcq',
       id: 'ch05-boss-2',
       prompt: 'Binning (bucketing) a numeric feature can help the algorithm because…',
       choices: [
-        'it hints that exact values within a range don’t matter, so fewer examples may suffice',
-        'it always increases model accuracy',
-        'it removes outliers from the dataset',
-        'it converts categorical features into numbers',
+        'it signals that exact values inside a range do not matter',
+        'it always raises accuracy, whatever bin boundaries you choose',
+        'it removes outliers by discarding values outside the bins',
+        'it turns categorical features into numbers the model can use',
       ],
       answer: 0,
       explain:
-        'A thoughtful binning bakes domain knowledge into the features: “anywhere in this range is the same situation” — a hint that can save training examples.',
+        'A thoughtful binning bakes domain knowledge into the features: “anywhere in this range is the same situation” — a hint that can let the algorithm learn from fewer examples. Badly chosen boundaries can hurt instead; outliers land in the end bins rather than vanishing; and binning runs the *other* direction, numbers to categories.',
     },
     {
       kind: 'numeric',
@@ -705,27 +705,27 @@ export const ch05: Chapter = {
       prompt: 'Which feature is the strongest candidate for *standardization* rather than normalization?',
       choices: [
         'One with a few extreme outliers among otherwise ordinary values',
-        'One that is uniformly spread between 0 and 1 already',
-        'One that only takes the values 0 and 1',
-        'One with no missing values',
+        'One already spread uniformly across the interval from 0 to 1',
+        'One that only ever takes the two binary values 0 and 1',
+        'One with no missing values anywhere in the training data',
       ],
       answer: 0,
       explain:
-        'Min-max normalization lets outliers define the range, squeezing all normal values into a sliver. Standardization (and bell-shaped or unsupervised settings) handles them more gracefully.',
+        'Min-max normalization lets the outliers define $min$ and $max$, squeezing every ordinary value into a sliver of $[0,1]$. Standardization rescales by the mean and standard deviation instead, so outliers stretch the tail rather than crushing the middle. A feature already in $[0,1]$, or already binary, needs no rescaling at all, and missingness is a separate problem.',
     },
     {
       kind: 'mcq',
       id: 'ch05-boss-6',
       prompt: 'Why would you impute a missing value with a number *outside* the feature’s normal range?',
       choices: [
-        'So the model can learn to treat “value was missing” as its own meaningful situation',
-        'To increase the variance of the feature',
-        'Because the mean is expensive to compute',
-        'To force the feature to be dropped',
+        'So the model can treat “this value was missing” as its own case',
+        'To raise the feature’s variance so the model weighs it more',
+        'Because the feature’s mean is too expensive to compute at scale',
+        'To make the feature obviously useless so the model drops it',
       ],
       answer: 0,
       explain:
-        'A clearly abnormal value acts as a flag: the model can learn what to do when the feature is absent. Mid-range imputation does the opposite — it hides the gap harmlessly.',
+        'A clearly abnormal value acts as a flag: the model can learn what to do when the feature is absent. Mid-range imputation does the opposite — it hides the gap harmlessly. Nothing here is about compute cost, and the goal is to keep the feature informative, not to discard it.',
     },
     {
       kind: 'tf',
@@ -741,14 +741,14 @@ export const ch05: Chapter = {
       id: 'ch05-boss-8',
       prompt: 'The test set exists to…',
       choices: [
-        'assess the finished model once, before it ships — untouched by any training or tuning',
-        'give the algorithm extra data when training stalls',
-        'tune hyperparameters more precisely than the validation set allows',
-        'store the examples with the rarest labels',
+        'assess the finished model once, untouched by training or tuning',
+        'supply the algorithm with extra data when training stalls early',
+        'tune hyperparameters more precisely than validation allows',
+        'hold the examples carrying the rarest labels in the dataset',
       ],
       answer: 0,
       explain:
-        'Every decision made against a dataset leaks into the model. The test set’s value is its innocence: it influenced nothing, so its verdict is unbiased.',
+        'Every decision made against a dataset leaks into the model. The test set’s value is its innocence: it influenced nothing, so its verdict is unbiased. Tuning against it — however carefully — spends exactly that innocence, and feeding it back into training destroys it outright.',
     },
     {
       kind: 'mcq',
@@ -778,14 +778,14 @@ export const ch05: Chapter = {
       id: 'ch05-boss-11',
       prompt: 'A model performs poorly *even on its training data*. This is called…',
       choices: [
-        'underfitting (high bias) — the model or features are too weak for the problem',
-        'overfitting (high variance) — the model is too flexible',
-        'regularization — the model was penalized too little',
-        'data leakage — the test set contaminated training',
+        'underfitting (high bias) — the model or features are too weak',
+        'overfitting (high variance) — the model is far too flexible',
+        'over-regularization — the complexity penalty was set too low',
+        'data leakage — the test set has contaminated the training set',
       ],
       answer: 0,
       explain:
-        'Failing on data it has already seen means the model can’t even represent the pattern: too simple a model, or features without predictive power.',
+        'Failing on data it has already seen means the model can’t even represent the pattern: too simple a model, or features without predictive power. Overfitting and leakage both make training performance look *better*, not worse — and a penalty set too low would add flexibility, not remove it.',
     },
     {
       kind: 'tf',
@@ -800,14 +800,14 @@ export const ch05: Chapter = {
       id: 'ch05-boss-13',
       prompt: 'Saying a model has “high variance” means…',
       choices: [
-        'training it on a differently sampled training set would give a noticeably different model',
-        'its predictions have a large numeric range',
-        'its features were not standardized',
-        'its training error is high',
+        'a differently drawn training set would give a rather different model',
+        'its predicted values are spread over a very wide numeric range',
+        'its features were never standardized or normalized before training',
+        'its training error stays high and bounces around between epochs',
       ],
       answer: 0,
       explain:
-        'Variance is sensitivity to the particular sample: the model shaped itself around this draw’s noise, which is why it stumbles on independently drawn test data.',
+        'Variance here means sensitivity to the particular sample, not spread in the outputs: the model shaped itself around this draw’s noise, which is why it stumbles on independently drawn test data. High training error is the *bias* symptom, and feature scaling is unrelated.',
     },
     {
       kind: 'multi',
@@ -815,28 +815,28 @@ export const ch05: Chapter = {
       prompt: 'Which are legitimate cures for overfitting? (select all that apply)',
       choices: [
         'Switch to a simpler model',
-        'Add more training data',
-        'Reduce the dimensionality of the examples',
-        'Regularize the model',
-        'Add many more features',
+        'Gather more training examples',
+        'Reduce the data’s dimensionality',
+        'Add a regularization penalty',
+        'Add many more engineered features',
       ],
       answers: [0, 1, 2, 3],
       explain:
-        'Less capacity, more data, fewer dimensions, or a complexity penalty all fight variance. Piling on features does the opposite — it feeds the overfit.',
+        'Less capacity, more data, fewer dimensions, or a complexity penalty all fight variance. Piling on features does the opposite — more dimensions for the same examples is a classic way *into* an overfit.',
     },
     {
       kind: 'mcq',
       id: 'ch05-boss-15',
       prompt: 'In practice, L1 regularization is prized because it…',
       choices: [
-        'yields a sparse model — most weights land at exactly zero, selecting features',
-        'guarantees the lowest possible test error',
-        'makes the objective easier to differentiate than L2',
-        'removes the need for a validation set',
+        'yields a sparse model — most weights land at exactly zero',
+        'guarantees the lowest test error of any regularization choice',
+        'is differentiable everywhere, unlike the squared L2 penalty',
+        'removes the need for a separate validation set when tuning',
       ],
       answer: 0,
       explain:
-        'Sparsity doubles as feature selection and explainability. For raw holdout performance, though, L2 usually edges it out — and L2 is the differentiable one.',
+        'Sparsity doubles as feature selection and explainability. For raw holdout performance, though, L2 usually edges L1 out — and it is L2, the squared penalty, that is smoothly differentiable; L1’s absolute value has a corner at zero. You still tune $C$ on a validation set either way.',
     },
     {
       kind: 'mcq',
@@ -844,13 +844,13 @@ export const ch05: Chapter = {
       prompt: 'Setting the regularization hyperparameter $C$ to zero…',
       choices: [
         'recovers plain, non-regularized regression',
-        'forces every weight to zero',
-        'maximizes the penalty term',
-        'turns L2 into L1',
+        'forces every weight down to exactly zero',
+        'makes the penalty term dominate the loss',
+        'turns the L2 penalty into an L1 penalty',
       ],
       answer: 0,
       explain:
-        '$C$ scales the penalty. Zero penalty = the ordinary objective; a huge $C$ is the other extreme, crushing weights until the model underfits.',
+        '$C$ scales the penalty, so $C = 0$ deletes it and leaves the ordinary objective. A huge $C$ is the *other* extreme, crushing weights until the model underfits — and no value of $C$ changes which penalty you chose.',
     },
     {
       kind: 'match',
@@ -882,8 +882,8 @@ export const ch05: Chapter = {
       choices: [
         'Recall — the share of true positives among all actual positives',
         'Precision — the share of true positives among positive predictions',
-        'Accuracy — the share of correct predictions overall',
-        'AUC — the area under the ROC curve',
+        'Accuracy — the share of correct predictions over all examples',
+        'AUC — the area under the model’s ROC curve',
       ],
       answer: 0,
       explain:
@@ -903,14 +903,14 @@ export const ch05: Chapter = {
       id: 'ch05-boss-21',
       prompt: 'Cost-sensitive accuracy handles classes of unequal importance by…',
       choices: [
-        'multiplying the FP and FN counts by assigned costs before computing accuracy',
-        'deleting examples of the cheaper class',
-        'raising the decision threshold to 0.99',
-        'replacing accuracy with the training error',
+        'multiplying the FP and FN counts by their assigned costs',
+        'deleting examples of the class that costs less to misclassify',
+        'raising the decision threshold until precision reaches 0.99',
+        'reporting the training error of the rarer class separately',
       ],
       answer: 0,
       explain:
-        'Assign each mistake type a price, reweight the two error cells, then compute accuracy as usual — expensive mistakes now drag the score down harder.',
+        'Assign each mistake type a price, reweight the two error cells, then compute accuracy as usual — expensive mistakes now drag the score down harder. Threshold moves and per-class reports change what you *look at*; only reweighting changes the metric itself, and throwing away examples throws away information.',
     },
     {
       kind: 'mcq',
@@ -920,7 +920,7 @@ export const ch05: Chapter = {
         'the top-right corner: TPR = 1 and FPR = 1',
         'the bottom-left corner: TPR = 0 and FPR = 0',
         'the top-left corner: TPR = 1 and FPR = 0',
-        'the exact center of the plot',
+        'the exact center of the plot, at TPR = FPR = 0.5',
       ],
       answer: 0,
       explain:
@@ -931,14 +931,14 @@ export const ch05: Chapter = {
       id: 'ch05-boss-23',
       prompt: 'A colleague reports an AUC of 0.38. The right reaction is…',
       choices: [
-        'suspicion — below 0.5 is worse than random, something is likely wired backwards',
-        'celebration — lower AUC means lower error',
-        'indifference — AUC is unrelated to model quality',
-        'shipping it — 0.38 clears the usual bar',
+        'suspicion — below 0.5 is worse than random guessing',
+        'celebration — a lower AUC means a lower error rate',
+        'indifference — AUC says nothing about model quality',
+        'approval — 0.38 comfortably clears the usual bar',
       ],
       answer: 0,
       explain:
-        'Random ranking scores 0.5; a perfect one scores 1.0. Below 0.5 means the scores anti-correlate with the labels — often a flipped sign or swapped classes.',
+        'Random ranking scores 0.5; a perfect one scores 1.0. AUC therefore runs *upward* with quality, and below 0.5 means the scores anti-correlate with the labels — often a flipped sign or swapped class labels rather than a genuinely terrible model.',
     },
     {
       kind: 'numeric',
