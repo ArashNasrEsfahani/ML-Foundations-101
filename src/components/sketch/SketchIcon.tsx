@@ -18,7 +18,9 @@ export type IconName =
   | 'book'
   | 'gear'
   | 'flag'
-  | 'reset';
+  | 'reset'
+  | 'globe'
+  | 'github';
 
 const PATHS: Record<IconName, React.ReactNode> = {
   bulb: (
@@ -89,6 +91,22 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M4.6 8.2A8.4 8.4 0 0120.3 12a8.3 8.3 0 01-8.2 8.3A8.4 8.4 0 013.7 13" />
       <path d="M4.4 3.6l.3 4.8 4.7-.4" />
+    </>
+  ),
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="8.9" />
+      <path d="M3.2 12.1h17.6" />
+      {/* the two meridians that make a circle read as a globe */}
+      <path d="M12 3.2c2.4 2.4 3.6 5.4 3.6 8.9s-1.2 6.4-3.6 8.8c-2.4-2.4-3.5-5.4-3.5-8.8S9.6 5.6 12 3.2z" />
+    </>
+  ),
+  github: (
+    // the octocat, kept closer to the real mark than the rest of this set — a
+    // link to a service is only useful if the badge is recognisable
+    <>
+      <path d="M15 21.1v-3.4c0-1-.3-1.7-.8-2.2 3-.3 5.9-1.5 5.9-6a4.7 4.7 0 00-1.2-3.2c.4-1.1.3-2.3-.1-3.3 0 0-1-.3-3.3 1.2a11.3 11.3 0 00-6 0C7.2 2.7 6.2 3 6.2 3c-.5 1-.6 2.2-.1 3.3A4.7 4.7 0 004.9 9.5c0 4.5 2.8 5.7 5.8 6-.4.4-.7 1-.8 1.7v3.9" />
+      <path d="M9.9 18.3c-2.8 1-4.2-.6-5-1.9" />
     </>
   ),
 };

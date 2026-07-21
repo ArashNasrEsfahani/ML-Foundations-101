@@ -13,6 +13,7 @@ import {
 } from '../../state/unlock';
 import { SketchIcon } from '../sketch/SketchIcon';
 import { PaperCard } from '../sketch/PaperCard';
+import { MadeByLine } from '../about/MadeBy';
 import { Illo } from '../../illustrations';
 
 const NODE = 74;
@@ -454,6 +455,7 @@ export function ChapterMap() {
             </Link>
           </div>
         </PaperCard>
+        <MadeByLine style={{ marginTop: 18 }} />
       </div>
     </main>
   );

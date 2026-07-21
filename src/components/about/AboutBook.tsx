@@ -4,6 +4,7 @@ import { PaperCard } from '../sketch/PaperCard';
 import { SketchIcon } from '../sketch/SketchIcon';
 import { Illo } from '../../illustrations';
 import { chapters } from '../../content';
+import { MadeByCard } from './MadeBy';
 
 const BOOK_URL = 'https://themlbook.com/';
 
@@ -76,6 +77,8 @@ export function AboutBook() {
           opens {BOOK_URL} in a new tab
         </p>
       </PaperCard>
+
+      <MadeByCard />
 
       <PaperCard padding={20} seed={71} dashed>
         <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--graphite)' }}>

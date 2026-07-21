@@ -114,6 +114,19 @@ code {
   background: var(--dot);
 }
 
+/* author credit links: quiet until you look straight at them */
+.credit-link {
+  color: var(--graphite);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--line);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.credit-link:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
 /* header wordmark: full name where it fits, short form on phones */
 .hud-wordmark {
   white-space: nowrap;
