@@ -118,6 +118,15 @@ export const ch04: Chapter = {
         {
           type: 'formula',
           tex: 'l(w, b) = \\frac{1}{N}\\sum_{i=1}^{N} \\big(y_i - (w x_i + b)\\big)^2',
+          parts: [
+            { tex: 'l(w, b)', label: 'how bad this particular line is' },
+            { tex: '=' },
+            { tex: '\\frac{1}{N}\\sum_{i=1}^{N}', label: 'averaged over every example' },
+            {
+              tex: '\\big(y_i - (w x_i + b)\\big)^2',
+              label: 'truth minus prediction, squared',
+            },
+          ],
           terms: [
             {
               tex: 'y_i - (w x_i + b)',
@@ -141,6 +150,13 @@ export const ch04: Chapter = {
         {
           type: 'formula',
           tex: '\\frac{\\partial l}{\\partial w} = \\frac{1}{N}\\sum_{i=1}^{N} -2\\,x_i\\big(y_i - (w x_i + b)\\big)',
+          parts: [
+            { tex: '\\frac{\\partial l}{\\partial w}', label: 'which way the loss tilts as w moves' },
+            { tex: '=' },
+            { tex: '\\frac{1}{N}\\sum_{i=1}^{N}', label: 'averaged over the examples' },
+            { tex: '-2\\,x_i', label: 'each one pulls in proportion to its x' },
+            { tex: '\\big(y_i - (w x_i + b)\\big)', label: 'and to how badly it is missed' },
+          ],
           terms: [
             {
               tex: '\\frac{\\partial l}{\\partial w}',
@@ -161,6 +177,13 @@ export const ch04: Chapter = {
         {
           type: 'formula',
           tex: '\\frac{\\partial l}{\\partial b} = \\frac{1}{N}\\sum_{i=1}^{N} -2\\big(y_i - (w x_i + b)\\big)',
+          parts: [
+            { tex: '\\frac{\\partial l}{\\partial b}', label: 'which way the loss tilts as b moves' },
+            { tex: '=' },
+            { tex: '\\frac{1}{N}\\sum_{i=1}^{N}', label: 'averaged over the examples' },
+            { tex: '-2', label: 'no x here — b lifts the whole line equally' },
+            { tex: '\\big(y_i - (w x_i + b)\\big)', label: 'so only the miss counts' },
+          ],
           terms: [
             {
               tex: '\\frac{\\partial l}{\\partial b}',
@@ -181,6 +204,15 @@ export const ch04: Chapter = {
         {
           type: 'formula',
           tex: 'w \\leftarrow w - \\alpha \\frac{\\partial l}{\\partial w}, \\qquad b \\leftarrow b - \\alpha \\frac{\\partial l}{\\partial b}',
+          parts: [
+            { tex: 'w \\leftarrow w', label: 'move w…' },
+            { tex: '-\\;\\alpha', label: '…by a small fraction α…' },
+            { tex: '\\frac{\\partial l}{\\partial w}', label: '…of its slope, downhill' },
+            {
+              tex: ',\\qquad b \\leftarrow b - \\alpha \\frac{\\partial l}{\\partial b}',
+              label: 'and b the same way, in the same breath',
+            },
+          ],
           terms: [
             {
               tex: '\\alpha',

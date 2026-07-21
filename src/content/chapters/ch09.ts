@@ -27,6 +27,15 @@ export const ch09: Chapter = {
         {
           type: 'formula',
           tex: '\\hat{f}_b(x) = \\frac{1}{Nb} \\sum_{i=1}^{N} k\\!\\left(\\frac{x - x_i}{b}\\right)',
+          parts: [
+            { tex: '\\hat{f}_b(x)', label: 'how dense the data is at x' },
+            { tex: '=' },
+            { tex: '\\frac{1}{Nb} \\sum_{i=1}^{N}', label: 'one bump per example, averaged' },
+            {
+              tex: 'k\\!\\left(\\frac{x - x_i}{b}\\right)',
+              label: 'a bump b wide, fading with distance',
+            },
+          ],
           terms: [
             { tex: '\\hat{f}_b', explain: 'the estimated pdf — a sum of N small bumps, one per example' },
             { tex: 'k', explain: 'the kernel: a smooth bump shape, typically the standard Gaussian' },
@@ -124,6 +133,15 @@ export const ch09: Chapter = {
         {
           type: 'formula',
           tex: 'J = \\sum_{i=1}^{N} \\lVert \\mathbf{x}_i - \\mathbf{c}_{a(i)} \\rVert^2',
+          parts: [
+            { tex: 'J', label: 'how tightly the clusters hold together' },
+            { tex: '=' },
+            { tex: '\\sum_{i=1}^{N}', label: 'over every point' },
+            {
+              tex: '\\lVert \\mathbf{x}_i - \\mathbf{c}_{a(i)} \\rVert^2',
+              label: 'its squared distance to its own centroid',
+            },
+          ],
           terms: [
             { tex: 'J', explain: 'inertia: how tightly the clusters hug their centroids — lower is tighter' },
             { tex: '\\mathbf{c}_{a(i)}', explain: 'the centroid currently assigned to example i' },
@@ -316,6 +334,13 @@ export const ch09: Chapter = {
         {
           type: 'formula',
           tex: '\\mathrm{Var}_{\\mathbf{u}} = \\mathbf{u}^{\\top}\\, \\boldsymbol{\\Sigma}\\, \\mathbf{u}',
+          parts: [
+            { tex: '\\mathrm{Var}_{\\mathbf{u}}', label: 'how spread out the shadows are' },
+            { tex: '=' },
+            { tex: '\\mathbf{u}^{\\top}', label: 'the direction you are projecting onto…' },
+            { tex: '\\boldsymbol{\\Sigma}', label: 'the data’s spread in every direction' },
+            { tex: '\\mathbf{u}', label: '…applied once on each side' },
+          ],
           terms: [
             { tex: '\\mathbf{u}', explain: 'a unit vector: the candidate direction to project onto' },
             { tex: '\\boldsymbol{\\Sigma}', explain: 'the covariance matrix of the (mean-centered) data' },

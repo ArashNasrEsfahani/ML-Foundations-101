@@ -37,6 +37,12 @@ export const ch02: Chapter = {
         {
           type: 'formula',
           tex: '\\sum_{i=1}^{n} x_i \\;\\stackrel{\\text{def}}{=}\\; x_1 + x_2 + \\dots + x_{n-1} + x_n',
+          parts: [
+            { tex: '\\sum_{i=1}^{n}', label: 'do this for i = 1, 2, … up to n' },
+            { tex: 'x_i', label: 'the term you add each time' },
+            { tex: '\\stackrel{\\text{def}}{=}' },
+            { tex: 'x_1 + x_2 + \\dots + x_{n-1} + x_n', label: 'the same thing, written out in full' },
+          ],
           terms: [
             { tex: '\\sum', explain: 'capital sigma: add up one term per value of the counter' },
             { tex: 'i=1', explain: 'the counter starts at 1…' },
@@ -70,6 +76,12 @@ export const ch02: Chapter = {
         {
           type: 'formula',
           tex: '\\mathbf{w}\\mathbf{x} \\;\\stackrel{\\text{def}}{=}\\; \\sum_{i=1}^{m} w^{(i)} x^{(i)}',
+          parts: [
+            { tex: '\\mathbf{w}\\mathbf{x}', label: 'the dot product of two vectors' },
+            { tex: '\\stackrel{\\text{def}}{=}' },
+            { tex: '\\sum_{i=1}^{m}', label: 'add up over all m positions' },
+            { tex: 'w^{(i)} x^{(i)}', label: 'matching entries multiplied together' },
+          ],
           terms: [
             { tex: '\\mathbf{w}\\mathbf{x}', explain: 'the dot product — some books write it w · x' },
             {
@@ -172,6 +184,14 @@ export const ch02: Chapter = {
         {
           type: 'formula',
           tex: '\\nabla f \\;\\stackrel{\\text{def}}{=}\\; \\left[ \\frac{\\partial f}{\\partial x^{(1)}},\\; \\frac{\\partial f}{\\partial x^{(2)}} \\right]',
+          parts: [
+            { tex: '\\nabla f', label: 'the gradient of f' },
+            { tex: '\\stackrel{\\text{def}}{=}' },
+            {
+              tex: '\\left[ \\frac{\\partial f}{\\partial x^{(1)}},\\; \\frac{\\partial f}{\\partial x^{(2)}} \\right]',
+              label: 'one slope per input, listed side by side',
+            },
+          ],
           terms: [
             { tex: '\\nabla f', explain: 'nabla f — the gradient, a vector with one slope per input' },
             {
@@ -269,6 +289,13 @@ export const ch02: Chapter = {
         {
           type: 'formula',
           tex: '\\mathbb{E}[X] \\;\\stackrel{\\text{def}}{=}\\; \\sum_{i=1}^{k} x_i \\Pr(X = x_i)',
+          parts: [
+            { tex: '\\mathbb{E}[X]', label: 'the long-run average of X' },
+            { tex: '\\stackrel{\\text{def}}{=}' },
+            { tex: '\\sum_{i=1}^{k}', label: 'over every value X can take' },
+            { tex: 'x_i', label: 'the value itself' },
+            { tex: '\\Pr(X = x_i)', label: 'weighted by how often it comes up' },
+          ],
           terms: [
             {
               tex: '\\mathbb{E}[X]',
@@ -358,6 +385,17 @@ export const ch02: Chapter = {
         {
           type: 'formula',
           tex: '\\Pr(X = x \\mid Y = y) = \\frac{\\Pr(Y = y \\mid X = x)\\,\\Pr(X = x)}{\\Pr(Y = y)}',
+          // the prior is lifted out from under the bar — same arithmetic, but it
+          // shows Bayes for what it is: a belief, adjusted by the evidence
+          parts: [
+            { tex: '\\Pr(X = x \\mid Y = y)', label: 'what you believe after the evidence' },
+            { tex: '=' },
+            {
+              tex: '\\frac{\\Pr(Y = y \\mid X = x)}{\\Pr(Y = y)}',
+              label: 'how much this evidence favours x',
+            },
+            { tex: '\\Pr(X = x)', label: 'what you believed before it' },
+          ],
           terms: [
             {
               tex: '\\Pr(X = x \\mid Y = y)',

@@ -28,7 +28,7 @@ export function BlockRenderer({
           case 'math':
             return <TeX key={i} tex={b.tex} block />;
           case 'formula':
-            return <FormulaBlock key={i} tex={b.tex} terms={b.terms} />;
+            return <FormulaBlock key={i} tex={b.tex} terms={b.terms} parts={b.parts} />;
           case 'list': {
             const items = b.items.map((it, j) => <li key={j}>{renderInline(it)}</li>);
             return b.ordered ? <ol key={i}>{items}</ol> : <ul key={i}>{items}</ul>;

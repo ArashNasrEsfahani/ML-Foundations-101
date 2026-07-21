@@ -22,6 +22,18 @@ export const ch07: Chapter = {
         {
           type: 'formula',
           tex: 'f(x) = \\frac{1}{N}\\sum_{i=1}^{N} w_i y_i, \\quad w_i = \\frac{N\\,k\\!\\left(\\frac{x_i - x}{b}\\right)}{\\sum_{l=1}^{N} k\\!\\left(\\frac{x_l - x}{b}\\right)}',
+          parts: [
+            { tex: 'f(x)', label: 'the prediction at x' },
+            { tex: '=' },
+            { tex: '\\frac{1}{N}\\sum_{i=1}^{N}', label: 'across every training point' },
+            { tex: 'w_i', label: 'how much this one counts…' },
+            { tex: 'y_i', label: '…times its label' },
+            { tex: ',\\quad' },
+            {
+              tex: 'w_i = \\frac{N\\,k\\!\\left(\\frac{x_i - x}{b}\\right)}{\\sum_{l=1}^{N} k\\!\\left(\\frac{x_l - x}{b}\\right)}',
+              label: 'and the nearer it is, the more it counts',
+            },
+          ],
           terms: [
             { tex: 'k(\\cdot)', explain: 'the kernel — a similarity function; the closer x_i is to x, the larger the weight' },
             { tex: 'w_i', explain: 'how much training label y_i counts toward the prediction at x' },
@@ -226,6 +238,14 @@ export const ch07: Chapter = {
         {
           type: 'formula',
           tex: '\\alpha_t = \\tfrac{1}{2}\\ln\\frac{1 - \\epsilon_t}{\\epsilon_t}',
+          parts: [
+            { tex: '\\alpha_t', label: 'how loud this stump’s vote is' },
+            { tex: '=' },
+            {
+              tex: '\\tfrac{1}{2}\\ln\\frac{1 - \\epsilon_t}{\\epsilon_t}',
+              label: 'loud when its error is small, silent at a coin flip',
+            },
+          ],
           terms: [
             { tex: '\\epsilon_t', explain: 'the weighted training error of stump t (0 = perfect, 0.5 = coin flip)' },
             { tex: '\\alpha_t', explain: 'the stump’s vote weight in the final sum; the prediction is the sign of Σ α_t h_t(x)' },
@@ -410,6 +430,15 @@ export const ch07: Chapter = {
         {
           type: 'formula',
           tex: '\\max\\!\\left(\\|f(A) - f(P)\\|^2 - \\|f(A) - f(N)\\|^2 + \\alpha,\\; 0\\right)',
+          parts: [
+            { tex: '\\max\\big(' },
+            { tex: '\\|f(A) - f(P)\\|^2', label: 'how far the two photos of the same face land' },
+            { tex: '-' },
+            { tex: '\\|f(A) - f(N)\\|^2', label: 'how far the stranger lands' },
+            { tex: '+' },
+            { tex: '\\alpha', label: 'the head start you demand' },
+            { tex: ',\\; 0\\big)', label: 'and nothing below zero — good enough is good enough' },
+          ],
           terms: [
             { tex: 'f', explain: 'the shared embedding network — the same weights process A, P and N' },
             { tex: 'A, P', explain: 'anchor and positive: two photos of the same person, whose embeddings should be close' },

@@ -18,6 +18,63 @@ import { Illo } from '../../illustrations';
 
 const NODE = 74;
 
+/** What the learner clicked, and why it did not open. */
+type LockedHint = { key: string; title: string; why: string };
+
+/**
+ * Clicking a padlock and having nothing happen is the worst answer the map can
+ * give: it looks broken rather than gated. So a locked node explains the exact
+ * condition that opens it, and offers the one-tap escape hatch.
+ */
+function LockedNotice({
+  hint,
+  onFreeRoam,
+  onDismiss,
+}: {
+  hint: LockedHint;
+  onFreeRoam: () => void;
+  onDismiss: () => void;
+}) {
+  return (
+    <div
+      className="anim-rise locked-notice"
+      role="status"
+      style={{
+        margin: '10px 0 2px',
+        background: '#fffdf8',
+        border: '1.5px dashed var(--graphite)',
+        borderRadius: 14,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+        <SketchIcon name="lock" size={22} strokeWidth={1.4} style={{ marginTop: 3 }} />
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: '0.95rem' }}>
+            <strong>{hint.title}</strong> is still locked. {hint.why}
+          </div>
+          <div style={{ fontSize: '0.88rem', color: 'var(--graphite)', marginTop: 4 }}>
+            Or switch to <strong style={{ color: 'var(--ink)' }}>free roam</strong> — everything
+            opens at once, and the XP and badges you have already earned come with you.
+          </div>
+        </div>
+      </div>
+      <div className="locked-notice-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+        <button
+          className="primary"
+          onClick={onFreeRoam}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+        >
+          <SketchIcon name="flag" size={16} />
+          Switch to free roam
+        </button>
+        <button className="ghost" onClick={onDismiss}>
+          Not now
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ChapterEmblem({ chapterId, locked }: { chapterId: string; locked: boolean }) {
   return (
     <div
@@ -75,6 +132,15 @@ export function ChapterMap() {
     for (const c of chapters) if (isChapterUnlocked(save, chapters, c.id)) last = c.id;
     return last;
   });
+
+  const [lockedHint, setLockedHint] = useState<LockedHint | null>(null);
+
+  // free roam unlocks the thing they just tapped, so take them straight to it
+  const goFreeRoam = (openChapterId?: string) => {
+    dispatch({ type: 'setMode', mode: 'free' });
+    if (openChapterId) setOpenId(openChapterId);
+    setLockedHint(null);
+  };
 
   // winding pencil path down the middle
   const pathD = useMemo(() => {
@@ -185,9 +251,27 @@ export function ChapterMap() {
                 style={{ animationDelay: `${Math.min(ci, 8) * 55}ms` }}
               >
                 <button
-                  onClick={() => unlocked && setOpenId(open ? null : chapter.id)}
-                  disabled={!unlocked}
-                  aria-expanded={open}
+                  onClick={() => {
+                    if (unlocked) {
+                      setLockedHint(null);
+                      setOpenId(open ? null : chapter.id);
+                      return;
+                    }
+                    const prev = chapters[ci - 1];
+                    const soft = chapter.softPrereq
+                      ? chapters.find((c) => c.id === chapter.softPrereq)
+                      : undefined;
+                    setLockedHint({
+                      key: chapter.id,
+                      title: `Chapter ${chapter.number} — ${chapter.title}`,
+                      why: soft
+                        ? `Defeat the boss of Chapter ${prev.number} to open it, or take the shortcut and defeat the boss of Chapter ${soft.number}.`
+                        : `Work through Chapter ${prev.number} and defeat its boss exam, and this one opens up.`,
+                    });
+                  }}
+                  // deliberately not `disabled`/`aria-disabled`: a locked card is
+                  // a real control now — it explains itself when you press it
+                  aria-expanded={unlocked ? open : undefined}
                   className={justUnlocked ? 'anim-unlock-card' : undefined}
                   style={{
                     display: 'flex',
@@ -300,8 +384,16 @@ export function ChapterMap() {
                       />
                     </svg>
                   </div>
-                  {!unlocked && <SketchIcon name="lock" size={20} />}
+                  {!unlocked && <SketchIcon name="lock" size={20} title="locked" />}
                 </button>
+
+                {lockedHint?.key === chapter.id && (
+                  <LockedNotice
+                    hint={lockedHint}
+                    onFreeRoam={() => goFreeRoam(chapter.id)}
+                    onDismiss={() => setLockedHint(null)}
+                  />
+                )}
 
                 {open && unlocked && (
                   <div
@@ -319,10 +411,21 @@ export function ChapterMap() {
                       const sUnlocked = isSectionUnlocked(save, chapters, chapter.id, s.id);
                       const sDone = !!save.sections[s.id]?.done;
                       return (
+                        <React.Fragment key={s.id}>
                         <Link
-                          key={s.id}
                           to={sUnlocked ? `/ch/${chapter.id}/${s.id}` : '#'}
-                          onClick={(e) => !sUnlocked && e.preventDefault()}
+                          onClick={(e) => {
+                            if (sUnlocked) return;
+                            e.preventDefault();
+                            const prev = chapter.sections[si - 1];
+                            setLockedHint({
+                              key: s.id,
+                              title: s.title,
+                              why: prev
+                                ? `Lessons open in order — finish “${prev.title}” and this one is next.`
+                                : 'Open the chapter before this one first.',
+                            });
+                          }}
                           className="anim-slide-left"
                           style={{
                             display: 'flex',
@@ -351,6 +454,14 @@ export function ChapterMap() {
                             ~{s.minutes} min
                           </span>
                         </Link>
+                        {lockedHint?.key === s.id && (
+                          <LockedNotice
+                            hint={lockedHint}
+                            onFreeRoam={() => goFreeRoam(chapter.id)}
+                            onDismiss={() => setLockedHint(null)}
+                          />
+                        )}
+                        </React.Fragment>
                       );
                     })}
                     {chapter.bossPool.length > 0 && (
@@ -396,8 +507,17 @@ export function ChapterMap() {
           {/* final exam node */}
           <section className="anim-rise" style={{ animationDelay: '480ms' }}>
             <button
-              onClick={() => finalOpen && navigate('/final')}
-              disabled={!finalOpen}
+              onClick={() => {
+                if (finalOpen) {
+                  navigate('/final');
+                  return;
+                }
+                setLockedHint({
+                  key: 'final',
+                  title: 'The Final Exam',
+                  why: 'It opens once every chapter boss has been defeated.',
+                });
+              }}
               className={finalOpen && !save.finalExam?.passed ? 'anim-pulse' : undefined}
               style={{
                 display: 'flex',
@@ -432,6 +552,14 @@ export function ChapterMap() {
                 </Link>
               )}
             </button>
+
+            {lockedHint?.key === 'final' && (
+              <LockedNotice
+                hint={lockedHint}
+                onFreeRoam={() => goFreeRoam()}
+                onDismiss={() => setLockedHint(null)}
+              />
+            )}
           </section>
         </div>
       </div>

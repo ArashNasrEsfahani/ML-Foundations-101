@@ -194,6 +194,12 @@ export const ch01: Chapter = {
         {
           type: 'formula',
           tex: '\\mathbf{w}\\mathbf{x} - b = 0',
+          parts: [
+            { tex: '\\mathbf{w}\\mathbf{x}', label: 'every feature, weighted and added up' },
+            { tex: '-' },
+            { tex: 'b', label: 'a learned offset' },
+            { tex: '= 0', label: 'right on the fence — this is the boundary' },
+          ],
           terms: [
             { tex: '\\mathbf{w}', explain: 'a weight for each feature; learned from the data' },
             { tex: '\\mathbf{x}', explain: 'the feature vector of the message being classified' },

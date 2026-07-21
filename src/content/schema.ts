@@ -51,6 +51,15 @@ export type Block =
       type: 'formula';
       tex: string;
       terms: { tex: string; explain: string }[];
+      /**
+       * Optional left-to-right decomposition of the same equation. Pieces that
+       * carry a meaning get a `label`; the joins between them (`=`, `+`, a
+       * minus sign) are listed without one and render as plain glue. Written
+       * out, the pieces must reproduce `tex` exactly — when `parts` is present
+       * the annotated layout replaces the plain equation rather than repeating
+       * it. Keep labels to a handful of words: they sit under the maths.
+       */
+      parts?: { tex: string; label?: string }[];
     }
   | { type: 'list'; items: Inline[]; ordered?: boolean }
   | { type: 'code'; lang: 'python'; code: string; caption?: string }

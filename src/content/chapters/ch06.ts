@@ -31,6 +31,15 @@ export const ch06: Chapter = {
         {
           type: 'formula',
           tex: 'f_l(\\mathbf{z}) = g_l(\\mathbf{W}_l\\mathbf{z} + \\mathbf{b}_l)',
+          parts: [
+            { tex: 'f_l(\\mathbf{z})', label: 'what this layer passes onward' },
+            { tex: '=' },
+            { tex: 'g_l\\big(', label: 'a bend applied at the very end' },
+            { tex: '\\mathbf{W}_l\\mathbf{z}', label: 'every incoming number, weighted and mixed' },
+            { tex: '+' },
+            { tex: '\\mathbf{b}_l', label: 'plus each unit’s own offset' },
+            { tex: '\\big)' },
+          ],
           terms: [
             {
               tex: '\\mathbf{z}',
@@ -238,6 +247,12 @@ export const ch06: Chapter = {
         {
           type: 'formula',
           tex: '\\mathrm{conv}(\\mathbf{P},\\mathbf{F}) = \\sum_{i}\\sum_{j} P_{i,j}\\,F_{i,j}',
+          parts: [
+            { tex: '\\mathrm{conv}(\\mathbf{P},\\mathbf{F})', label: 'one number for this patch' },
+            { tex: '=' },
+            { tex: '\\sum_{i}\\sum_{j}', label: 'add over every cell of the window' },
+            { tex: 'P_{i,j}\\,F_{i,j}', label: 'pixel times the filter weight sitting on it' },
+          ],
           terms: [
             { tex: '\\mathbf{P}', explain: 'the patch of pixels currently under the sliding window' },
             {
@@ -350,6 +365,16 @@ export const ch06: Chapter = {
         {
           type: 'formula',
           tex: '\\mathbf{h}^{t} = g\\left(\\mathbf{W}\\mathbf{x}^{t} + \\mathbf{U}\\mathbf{h}^{t-1} + \\mathbf{b}\\right)',
+          parts: [
+            { tex: '\\mathbf{h}^{t}', label: 'the memory after step t' },
+            { tex: '=' },
+            { tex: 'g\\big(' },
+            { tex: '\\mathbf{W}\\mathbf{x}^{t}', label: 'what just arrived' },
+            { tex: '+' },
+            { tex: '\\mathbf{U}\\mathbf{h}^{t-1}', label: 'what it already remembered' },
+            { tex: '+' },
+            { tex: '\\mathbf{b}\\big)', label: 'an offset, then squashed' },
+          ],
           terms: [
             { tex: '\\mathbf{x}^{t}', explain: 'the sequence element at position t — say, the word at position t of a sentence' },
             {

@@ -23,6 +23,13 @@ export const ch03: Chapter = {
         {
           type: 'formula',
           tex: 'f_{w,b}(x) = wx + b',
+          parts: [
+            { tex: 'f_{w,b}(x)', label: 'the prediction for input x' },
+            { tex: '=' },
+            { tex: 'wx', label: 'how steeply the answer follows x' },
+            { tex: '+' },
+            { tex: 'b', label: 'where the line starts' },
+          ],
           terms: [
             { tex: 'f_{w,b}', explain: 'the model, parametrized by exactly two values: w and b' },
             { tex: 'w', explain: 'the slope — how much the prediction changes per unit of x (a vector \\mathbf{w} when there are many features)' },
@@ -43,6 +50,13 @@ export const ch03: Chapter = {
         {
           type: 'formula',
           tex: '\\frac{1}{N} \\sum_{i=1}^{N} (f_{w,b}(\\mathbf{x}_i) - y_i)^2',
+          parts: [
+            { tex: '\\frac{1}{N} \\sum_{i=1}^{N}', label: 'averaged over all N examples' },
+            {
+              tex: '\\big(f_{w,b}(\\mathbf{x}_i) - y_i\\big)^2',
+              label: 'one example’s miss, squared',
+            },
+          ],
           terms: [
             { tex: '(f_{w,b}(\\mathbf{x}_i) - y_i)^2', explain: 'the loss function — here squared error loss, the penalty one example charges the model' },
             { tex: '\\frac{1}{N}\\sum', explain: 'averaging losses over all N examples gives the cost function, also called the empirical risk' },
@@ -243,6 +257,13 @@ export const ch03: Chapter = {
         {
           type: 'formula',
           tex: 'H(\\mathcal{S}) = -p \\log_2 p - (1-p)\\log_2(1-p)',
+          parts: [
+            { tex: 'H(\\mathcal{S})', label: 'how mixed the set is, in bits' },
+            { tex: '=' },
+            { tex: '-p \\log_2 p', label: 'the surprise coming from the 1s' },
+            { tex: '-' },
+            { tex: '(1-p)\\log_2(1-p)', label: 'and the surprise from the 0s' },
+          ],
           terms: [
             { tex: 'p', explain: 'the fraction of examples in the set labeled 1' },
             { tex: '\\log_2', explain: 'base-2 logarithm measures entropy in bits; the book uses ln — the shape and the argmin are the same' },
@@ -252,6 +273,15 @@ export const ch03: Chapter = {
         {
           type: 'formula',
           tex: 'H(\\mathcal{S}_-, \\mathcal{S}_+) = \\frac{|\\mathcal{S}_-|}{|\\mathcal{S}|} H(\\mathcal{S}_-) + \\frac{|\\mathcal{S}_+|}{|\\mathcal{S}|} H(\\mathcal{S}_+)',
+          parts: [
+            { tex: 'H(\\mathcal{S}_-, \\mathcal{S}_+)', label: 'how mixed the two branches are, together' },
+            { tex: '=' },
+            { tex: '\\frac{|\\mathcal{S}_-|}{|\\mathcal{S}|}', label: 'the share going left' },
+            { tex: 'H(\\mathcal{S}_-)', label: 'times that branch’s own entropy' },
+            { tex: '+' },
+            { tex: '\\frac{|\\mathcal{S}_+|}{|\\mathcal{S}|}', label: 'the share going right' },
+            { tex: 'H(\\mathcal{S}_+)', label: 'times its entropy' },
+          ],
           terms: [
             { tex: '\\frac{|\\mathcal{S}_-|}{|\\mathcal{S}|}', explain: 'each branch’s entropy is weighted by the fraction of examples that flow into it' },
             { tex: 'H(\\mathcal{S}_-, \\mathcal{S}_+)', explain: 'the weighted entropy of the split — ID3 picks the split minimizing this' },
@@ -344,6 +374,14 @@ export const ch03: Chapter = {
         {
           type: 'formula',
           tex: '\\max(0,\\; 1 - y_i(\\mathbf{w}\\mathbf{x}_i - b))',
+          parts: [
+            { tex: '\\max\\big(0,', label: 'zero once the point sits safely on its own side' },
+            {
+              tex: '1 - y_i(\\mathbf{w}\\mathbf{x}_i - b)',
+              label: 'how far it strays into the margin, or past it',
+            },
+            { tex: '\\big)' },
+          ],
           terms: [
             { tex: '\\max(0, \\cdot)', explain: 'zero when the example is on the correct side with room to spare (constraint satisfied)' },
             { tex: '1 - y_i(\\mathbf{w}\\mathbf{x}_i - b)', explain: 'grows the further a point strays past the margin onto the wrong side' },
@@ -362,6 +400,14 @@ export const ch03: Chapter = {
         {
           type: 'formula',
           tex: "k(\\mathbf{x}, \\mathbf{x}') = \\exp\\left(-\\frac{\\|\\mathbf{x} - \\mathbf{x}'\\|^2}{2\\sigma^2}\\right)",
+          parts: [
+            { tex: "k(\\mathbf{x}, \\mathbf{x}')", label: 'how similar two points are' },
+            { tex: '=' },
+            {
+              tex: "\\exp\\left(-\\frac{\\|\\mathbf{x} - \\mathbf{x}'\\|^2}{2\\sigma^2}\\right)",
+              label: '1 when identical, fading fast as they separate',
+            },
+          ],
           terms: [
             { tex: "\\|\\mathbf{x} - \\mathbf{x}'\\|^2", explain: 'squared Euclidean distance between the two feature vectors' },
             { tex: '\\sigma', explain: 'controls how fast similarity fades with distance: the analyst’s smooth-vs-curvy dial (widgets often use γ = 1/(2σ²))' },
@@ -450,6 +496,14 @@ export const ch03: Chapter = {
         {
           type: 'formula',
           tex: 'd(\\mathbf{x}_i, \\mathbf{x}_k) = \\sqrt{\\textstyle\\sum_{j=1}^{D} (x_i^{(j)} - x_k^{(j)})^2}',
+          parts: [
+            { tex: 'd(\\mathbf{x}_i, \\mathbf{x}_k)', label: 'how far apart two examples are' },
+            { tex: '=' },
+            {
+              tex: '\\sqrt{\\textstyle\\sum_{j=1}^{D} (x_i^{(j)} - x_k^{(j)})^2}',
+              label: 'square each feature’s gap, add them up, take the root',
+            },
+          ],
           terms: [
             { tex: 'd', explain: 'Euclidean distance — the straight-line, "as the crow flies" measure of closeness' },
             { tex: '(x_i^{(j)} - x_k^{(j)})^2', explain: 'per-feature differences, squared and summed across all D dimensions' },

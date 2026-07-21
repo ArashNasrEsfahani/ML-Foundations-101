@@ -208,6 +208,18 @@ export const ch10: Chapter = {
         {
           type: 'formula',
           tex: 'f(\\mathbf{x}) = b + \\sum_{i=1}^{D} w_i x_i + \\sum_{i=1}^{D}\\sum_{j=i+1}^{D} (\\mathbf{v}_i \\mathbf{v}_j)\\, x_i x_j',
+          parts: [
+            { tex: 'f(\\mathbf{x})', label: 'the prediction' },
+            { tex: '=' },
+            { tex: 'b', label: 'a baseline' },
+            { tex: '+' },
+            { tex: '\\sum_{i=1}^{D} w_i x_i', label: 'each feature on its own, as in linear regression' },
+            { tex: '+' },
+            {
+              tex: '\\sum_{i=1}^{D}\\sum_{j=i+1}^{D} (\\mathbf{v}_i \\mathbf{v}_j)\\, x_i x_j',
+              label: 'and every pair of features, acting together',
+            },
+          ],
           terms: [
             { tex: 'b,\\ w_i', explain: 'a bias and per-feature weights, exactly as in linear regression' },
             { tex: '\\mathbf{v}_i', explain: 'a k-dimensional factor vector for feature i, with k ≪ D' },

@@ -114,6 +114,43 @@ code {
   background: var(--dot);
 }
 
+/* Maths in running prose is one glyph as far as the paragraph is concerned:
+   a line break landing between the x and its superscript reads as a bug.
+   inline-block is what actually forbids the break; nowrap stops KaTeX's own
+   inner spans wrapping inside it. */
+.tex-inline {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* A display equation is already on its own line, so it can afford to scroll
+   rather than force the whole page sideways on a phone. */
+.tex-block {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* the "this is still locked" explainer on the map. The map's chapter column is
+   already narrow on a phone — it leaves room for the winding pencil path — so
+   the notice gives up its indents there rather than squeezing the sentence. */
+.locked-notice {
+  padding: 14px 18px;
+}
+
+.locked-notice-actions {
+  padding-left: 36px;
+}
+
+@media (max-width: 620px) {
+  .locked-notice {
+    padding: 12px 13px;
+  }
+  .locked-notice-actions {
+    padding-left: 0;
+  }
+}
+
 /* author credit links: quiet until you look straight at them */
 .credit-link {
   color: var(--graphite);

@@ -340,6 +340,18 @@ export const ch05: Chapter = {
         {
           type: 'formula',
           tex: '\\min_{\\mathbf{w},b}\\left[ C|\\mathbf{w}| + \\frac{1}{N}\\sum_{i=1}^{N}\\left(f_{\\mathbf{w},b}(\\mathbf{x}_i) - y_i\\right)^2 \\right]',
+          parts: [
+            { tex: '\\min_{\\mathbf{w},b}', label: 'find the w and b that make this smallest' },
+            { tex: '\\Bigg[' },
+            { tex: 'C', label: 'how much simplicity is worth to you' },
+            { tex: '|\\mathbf{w}|', label: 'the size of the weights' },
+            { tex: '+' },
+            {
+              tex: '\\frac{1}{N}\\sum_{i=1}^{N}\\big(f_{\\mathbf{w},b}(\\mathbf{x}_i) - y_i\\big)^2',
+              label: 'the ordinary training error',
+            },
+            { tex: '\\Bigg]' },
+          ],
           terms: [
             { tex: 'C', explain: 'a hyperparameter you tune: how much simplicity matters relative to fitting the data' },
             { tex: '|\\mathbf{w}|', explain: 'the L1 penalty: |w^{(1)}| + |w^{(2)}| + … + |w^{(D)}|' },
@@ -356,6 +368,18 @@ export const ch05: Chapter = {
         {
           type: 'formula',
           tex: '\\min_{\\mathbf{w},b}\\left[ C\\|\\mathbf{w}\\|^2 + \\frac{1}{N}\\sum_{i=1}^{N}\\left(f_{\\mathbf{w},b}(\\mathbf{x}_i) - y_i\\right)^2 \\right]',
+          parts: [
+            { tex: '\\min_{\\mathbf{w},b}', label: 'find the w and b that make this smallest' },
+            { tex: '\\Bigg[' },
+            { tex: 'C', label: 'the same knob as before' },
+            { tex: '\\|\\mathbf{w}\\|^2', label: 'the weights squared — one big weight is now very expensive' },
+            { tex: '+' },
+            {
+              tex: '\\frac{1}{N}\\sum_{i=1}^{N}\\big(f_{\\mathbf{w},b}(\\mathbf{x}_i) - y_i\\big)^2',
+              label: 'the ordinary training error',
+            },
+            { tex: '\\Bigg]' },
+          ],
           terms: [
             { tex: '\\|\\mathbf{w}\\|^2', explain: 'the L2 penalty: (w^{(1)})^2 + (w^{(2)})^2 + … + (w^{(D)})^2' },
             { tex: 'C', explain: 'again the knob: C = 0 recovers plain regression; huge C crushes all weights toward zero and underfits' },
