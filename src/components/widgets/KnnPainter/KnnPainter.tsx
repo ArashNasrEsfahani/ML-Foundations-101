@@ -39,11 +39,11 @@ const GUIDE: GuideEntry[] = [
   },
   {
     control: 'k',
-    what: 'How many neighbours get a vote on each spot of the plot. At $k = 1$ every stray point carves out its own island of territory; raising it makes the vote a majority and smooths those islands away.',
+    what: 'How many neighbors get a vote on each spot of the plot. At $k = 1$ every stray point carves out its own island of territory; raising it makes the vote a majority and smooths those islands away.',
   },
   {
     control: 'euclidean',
-    what: 'Measures neighbour distance as straight-line distance across the plot, the ordinary meaning of *near*. This is the setting the regions look like a map under.',
+    what: 'Measures neighbor distance as straight-line distance across the plot, the ordinary meaning of *near*. This is the setting the regions look like a map under.',
   },
   {
     control: 'cosine',
@@ -51,7 +51,7 @@ const GUIDE: GuideEntry[] = [
   },
   {
     control: 'compare k=1 vs k=7',
-    what: 'Refits both neighbourhood sizes over the whole plot and reports the share of it they label differently. The challenge wants at least 8%, which needs points placed so that a lone neighbour and a majority of seven genuinely disagree.',
+    what: 'Refits both neighborhood sizes over the whole plot and reports the share of it they label differently. The challenge wants at least 8%, which needs points placed so that a lone neighbor and a majority of seven genuinely disagree.',
   },
   {
     control: 'the two grays',

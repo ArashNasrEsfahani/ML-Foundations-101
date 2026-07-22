@@ -75,7 +75,7 @@ export const conceptsCh05: Concept[] = [
     id: 'data-imputation',
     term: 'data imputation',
     simple:
-      'Filling in the blanks. Some rows arrive with a value missing and most algorithms refuse a hole, so you put something there — and what you choose to put there is a modelling decision, not a formality.',
+      'Filling in the blanks. Some rows arrive with a value missing and most algorithms refuse a hole, so you put something there — and what you choose to put there is a modeling decision, not a formality.',
     technical:
       'Four usual choices, with different intents: the feature mean (harmless, adds nothing); a value far outside the normal range (flags the gap, so the model can learn a rule for it); a mid-range value (so the feature barely moves the prediction); or a small regression predicting the missing feature from the others. With enough data, adding a binary *was-missing* indicator beats all of them, because missingness is usually informative — a blank income field is not a random blank. Whichever you pick, the identical rule must run at prediction time.',
     math:
@@ -100,7 +100,7 @@ export const conceptsCh05: Concept[] = [
     id: 'training-set',
     term: 'training set',
     simple:
-      'The big slice of your labelled data that the algorithm is allowed to learn from. Everything the model knows, it learned here.',
+      'The big slice of your labeled data that the algorithm is allowed to learn from. Everything the model knows, it learned here.',
     technical:
       'Usually 70% of the data, and upwards of 95% when data is plentiful. Its size is the main lever on [[model-variance|variance]]: more examples make it harder for a model to bend around noise. What it cannot do is tell you whether the model [[generalization|generalizes]] — error measured here falls monotonically as [[model-capacity|capacity]] rises, so it is structurally silent about [[overfitting]]. Anything fitted, scalers and imputers included, must be fitted here and nowhere else.',
     math:
@@ -220,7 +220,7 @@ export const conceptsCh05: Concept[] = [
     technical:
       'The dial behind the whole chapter: polynomial degree, tree depth, hidden units, number of features, and inversely the [[regularization]] strength. *Effective* capacity is not the raw parameter count — a heavily penalized thousand-parameter model can be less flexible than a free ten-parameter one, which is why regularization works at all. Raise it and training error falls monotonically while holdout error traces a U.',
     math:
-      'Classical measures count the labellings a class can realize: the VC dimension is the largest number of points the class can label in every possible way. A linear classifier in $D$ dimensions has VC dimension $D + 1$; a 1-nearest-neighbour rule has infinite VC dimension and works perfectly well, which is a hint that the bound $R \\le \\hat{R} + O(\\sqrt{h/N})$ is loose rather than wrong.',
+      'Classical measures count the labelings a class can realize: the VC dimension is the largest number of points the class can label in every possible way. A linear classifier in $D$ dimensions has VC dimension $D + 1$; a 1-nearest-neighbor rule has infinite VC dimension and works perfectly well, which is a hint that the bound $R \\le \\hat{R} + O(\\sqrt{h/N})$ is loose rather than wrong.',
     statquest: 'bias and variance',
     teachesAt: 'ch05-overfitting',
     see: ['overfitting', 'underfitting', 'regularization', 'hyperparameter'],
@@ -231,7 +231,7 @@ export const conceptsCh05: Concept[] = [
     simple:
       'Charging the model rent for complexity. It may still be complicated, but only if the extra accuracy is worth the fee — and mostly it is not, so the model comes out simpler and travels better.',
     technical:
-      'Any modification that lowers holdout error at the cost of training error. The classic form adds a penalty on the size of the weights, so the optimiser must buy each unit of complexity with training-error savings; the strength is a [[hyperparameter]] you tune. The purchase is a small rise in [[model-bias|bias]] for a large drop in [[model-variance|variance]]. The family is wider than penalties: [[dropout]], [[early-stopping]], [[data-augmentation]] and [[pruning]] are all regularizers, and so is choosing a smaller model to begin with.',
+      'Any modification that lowers holdout error at the cost of training error. The classic form adds a penalty on the size of the weights, so the optimizer must buy each unit of complexity with training-error savings; the strength is a [[hyperparameter]] you tune. The purchase is a small rise in [[model-bias|bias]] for a large drop in [[model-variance|variance]]. The family is wider than penalties: [[dropout]], [[early-stopping]], [[data-augmentation]] and [[pruning]] are all regularizers, and so is choosing a smaller model to begin with.',
     math:
       'Minimize $\\hat{R}(f) + \\lambda\\,\\Omega(f)$ rather than $\\hat{R}(f)$ alone, with $\\Omega$ measuring complexity and $\\lambda \\ge 0$ pricing it. Under [[maximum-a-posteriori|MAP]] estimation this *is* a [[prior]] on the parameters: a Gaussian prior gives $\\Omega = \\|\\mathbf{w}\\|_2^{2}$, a Laplace prior gives $\\Omega = \\|\\mathbf{w}\\|_1$. Watch the letter: this chapter writes the strength as $C$, ridge and lasso libraries call it `alpha`, and SVM and logistic-regression libraries use $C$ for its *inverse*.',
     statquest: 'regularization ridge lasso',
@@ -244,7 +244,7 @@ export const conceptsCh05: Concept[] = [
     simple:
       'Charge the model for the total size of its weights, each counted at face value. Under that charge the cheapest saving is to switch a feature off completely, so many weights end up at exactly zero.',
     technical:
-      'The distinctive behaviour is [[sparse-model|sparsity]]: it does not merely shrink weights, it zeroes them, performing [[feature-selection]] as a side effect and leaving a model you can read aloud. The reason is geometric — the constraint region is a diamond whose corners sit on the axes, and a corner is a point where some weight is exactly zero. Two costs: it is not differentiable at zero, so plain [[gradient-descent]] needs help (subgradients, coordinate descent, proximal steps); and among correlated features it keeps one essentially at random and zeroes its twins.',
+      'The distinctive behavior is [[sparse-model|sparsity]]: it does not merely shrink weights, it zeroes them, performing [[feature-selection]] as a side effect and leaving a model you can read aloud. The reason is geometric — the constraint region is a diamond whose corners sit on the axes, and a corner is a point where some weight is exactly zero. Two costs: it is not differentiable at zero, so plain [[gradient-descent]] needs help (subgradients, coordinate descent, proximal steps); and among correlated features it keeps one essentially at random and zeroes its twins.',
     math:
       '$\\Omega(\\mathbf{w}) = \\|\\mathbf{w}\\|_1 = \\sum_{j=1}^{D}\\left|w^{(j)}\\right|$, whose subgradient is $\\mathrm{sign}(w^{(j)})$ — a push of constant size no matter how small the weight, so a weight without enough gradient support is driven to zero and *stays* there. With orthogonal features the solution is soft thresholding, $w^{(j)} = \\mathrm{sign}(\\hat{w}^{(j)})\\max\\!\\left(0,\\ |\\hat{w}^{(j)}| - \\lambda\\right)$: subtract $\\lambda$, clip at zero.',
     statquest: 'lasso regression',
@@ -268,7 +268,7 @@ export const conceptsCh05: Concept[] = [
     id: 'elastic-net',
     term: 'elastic net',
     simple:
-      'Use both penalties at once, with a dial for how much of each. You get the feature-switching-off behaviour of one and the stability of the other.',
+      'Use both penalties at once, with a dial for how much of each. You get the feature-switching-off behavior of one and the stability of the other.',
     technical:
       'The fix for lasso’s worst habit. Faced with a group of strongly correlated features, [[l1-regularization|L1]] keeps one at random and zeroes the rest, so the chosen set changes when you resample; adding an [[l2-regularization|L2]] term makes the penalty strictly convex again and the group is kept or dropped together. The price is two [[hyperparameter|hyperparameters]] instead of one, tuned together on a two-dimensional [[grid-search|grid]].',
     math:
@@ -319,7 +319,7 @@ export const conceptsCh05: Concept[] = [
     id: 'batch-normalization',
     term: 'batch normalization',
     simple:
-      'Between the layers of a network, recentre and rescale the numbers flowing through so they stay in a sensible range. Later layers then stop having to chase a moving target every time the earlier ones change.',
+      'Between the layers of a network, recenter and rescale the numbers flowing through so they stay in a sensible range. Later layers then stop having to chase a moving target every time the earlier ones change.',
     technical:
       'Standardizes each unit’s pre-activation using the mean and variance of the current [[minibatch]], then applies a learned scale and shift so the layer can undo the normalization when that is genuinely better. It permits much larger [[learning-rate|learning rates]], blunts sensitivity to initialization, and regularizes mildly, because each example’s normalization depends on which other examples share its batch — noise the network cannot fit. The catch is that training and inference behave differently (batch statistics against running averages), and small batches make the estimates noisy.',
     math:
@@ -408,7 +408,7 @@ export const conceptsCh05: Concept[] = [
     simple:
       'Most classifiers hand you a confidence between zero and one rather than a verdict. The threshold is the line you draw across that confidence — above it you act, below it you do not — and it is your choice, not the model’s.',
     technical:
-      'The cheapest lever in applied classification and the most often forgotten: the model is already trained, and sliding the threshold walks you along a whole curve of possible behaviours for free. Raise it and [[precision]] climbs while [[recall]] falls; lower it and the reverse. The default of 0.5 is a convention with no claim on your problem — it is optimal only when both mistakes cost the same and the classes are balanced. Choose it on the [[validation-set]], from the costs, and never on the [[test-set]].',
+      'The cheapest lever in applied classification and the most often forgotten: the model is already trained, and sliding the threshold walks you along a whole curve of possible behaviors for free. Raise it and [[precision]] climbs while [[recall]] falls; lower it and the reverse. The default of 0.5 is a convention with no claim on your problem — it is optimal only when both mistakes cost the same and the classes are balanced. Choose it on the [[validation-set]], from the costs, and never on the [[test-set]].',
     math:
       'Predict positive when $\\Pr(y = 1 \\mid \\mathbf{x}) \\ge \\tau$. Under costs $c_{FP}$ and $c_{FN}$ the expected-cost-minimizing choice is $\\tau^{\\star} = \\dfrac{c_{FP}}{c_{FP} + c_{FN}}$ — with a miss ten times worse than a false alarm, $\\tau^{\\star} = 1/11 \\approx 0.09$, nowhere near $0.5$. Sweeping $\\tau$ from 1 down to 0 traces the [[roc-curve|ROC curve]] from one corner to the other.',
     statquest: 'ROC and AUC',
@@ -434,7 +434,7 @@ export const conceptsCh05: Concept[] = [
     simple:
       'Not all mistakes cost the same, so stop counting them the same. Put a price on each kind of error and let the expensive ones drag the score down harder.',
     technical:
-      'The honest version of [[accuracy]] when a false negative and a false positive have different consequences — a missed tumour against an unnecessary scan. Two places to apply it: at scoring time, or at training time by reweighting the [[loss-function|loss]] per class ([[class-weights]]) so the optimiser itself takes the prices seriously. Doing both is normal. The hard part is never the arithmetic; it is getting anyone to commit to the numbers, because the ratio between two costs is a policy decision wearing a statistical hat.',
+      'The honest version of [[accuracy]] when a false negative and a false positive have different consequences — a missed tumour against an unnecessary scan. Two places to apply it: at scoring time, or at training time by reweighting the [[loss-function|loss]] per class ([[class-weights]]) so the optimizer itself takes the prices seriously. Doing both is normal. The hard part is never the arithmetic; it is getting anyone to commit to the numbers, because the ratio between two costs is a policy decision wearing a statistical hat.',
     math:
       'Weight the error cells and compute as usual: $\\dfrac{TP + TN}{TP + TN + c_{FP}\\,FP + c_{FN}\\,FN}$. The equivalent view is expected cost $c_{FP}\\,FP + c_{FN}\\,FN$, minimized over the [[decision-threshold]] at $\\tau^{\\star} = c_{FP}/(c_{FP} + c_{FN})$ — so choosing costs and choosing a threshold are the same act, stated twice.',
     teachesAt: 'ch05-metrics',

@@ -327,7 +327,7 @@ export function TinyNetLab({ challenge }: WidgetProps) {
         },
         {
           control: 'accuracy',
-          what: 'Share of the training points currently labelled correctly. On XOR, 50% means the network has settled for a straight line and needs a reset.',
+          what: 'Share of the training points currently labeled correctly. On XOR, 50% means the network has settled for a straight line and needs a reset.',
         },
         {
           control: 'loss',

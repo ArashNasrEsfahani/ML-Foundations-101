@@ -438,7 +438,7 @@ export const ch08: Chapter = {
       ],
       answer: 0,
       explain:
-        'Imbalance is about the *proportion of each class*, so it needs labelled classes of unequal size. When one class is rare, most algorithms happily sacrifice it — the boundary drifts into minority territory to keep the numerous majority happy.',
+        'Imbalance is about the *proportion of each class*, so it needs labeled classes of unequal size. When one class is rare, most algorithms happily sacrifice it — the boundary drifts into minority territory to keep the numerous majority happy.',
     },
     {
       kind: 'numeric',

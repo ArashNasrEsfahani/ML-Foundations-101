@@ -12,7 +12,7 @@ export const conceptsCh01: Concept[] = [
     simple:
       'The craft of getting a computer to work something out from examples instead of from instructions. Nobody can write the rule that separates spam from mail, so you hand over thousands of sorted messages and a procedure searches for a rule that reproduces them.',
     technical:
-      'An engineering discipline with a three-step shape: collect a [[dataset]], run a learning algorithm over it to produce a [[model]], apply the model to new inputs. What separates it from ordinary programming is that the behaviour is *derived* rather than authored; what it costs you is certainty, since the model is right about most inputs rather than every input, and only for as long as new inputs keep resembling the training data.',
+      'An engineering discipline with a three-step shape: collect a [[dataset]], run a learning algorithm over it to produce a [[model]], apply the model to new inputs. What separates it from ordinary programming is that the behavior is *derived* rather than authored; what it costs you is certainty, since the model is right about most inputs rather than every input, and only for as long as new inputs keep resembling the training data.',
     math:
       'A supervised learner picks $f^\\star = \\arg\\min_{f \\in \\mathcal{F}} \\frac{1}{N}\\sum_{i=1}^{N}\\ell(f(\\mathbf{x}_i), y_i)$ out of a chosen family $\\mathcal{F}$. The quantity anyone actually cares about is the expected loss over the true distribution, $\\mathbb{E}_{(\\mathbf{x},y)\\sim\\mathcal{D}}\\left[\\ell(f(\\mathbf{x}),y)\\right]$, which is never computable — every algorithm in this course is a different way of minimizing the first while keeping the second under control.',
     statquest: 'machine learning fundamentals',
@@ -60,11 +60,11 @@ export const conceptsCh01: Concept[] = [
     id: 'semi-supervised-learning',
     term: 'semi-supervised learning',
     simple:
-      'A handful of labelled examples and a mountain of unlabelled ones. The mountain carries no answers, but it does show where the examples crowd together — and knowing that a boundary ought to run through empty ground rather than through a crowd turns out to be worth a great deal.',
+      'A handful of labeled examples and a mountain of unlabeled ones. The mountain carries no answers, but it does show where the examples crowd together — and knowing that a boundary ought to run through empty ground rather than through a crowd turns out to be worth a great deal.',
     technical:
-      'It works when one specific assumption holds: points in the same dense clump share a label, so the [[decision-boundary]] should pass through low-density regions. Under that assumption a thousand unlabelled points sharpen a boundary fitted from twenty labelled ones. When the assumption fails the unlabelled data actively misleads — one of the few techniques in the book that can leave you worse off than ignoring the extra data. [[self-learning|Self-training]] is the simplest recipe.',
+      'It works when one specific assumption holds: points in the same dense clump share a label, so the [[decision-boundary]] should pass through low-density regions. Under that assumption a thousand unlabeled points sharpen a boundary fitted from twenty labeled ones. When the assumption fails the unlabeled data actively misleads — one of the few techniques in the book that can leave you worse off than ignoring the extra data. [[self-learning|Self-training]] is the simplest recipe.',
     math:
-      'Labelled $\\{(\\mathbf{x}_i,y_i)\\}_{i=1}^{l}$ alongside unlabelled $\\{\\mathbf{x}_j\\}_{j=l+1}^{l+u}$, typically with $u \\gg l$. Training minimizes $\\sum_{i=1}^{l}\\ell(f(\\mathbf{x}_i), y_i) + \\lambda\\,\\Omega\\!\\left(f, \\{\\mathbf{x}_j\\}\\right)$, where $\\Omega$ penalizes a boundary that cuts through a dense region and $\\lambda$ prices how far you trust that assumption.',
+      'Labeled $\\{(\\mathbf{x}_i,y_i)\\}_{i=1}^{l}$ alongside unlabeled $\\{\\mathbf{x}_j\\}_{j=l+1}^{l+u}$, typically with $u \\gg l$. Training minimizes $\\sum_{i=1}^{l}\\ell(f(\\mathbf{x}_i), y_i) + \\lambda\\,\\Omega\\!\\left(f, \\{\\mathbf{x}_j\\}\\right)$, where $\\Omega$ penalizes a boundary that cuts through a dense region and $\\lambda$ prices how far you trust that assumption.',
     teachesAt: 'ch01-types-of-learning',
     see: ['supervised-learning', 'self-learning', 'decision-boundary'],
   },

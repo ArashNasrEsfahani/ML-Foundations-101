@@ -143,7 +143,7 @@ export function ThresholdRoc({ challenge }: WidgetProps) {
         },
         {
           control: 'accuracy',
-          what: 'Share of all 100 examples labelled correctly. It hides the trade the other two show, which is why it is the last number to look at.',
+          what: 'Share of all 100 examples labeled correctly. It hides the trade the other two show, which is why it is the last number to look at.',
         },
         {
           control: 'the ROC curve',

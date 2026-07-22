@@ -39,7 +39,7 @@ export interface Concept {
   video?: string;
   /** the section that teaches this properly — becomes a "read the section" link */
   teachesAt?: string;
-  /** neighbouring ideas, offered as follow-on chips at the bottom of the card */
+  /** neighboring ideas, offered as follow-on chips at the bottom of the card */
   see?: string[];
 }
 

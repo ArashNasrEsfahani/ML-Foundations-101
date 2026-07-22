@@ -375,7 +375,7 @@ export const ch06: Chapter = {
         {
           type: 'hint',
           md:
-            'Count the saving on the 100×100 photo from the top of this section. A fully-connected layer of 1000 units cost $10^7$ weights. A convolution layer with 64 filters of size 3×3 over three colour channels costs $64 \\times (3 \\times 3 \\times 3 + 1) = 1792$ — five thousand times fewer, and *the number does not change if the photo gets bigger*. That is what weight sharing buys, and it is a regularizer as much as a saving: a pattern learned from examples in one corner of the image is available in every other corner for free.',
+            'Count the saving on the 100×100 photo from the top of this section. A fully-connected layer of 1000 units cost $10^7$ weights. A convolution layer with 64 filters of size 3×3 over three color channels costs $64 \\times (3 \\times 3 \\times 3 + 1) = 1792$ — five thousand times fewer, and *the number does not change if the photo gets bigger*. That is what weight sharing buys, and it is a regularizer as much as a saving: a pattern learned from examples in one corner of the image is available in every other corner for free.',
         },
         {
           type: 'widget',

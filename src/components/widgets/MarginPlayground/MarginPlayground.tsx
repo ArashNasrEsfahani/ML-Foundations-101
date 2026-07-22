@@ -291,11 +291,10 @@ export function MarginPlayground({ challenge }: WidgetProps) {
     <WidgetFrame
       title="Margins, noise and kernels"
       intro={
-        <>
-          The shaded region is one class’s side; the darker band hugs the decision boundary.
-          Points with a dashed ring are the ones holding the boundary up. Slide C to trade
-          margin width against mistakes — then hand the rings to the RBF kernel.
-        </>
+        'The shaded region is one class’s side; the darker band hugs the [[decision-boundary|decision boundary]]. ' +
+        'Points with a dashed ring are the [[support-vector|support vectors]] holding it up. Slide [[svm-c|C]] to ' +
+        'trade [[margin]] width against mistakes — then hand the rings to the [[rbf-kernel|RBF kernel]], which ' +
+        'replaces the straight line with a boundary built from one bump per point.'
       }
       guide={GUIDE}
       onReset={reset}

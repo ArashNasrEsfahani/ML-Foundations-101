@@ -46,7 +46,7 @@ function AnnotatedFormula({ parts }: { parts: { tex: string; label?: string }[] 
           columnGap: 7,
           // max-content + auto margins: centered while it fits, and when it does
           // not, the columns keep their width and the row scrolls instead of
-          // collapsing to one word per line and colliding with its neighbour
+          // collapsing to one word per line and colliding with its neighbor
           width: 'max-content',
           margin: '0 auto',
         }}

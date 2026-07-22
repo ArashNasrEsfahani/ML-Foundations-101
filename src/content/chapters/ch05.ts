@@ -36,7 +36,7 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            'The bill arrives when a category has many values. A colour column with three levels costs three columns; a *city* column with 800 levels costs 800, nearly all of them zero nearly all of the time, and each one has to earn its weight from however few examples share that city. High **[[cardinality]]** is where one-hot stops being free. The standard escapes: fold every level below some count into a single *other* bucket; replace the level by a number derived from it (how often it occurs, or the average label for it, computed on training data only); or — once you reach user ids and product ids — hand the problem to an [[embedding-layer|embedding]], which learns a short dense vector per level instead of one axis each.',
+            'The bill arrives when a category has many values. A color column with three levels costs three columns; a *city* column with 800 levels costs 800, nearly all of them zero nearly all of the time, and each one has to earn its weight from however few examples share that city. High **[[cardinality]]** is where one-hot stops being free. The standard escapes: fold every level below some count into a single *other* bucket; replace the level by a number derived from it (how often it occurs, or the average label for it, computed on training data only); or — once you reach user ids and product ids — hand the problem to an [[embedding-layer|embedding]], which learns a short dense vector per level instead of one axis each.',
         },
         {
           type: 'p',
@@ -496,7 +496,7 @@ export const ch05: Chapter = {
           type: 'list',
           items: [
             '**[[dropout]]** — switch off a random subset of a network’s units on every training pass, so no unit can lean on any other and the network learns several independent routes to the answer.',
-            '**[[batch-normalization]]** — recentre and rescale the numbers flowing between layers; mainly a training accelerant, mildly a regularizer, since each example’s normalization depends on whichever examples share its batch.',
+            '**[[batch-normalization]]** — recenter and rescale the numbers flowing between layers; mainly a training accelerant, mildly a regularizer, since each example’s normalization depends on whichever examples share its batch.',
             '**[[data-augmentation]]** — invent new training examples by altering existing ones in ways that don’t change the label (a mirrored cat is still a cat). This attacks the *sample size* rather than the model, which is why it works so well when labels are scarce.',
             '**[[early-stopping]]** — watch the validation curve and stop when it turns upward. Training length behaves like a capacity dial, so stopping early is regularization by wall clock, and it costs nothing.',
           ],

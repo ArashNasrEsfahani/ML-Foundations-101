@@ -451,7 +451,7 @@ export const ch02: Chapter = {
             { tex: '=' },
             {
               tex: '\\frac{\\Pr(Y = y \\mid X = x)}{\\Pr(Y = y)}',
-              label: 'how much this evidence favours x',
+              label: 'how much this evidence favors x',
             },
             { tex: '\\Pr(X = x)', label: 'what you believed before it' },
           ],

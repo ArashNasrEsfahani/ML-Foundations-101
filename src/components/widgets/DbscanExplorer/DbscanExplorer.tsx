@@ -103,15 +103,15 @@ export function DbscanExplorer({ challenge }: WidgetProps) {
         },
         {
           control: 'ε',
-          what: 'How far apart two points can be and still count as neighbours — see [[dbscan]]. Too small and everything becomes noise; too large and separate clusters merge into one.',
+          what: 'How far apart two points can be and still count as neighbors — see [[dbscan]]. Too small and everything becomes noise; too large and separate clusters merge into one.',
         },
         {
           control: 'minPts',
-          what: 'How many neighbours within ε a point needs to be a [[core-point]] and grow a cluster from itself. Raising it thins the clusters to their dense spines and pushes the edges out to noise.',
+          what: 'How many neighbors within ε a point needs to be a [[core-point]] and grow a cluster from itself. Raising it thins the clusters to their dense spines and pushes the edges out to noise.',
         },
         {
           control: 'tap or hover a point',
-          what: 'Draws that point’s ε-circle, which is the neighbourhood the algorithm actually counts. Move ε with a point selected and you can see the radius that decides everything.',
+          what: 'Draws that point’s ε-circle, which is the neighborhood the algorithm actually counts. Move ε with a point selected and you can see the radius that decides everything.',
         },
         {
           control: 'reset',

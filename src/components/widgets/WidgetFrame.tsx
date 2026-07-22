@@ -26,7 +26,13 @@ export function WidgetFrame({
   challengeDone,
 }: {
   title: string;
-  /** one or two sentences on what the widget is for, above the controls */
+  /**
+   * One or two sentences on what the widget is for, above the controls. Pass a
+   * string and it is read as markdown-lite, so an intro can mark the terms its
+   * own controls are named after — a button labeled "RBF kernel" should have
+   * an unfoldable "RBF kernel" in the sentence above it. JSX is still accepted
+   * for the intros that need `<TeX>` or interpolated numbers.
+   */
   intro?: React.ReactNode;
   guide?: GuideEntry[];
   children: React.ReactNode;
@@ -85,7 +91,9 @@ export function WidgetFrame({
       </div>
 
       {intro && (
-        <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>{intro}</p>
+        <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
+          {typeof intro === 'string' ? renderInline(intro) : intro}
+        </p>
       )}
 
       {guide && guideOpen && (

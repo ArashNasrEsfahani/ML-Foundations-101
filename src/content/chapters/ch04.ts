@@ -123,7 +123,7 @@ export const ch04: Chapter = {
         {
           type: 'p',
           md:
-            'Time to watch the machinery run. The demo problem: predict a company’s **units sold** from its **radio-ad spendings** (in millions). One feature, so the model is $f(x) = wx + b$ with exactly two parameters to learn. Linear regression has a [closed-form solution](sec:ch03-linear-regression), so gradient descent is not *needed* here — which is precisely why it makes the perfect glass-box demo: you can check every step against an answer you already know. [Logistic regression](sec:ch03-logistic-regression) is where the need becomes real, because setting its gradient to zero produces equations no one can solve algebraically. The criterion is the **[[mean-squared-error|mean squared error]]**:',
+            'Time to watch the machinery run. The demo problem: predict a company’s **units sold** from its **radio-ad spendings** (in millions). One feature, so the model is $f(x) = wx + b$ with exactly two parameters to learn. Linear regression has a [closed-form solution](sec:ch03-linear-regression), so **[[gradient-descent]]** is not *needed* here — which is precisely why it makes the perfect glass-box demo: you can check every step against an answer you already know. [Logistic regression](sec:ch03-logistic-regression) is where the need becomes real, because setting its gradient to zero produces equations no one can solve algebraically. The criterion is the **[[mean-squared-error|mean squared error]]**:',
         },
         {
           type: 'formula',

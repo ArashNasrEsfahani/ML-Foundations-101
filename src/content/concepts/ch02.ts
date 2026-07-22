@@ -76,7 +76,7 @@ export const conceptsCh02: Concept[] = [
     simple:
       'The same shorthand as the summation sign, but multiplying instead of adding. It shows up almost exclusively in one place: combining the chances of independent events, because independent chances multiply.',
     technical:
-      'Products of many probabilities are numerically hostile — a few hundred factors below 1 underflow to exactly zero in floating point, and zero is a number no optimiser can recover from. The standard escape is the logarithm, which converts a product into a sum. That is the reason [[log-likelihood]] rather than likelihood is what actually gets maximized, and one reason [[maximum-likelihood]] training is tractable at all.',
+      'Products of many probabilities are numerically hostile — a few hundred factors below 1 underflow to exactly zero in floating point, and zero is a number no optimizer can recover from. The standard escape is the logarithm, which converts a product into a sum. That is the reason [[log-likelihood]] rather than likelihood is what actually gets maximized, and one reason [[maximum-likelihood]] training is tractable at all.',
     math:
       '$\\prod_{i=1}^{n}x_i \\stackrel{\\text{def}}{=} x_1\\cdot x_2\\cdots x_n$, and $\\log\\prod_i x_i = \\sum_i \\log x_i$. The danger is concrete: $0.1^{400} = 10^{-400}$ is far below the smallest double a machine can hold and becomes exactly $0$, while the corresponding sum of logarithms, $400\\ln 0.1 \\approx -921$, is an ordinary number.',
     teachesAt: 'ch02-data-structures',
@@ -115,7 +115,7 @@ export const conceptsCh02: Concept[] = [
     technical:
       'What optimization would like to reach and can rarely prove it has. [[convex|Convex]] objectives make it attainable, because every local minimum is global and [[gradient-descent]] cannot be trapped. Deep networks give that up, and the loss is smaller than it sounds: a good-enough minimum that [[generalization|generalizes]] often beats the true global minimum of the training objective, which by definition is also the best possible fit to the training noise.',
     math:
-      'A point $c^{\\star}$ with $f(c^{\\star})\\le f(x)$ for every $x$ in the domain. For convex $f$ the set of minimisers is itself convex and any stationary point belongs to it; for non-convex $f$, verifying that a candidate is global is NP-hard in general, which is why nobody claims it.',
+      'A point $c^{\\star}$ with $f(c^{\\star})\\le f(x)$ for every $x$ in the domain. For convex $f$ the set of minimizers is itself convex and any stationary point belongs to it; for non-convex $f$, verifying that a candidate is global is NP-hard in general, which is why nobody claims it.',
     statquest: 'gradient descent',
     teachesAt: 'ch02-data-structures',
     see: ['local-minimum', 'convex', 'gradient-descent'],
@@ -124,7 +124,7 @@ export const conceptsCh02: Concept[] = [
     id: 'derivative',
     term: 'derivative',
     simple:
-      'How fast something is changing, right now. One number: how much the output moves for a tiny nudge of the input. Positive means rising, negative means falling, zero means flat ground — and flat ground is what an optimiser is hunting for.',
+      'How fast something is changing, right now. One number: how much the output moves for a tiny nudge of the input. Positive means rising, negative means falling, zero means flat ground — and flat ground is what an optimizer is hunting for.',
     technical:
       'The derivative at a point is the slope of the straight line that best matches the curve there. Its definition is a limit — take the slope between two nearby points and slide them together — but in practice you assemble it from a handful of memorized rules plus the [[chain-rule]]. Machine learning cares for two reasons: the sign says which way to move to reduce a loss, and the size says how urgently.',
     math:
@@ -217,7 +217,7 @@ export const conceptsCh02: Concept[] = [
     simple:
       'The long-run average, worked out in advance. Weight every possible value by how often it happens, add them up, and you have the number the average of many draws will settle towards — even when it is a value the thing itself can never produce.',
     technical:
-      'The centre of mass of a distribution: balance the probabilities on a pencil and the expectation is where it balances. It is linear, which is why it appears in every derivation — $\\mathbb{E}[aX+bY] = a\\mathbb{E}[X]+b\\mathbb{E}[Y]$ holds whether or not $X$ and $Y$ are independent, and no other summary statistic is that well behaved. A model’s true risk is an expectation, [[variance]] is an expectation, and an [[unbiased-estimator]] is defined by one.',
+      'The center of mass of a distribution: balance the probabilities on a pencil and the expectation is where it balances. It is linear, which is why it appears in every derivation — $\\mathbb{E}[aX+bY] = a\\mathbb{E}[X]+b\\mathbb{E}[Y]$ holds whether or not $X$ and $Y$ are independent, and no other summary statistic is that well behaved. A model’s true risk is an expectation, [[variance]] is an expectation, and an [[unbiased-estimator]] is defined by one.',
     math:
       '$\\mathbb{E}[X]\\stackrel{\\text{def}}{=}\\sum_{i=1}^{k}x_i\\Pr(X = x_i)$, or $\\int_{\\mathbb{R}}xf_X(x)\\,dx$ in the continuous case. A fair die gives $\\frac{1+2+3+4+5+6}{6} = 3.5$, a face it does not have. Weighted example: values $1,2,3$ with probabilities $0.2, 0.5, 0.3$ give $0.2 + 1.0 + 0.9 = 2.1$.',
     statquest: 'expected values',
@@ -256,7 +256,7 @@ export const conceptsCh02: Concept[] = [
     simple:
       'A recipe for guessing something you cannot measure, which is not systematically wrong. Any single guess misses; what makes it unbiased is that the misses cancel — repeat the exercise on fresh samples forever and the average guess lands exactly on the truth.',
     technical:
-      'Bias is a statement about the centre of an estimator, not its accuracy on one sample, so an unbiased estimator can still be useless if it is wildly noisy — and a slightly biased estimator with far smaller [[variance]] is often the better tool, which is the whole argument for [[regularization]]. The classic fact: the sample mean is unbiased for the true mean, while the sample variance computed with $1/N$ is not, because the deviations are measured from the sample’s own mean rather than the true one.',
+      'Bias is a statement about the center of an estimator, not its accuracy on one sample, so an unbiased estimator can still be useless if it is wildly noisy — and a slightly biased estimator with far smaller [[variance]] is often the better tool, which is the whole argument for [[regularization]]. The classic fact: the sample mean is unbiased for the true mean, while the sample variance computed with $1/N$ is not, because the deviations are measured from the sample’s own mean rather than the true one.',
     math:
       '$\\hat\\theta(S_X)$ is unbiased for $\\theta$ when $\\mathbb{E}\\!\\left[\\hat\\theta(S_X)\\right] = \\theta$. The sample mean qualifies: $\\mathbb{E}\\!\\left[\\frac{1}{N}\\sum_{i=1}^{N}x_i\\right] = \\frac{1}{N}\\sum_i\\mathbb{E}[x_i] = \\mu$. The uncorrected variance does not — $\\mathbb{E}\\!\\left[\\frac{1}{N}\\sum_i(x_i-\\hat\\mu)^{2}\\right] = \\frac{N-1}{N}\\sigma^{2}$ — which is the entire reason for the $N-1$ denominator.',
     statquest: 'population and estimated variance',
@@ -284,7 +284,7 @@ export const conceptsCh02: Concept[] = [
     technical:
       'It flips a conditional round: you know how often the evidence shows up when the hypothesis is true, and you want how often the hypothesis is true when the evidence shows up. Those are different numbers and the gap between them is the [[prior]]. Concretely, a test catching 90% of a disease that affects 1 person in 100 leaves you only about 8% likely to be ill after a positive result, because the 10% false-alarm rate is charged against a vastly larger healthy population. Naive Bayes, [[maximum-a-posteriori|MAP]] estimation and every Bayesian method in Chapter 11 rest on it.',
     math:
-      '$\\Pr(X = x\\mid Y = y) = \\dfrac{\\Pr(Y = y\\mid X = x)\\,\\Pr(X = x)}{\\Pr(Y = y)}$, which falls out of writing the joint two ways: $\\Pr(X,Y) = \\Pr(X\\mid Y)\\Pr(Y) = \\Pr(Y\\mid X)\\Pr(X)$. The denominator is only a normaliser, $\\Pr(Y = y) = \\sum_x \\Pr(Y = y\\mid X = x)\\Pr(X = x)$, so the memorable form is posterior $\\propto$ likelihood $\\times$ prior. In odds form, prior odds of $1{:}99$ times a likelihood ratio of $0.9/0.1 = 9$ gives posterior odds $9{:}99$, about $8.3\\%$.',
+      '$\\Pr(X = x\\mid Y = y) = \\dfrac{\\Pr(Y = y\\mid X = x)\\,\\Pr(X = x)}{\\Pr(Y = y)}$, which falls out of writing the joint two ways: $\\Pr(X,Y) = \\Pr(X\\mid Y)\\Pr(Y) = \\Pr(Y\\mid X)\\Pr(X)$. The denominator is only a normalizer, $\\Pr(Y = y) = \\sum_x \\Pr(Y = y\\mid X = x)\\Pr(X = x)$, so the memorable form is posterior $\\propto$ likelihood $\\times$ prior. In odds form, prior odds of $1{:}99$ times a likelihood ratio of $0.9/0.1 = 9$ gives posterior odds $9{:}99$, about $8.3\\%$.',
     statquest: 'bayes theorem',
     teachesAt: 'ch02-bayes',
     see: ['prior', 'posterior', 'likelihood', 'conditional-probability', 'maximum-a-posteriori'],
@@ -295,7 +295,7 @@ export const conceptsCh02: Concept[] = [
     simple:
       'What you believed before the evidence arrived. Often it is nothing grander than a base rate — how common the thing is in the population — and ignoring it is the most reliable way there is to misread a test result.',
     technical:
-      'In parameter estimation the prior is a distribution over the parameter values themselves, encoding what you are willing to assume before seeing data. That is not a philosophical flourish: a Gaussian prior centred on zero *is* [[l2-regularization]], and a Laplace prior is [[l1-regularization]]. Its influence shrinks as examples accumulate, so it matters most exactly when data is scarce — which is when people are most tempted to leave it out.',
+      'In parameter estimation the prior is a distribution over the parameter values themselves, encoding what you are willing to assume before seeing data. That is not a philosophical flourish: a Gaussian prior centered on zero *is* [[l2-regularization]], and a Laplace prior is [[l1-regularization]]. Its influence shrinks as examples accumulate, so it matters most exactly when data is scarce — which is when people are most tempted to leave it out.',
     math:
       '$\\Pr(X = x)$, or over parameters $\\Pr(\\boldsymbol\\theta)$. Since $\\log\\Pr(\\boldsymbol\\theta\\mid\\text{data}) = \\log\\Pr(\\text{data}\\mid\\boldsymbol\\theta) + \\log\\Pr(\\boldsymbol\\theta) + \\text{const}$, a prior $\\boldsymbol\\theta\\sim\\mathcal{N}(0,\\tau^{2}\\mathbf{I})$ contributes the term $-\\frac{1}{2\\tau^{2}}\\|\\boldsymbol\\theta\\|^{2}$ — a penalty on large weights, arrived at from probability rather than from taste.',
     statquest: 'bayes theorem',
@@ -345,7 +345,7 @@ export const conceptsCh02: Concept[] = [
     id: 'hyperparameter',
     term: 'hyperparameter',
     simple:
-      'A setting you choose before training starts, because the algorithm has no way of working it out from the data. How many neighbours to consult, how harshly to punish mistakes, how big a step to take — the dials on the outside of the machine.',
+      'A setting you choose before training starts, because the algorithm has no way of working it out from the data. How many neighbors to consult, how harshly to punish mistakes, how big a step to take — the dials on the outside of the machine.',
     technical:
       'The distinguishing test: [[model-parameters|parameters]] are fitted by the training procedure, hyperparameters are inputs to it. They cannot be tuned on the training set, where the answer would always be “maximum flexibility, please”, so they are settled on a [[validation-set]] by [[grid-search]], [[random-search]] or [[bayesian-optimization]], as [Chapter 5 sets out](sec:ch05-tuning). Most are searched on a log scale, because what matters is the order of magnitude rather than the third decimal place.',
     math:
@@ -374,7 +374,7 @@ export const conceptsCh02: Concept[] = [
     technical:
       'The target is continuous and ordered, so being wrong by a little is genuinely better than being wrong by a lot and the [[loss-function|loss]] has to say so: squared error punishes large misses hardest, absolute error treats every miss proportionally and shrugs at outliers. Classification metrics do not transfer — there is no accuracy here, only [[mean-squared-error]], mean absolute error and $R^{2}$. The workhorse is [[linear-regression]].',
     math:
-      'Learn $f:\\mathbb{R}^{D}\\to\\mathbb{R}$ minimizing $\\frac{1}{N}\\sum_{i=1}^{N}\\left(f(\\mathbf{x}_i)-y_i\\right)^{2}$. Worth knowing what that choice buys: the minimiser of expected squared error is the conditional mean $\\mathbb{E}[Y\\mid\\mathbf{X} = \\mathbf{x}]$, while the minimiser of absolute error is the conditional *median* — the loss decides which summary of the truth comes back.',
+      'Learn $f:\\mathbb{R}^{D}\\to\\mathbb{R}$ minimizing $\\frac{1}{N}\\sum_{i=1}^{N}\\left(f(\\mathbf{x}_i)-y_i\\right)^{2}$. Worth knowing what that choice buys: the minimizer of expected squared error is the conditional mean $\\mathbb{E}[Y\\mid\\mathbf{X} = \\mathbf{x}]$, while the minimizer of absolute error is the conditional *median* — the loss decides which summary of the truth comes back.',
     statquest: 'linear regression',
     teachesAt: 'ch02-ml-vocabulary',
     see: ['linear-regression', 'classification', 'mean-squared-error'],
@@ -387,7 +387,7 @@ export const conceptsCh02: Concept[] = [
     technical:
       'The two-class case is special because a single number suffices — one score, one threshold, one boundary. It is also where the interesting evaluation lives: when one class is rare, [[accuracy]] becomes useless (always answering “healthy” scores 99% on a disease affecting 1 in 100) and [[precision]], [[recall]] and the [[roc-curve]] take over. Encodings differ by algorithm, $\\{0,1\\}$ for [[logistic-regression]] and $\\{-1,+1\\}$ for the SVM.',
     math:
-      'Learn $f:\\mathbb{R}^{D}\\to\\{0,1\\}$, typically as $\\mathbb{1}\\!\\left[s(\\mathbf{x}) > \\tau\\right]$ for a score $s$ and a [[decision-threshold|threshold]] $\\tau$. Sweeping $\\tau$ traces the entire [[roc-curve]] without retraining anything, which is why the threshold is a deployment decision rather than a modelling one.',
+      'Learn $f:\\mathbb{R}^{D}\\to\\{0,1\\}$, typically as $\\mathbb{1}\\!\\left[s(\\mathbf{x}) > \\tau\\right]$ for a score $s$ and a [[decision-threshold|threshold]] $\\tau$. Sweeping $\\tau$ traces the entire [[roc-curve]] without retraining anything, which is why the threshold is a deployment decision rather than a modeling one.',
     statquest: 'logistic regression',
     teachesAt: 'ch02-ml-vocabulary',
     see: ['classification', 'multiclass-classification', 'decision-threshold', 'roc-curve'],

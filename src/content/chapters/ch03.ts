@@ -18,7 +18,7 @@ export const ch03: Chapter = {
         {
           type: 'p',
           md:
-            'This chapter tours five algorithms that earn their place twice over: each is genuinely useful on its own, and each is a building block inside fancier methods. First up is the workhorse of prediction: **linear regression**. You have labeled examples $\\{(\\mathbf{x}_i, y_i)\\}_{i=1}^N$ where every target $y_i$ is a *real number* — a price, a temperature, a weight — and you want a model that predicts it as a **linear combination** of the features:',
+            'This chapter tours five algorithms that earn their place twice over: each is genuinely useful on its own, and each is a building block inside fancier methods. First up is the workhorse of prediction: **[[linear-regression]]**. You have labeled examples $\\{(\\mathbf{x}_i, y_i)\\}_{i=1}^N$ where every target $y_i$ is a *real number* — a price, a temperature, a weight — so this is a [[regression]] task rather than a [[classification]] one, and you want a [[model]] that predicts the target as a **linear combination** of the [[feature-vector|features]]:',
         },
         {
           type: 'formula',
@@ -40,12 +40,12 @@ export const ch03: Chapter = {
         {
           type: 'p',
           md:
-            'Look familiar? It is the SVM expression from Chapter 1 minus the sign operator. But the *role* of the hyperplane flips completely. The SVM hyperplane is a fence: it must sit **as far as possible** from the two groups it separates. The regression hyperplane is a clothesline: it must run **as close as possible** to every training point, because we read predictions directly off it. A line far from the dots would produce nonsense for new inputs.',
+            'Look familiar? It is the [[support-vector-machine|SVM]] expression from [Chapter 1](sec:ch01-how-supervised-works) minus the sign operator. But the *role* of the [[hyperplane]] flips completely. The SVM hyperplane is a fence: it must sit **as far as possible** from the two groups it separates. The regression hyperplane is a clothesline: it must run **as close as possible** to every training point, because we read predictions directly off it. A line far from the dots would produce nonsense for new inputs.',
         },
         {
           type: 'p',
           md:
-            'How do we measure "close to all points"? With an **objective** — the expression we minimize. Linear regression minimizes the average of squared differences between predictions and targets, the **mean squared error**:',
+            'How do we measure "close to all points"? With an **[[optimization-criterion|objective]]** — the expression we minimize. Linear regression minimizes the average of squared differences between predictions and targets, the **[[mean-squared-error|mean squared error]]**:',
         },
         {
           type: 'formula',
@@ -58,14 +58,14 @@ export const ch03: Chapter = {
             },
           ],
           terms: [
-            { tex: '(f_{w,b}(\\mathbf{x}_i) - y_i)^2', explain: 'the loss function — here squared error loss, the penalty one example charges the model' },
+            { tex: '(f_{w,b}(\\mathbf{x}_i) - y_i)^2', explain: 'the [[loss-function|loss function]] — here [[squared-loss|squared error loss]], the penalty one example charges the model' },
             { tex: '\\frac{1}{N}\\sum', explain: 'averaging losses over all N examples gives the cost function, also called the empirical risk' },
           ],
         },
         {
           type: 'p',
           md:
-            'Why *squared*? Absolute differences would make sense too, and so would cubes — many design choices in ML are less inevitable than they look. The square won for practical reasons dating back to Legendre in 1705: it is **smooth** (the absolute value has no continuous derivative at zero), and a smooth objective lets you set the gradient to zero and solve a **closed-form** system of equations — no iterative search needed. Squaring also exaggerates big misses, which pushes the line away from gross errors. Bonus: a model this simple rarely **overfits** — it almost never memorizes noise.',
+            'Why *squared*? Absolute differences would make sense too, and so would cubes — many design choices in ML are less inevitable than they look. The square won for practical reasons dating back to Legendre in 1705: it is **[[differentiable|smooth]]** (the absolute value has no continuous [[derivative]] at zero), and a smooth objective lets you set the [[gradient]] to zero and solve a **[[closed-form-solution|closed-form]]** system of equations — no iterative search needed. Squaring also exaggerates big misses, which pushes the line away from gross errors. Bonus: a model this simple rarely **[[overfitting|overfits]]** — it almost never memorizes noise.',
         },
         {
           type: 'widget',
@@ -79,7 +79,7 @@ export const ch03: Chapter = {
         {
           type: 'hint',
           md:
-            'Overfitting preview: fit these same dots with a degree-10 polynomial and it will thread through nearly every one — then predict garbage between them. Chapter 5 deals with this properly.',
+            '[[overfitting|Overfitting]] preview: fit these same dots with a degree-10 polynomial and it will thread through nearly every one — then predict garbage between them. [Chapter 5](sec:ch05-overfitting) deals with this properly.',
         },
         {
           type: 'quiz',
@@ -143,7 +143,7 @@ export const ch03: Chapter = {
         {
           type: 'p',
           md:
-            'The name lies to you once: **logistic regression is not regression** — it is a *classification* algorithm. The name is inherited from statistics, because its math looks so much like linear regression’s. The problem it solves: you want a linear model, but your labels are 0 or 1, while $wx + b$ happily outputs anything from $-\\infty$ to $+\\infty$. You need a squashing function whose output lives in $(0, 1)$ — then you can read the output as a *probability of being positive*.',
+            'The name lies to you once: **[[logistic-regression]] is not regression** — it is a *[[binary-classification|classification]]* algorithm. The name is inherited from statistics, because its math looks so much like [[linear-regression|linear regression]]’s. The problem it solves: you want a linear model, but your [[label|labels]] are 0 or 1, while $wx + b$ happily outputs anything from $-\\infty$ to $+\\infty$. You need a squashing function whose output lives in $(0, 1)$ — then you can read the output as a *probability of being positive*.',
         },
         {
           type: 'formula',
@@ -156,12 +156,12 @@ export const ch03: Chapter = {
         {
           type: 'p',
           md:
-            'This S-shaped curve is the **standard logistic function**, better known as the **sigmoid**. Feed it the familiar linear score and you get the logistic regression model: $f_{\\mathbf{w},b}(\\mathbf{x}) = 1 / (1 + e^{-(\\mathbf{w}\\mathbf{x} + b)})$. Its output is interpreted as $p(y{=}1 \\mid \\mathbf{x})$; if it is at least a threshold (usually $0.5$), predict positive, otherwise negative. Note the anchor point: $\\sigma(0) = 0.5$, so the decision boundary sits exactly where $\\mathbf{w}\\mathbf{x} + b = 0$.',
+            'This S-shaped curve is the **standard logistic function**, better known as the **[[sigmoid]]**. Feed it the familiar linear score and you get the logistic regression model: $f_{\\mathbf{w},b}(\\mathbf{x}) = 1 / (1 + e^{-(\\mathbf{w}\\mathbf{x} + b)})$. Its output is interpreted as $p(y{=}1 \\mid \\mathbf{x})$; if it is at least a [[decision-threshold|threshold]] (usually $0.5$), predict positive, otherwise negative. Note the anchor point: $\\sigma(0) = 0.5$, so the [[decision-boundary|decision boundary]] sits exactly where $\\mathbf{w}\\mathbf{x} + b = 0$.',
         },
         {
           type: 'p',
           md:
-            'Training does *not* minimize squared error here. Instead we use **maximum likelihood**: choose $\\mathbf{w}, b$ to make the labels we actually observed as probable as possible under the model. One example’s likelihood is $f(\\mathbf{x}_i)$ if $y_i = 1$ and $1 - f(\\mathbf{x}_i)$ if $y_i = 0$; assuming independent observations, the dataset’s likelihood is the **product** of all of them — probabilities multiply, like coin flips.',
+            'Training does *not* minimize [[squared-loss|squared error]] here. Instead we use **[[maximum-likelihood|maximum likelihood]]**: choose $\\mathbf{w}, b$ to make the labels we actually observed as probable as possible under the model. One example’s [[likelihood]] is $f(\\mathbf{x}_i)$ if $y_i = 1$ and $1 - f(\\mathbf{x}_i)$ if $y_i = 0$; assuming independent observations, the dataset’s likelihood is the **[[capital-pi-notation|product]]** of all of them — probabilities multiply, like coin flips.',
         },
         {
           type: 'math',
@@ -170,7 +170,7 @@ export const ch03: Chapter = {
         {
           type: 'p',
           md:
-            'In practice we maximize the **log-likelihood** $\\sum_i y_i \\ln f(\\mathbf{x}_i) + (1-y_i)\\ln(1 - f(\\mathbf{x}_i))$ instead: $\\ln$ is strictly increasing, so the best $(\\mathbf{w}, b)$ is unchanged, and sums of logs are far friendlier than products of many numbers between 0 and 1. One more contrast with linear regression: there is **no closed-form solution** this time. The optimum is found numerically — typically with **gradient descent** (Chapter 4).',
+            'In practice we maximize the **[[log-likelihood|log-likelihood]]** $\\sum_i y_i \\ln f(\\mathbf{x}_i) + (1-y_i)\\ln(1 - f(\\mathbf{x}_i))$ instead: $\\ln$ is strictly increasing, so the best $(\\mathbf{w}, b)$ is unchanged, and sums of logs are far friendlier than products of many numbers between 0 and 1. One more contrast with linear regression: there is **no [[closed-form-solution|closed-form solution]]** this time. The optimum is found numerically — typically with **[[gradient-descent]]**, the subject of [Chapter 4](sec:ch04-gradient-descent).',
         },
         {
           type: 'widget',
@@ -247,12 +247,12 @@ export const ch03: Chapter = {
         {
           type: 'p',
           md:
-            'A **decision tree** plays twenty questions with your feature vector. It is an acyclic graph: each branching node examines one feature — *is $x^{(j)}$ below threshold $t$?* — and sends the example left or right; each **leaf** announces a class. Unlike logistic regression, which finds an *optimal* $(\\mathbf{w}^*, b^*)$ for a fixed formula, tree learning builds a **non-parametric** model piece by piece, approximately. The classic formulation covered in the book is **ID3**.',
+            'A **[[decision-tree|decision tree]]** plays twenty questions with your [[feature-vector|feature vector]]. It is an acyclic graph: each branching node examines one feature — *is $x^{(j)}$ below threshold $t$?* — and sends the example left or right; each **[[leaf-node|leaf]]** announces a class. Unlike [[logistic-regression|logistic regression]], which finds an *optimal* $(\\mathbf{w}^*, b^*)$ for a fixed formula, tree learning builds a **[[non-parametric-model|non-parametric]]** model piece by piece, approximately. The classic formulation covered in the book is **[[id3|ID3]]**.',
         },
         {
           type: 'p',
           md:
-            'ID3 starts with every labeled example in a single node, predicting just the average label. Then it searches all features $j$ and all thresholds $t$, imagines splitting the set $\\mathcal{S}$ into $\\mathcal{S}_-$ (examples with $x^{(j)} < t$) and $\\mathcal{S}_+$ (the rest), and asks: *which split leaves the least uncertainty behind?* Uncertainty is measured by **entropy** — maximal when classes are perfectly mixed, zero when a set is pure:',
+            'ID3 starts with every labeled example in a single node, predicting just the average label. Then it searches all features $j$ and all thresholds $t$, imagines splitting the set $\\mathcal{S}$ into $\\mathcal{S}_-$ (examples with $x^{(j)} < t$) and $\\mathcal{S}_+$ (the rest), and asks: *which split leaves the least uncertainty behind?* Uncertainty is measured by **[[entropy]]** — maximal when classes are perfectly mixed, zero when a set is pure:',
         },
         {
           type: 'formula',
@@ -290,12 +290,12 @@ export const ch03: Chapter = {
         {
           type: 'p',
           md:
-            'The drop from $H(\\mathcal{S})$ to the weighted entropy after splitting is the **information gain** — how many bits of uncertainty the question removes. ID3 greedily takes the best split, then recurses into each branch. It stops splitting a node when: the node is already pure, no attribute is left to split on, the best gain falls below some $\\epsilon$, or the tree hits a maximum depth $d$ ($\\epsilon$ and $d$ are hyperparameters, found experimentally).',
+            'The drop from $H(\\mathcal{S})$ to the weighted entropy after splitting is the **[[information-gain|information gain]]** — how many bits of uncertainty the question removes. ID3 greedily takes the best split, then recurses into each branch. It stops splitting a node when: the node is already pure, no attribute is left to split on, the best gain falls below some $\\epsilon$, or the tree hits a maximum depth $d$ ($\\epsilon$ and $d$ are [[hyperparameter|hyperparameters]], found experimentally).',
         },
         {
           type: 'p',
           md:
-            'Note the word **greedy**: each split is chosen by its *local* benefit, with no lookahead to future splits — so ID3 does **not** guarantee the globally optimal tree (backtracking during search can improve it, at a price). The most widely used refinement, **C4.5**, handles continuous *and* discrete features, tolerates missing values, and fights overfitting with **pruning**: grow the tree fully, then walk back through it and replace branches that don’t pull their weight with leaves.',
+            'Note the word **[[greedy-algorithm|greedy]]**: each split is chosen by its *local* benefit, with no lookahead to future splits — so ID3 does **not** guarantee the globally optimal tree (backtracking during search can improve it, at a price). The most widely used refinement, **C4.5**, handles continuous *and* discrete features, tolerates missing values, and fights [[overfitting]] with **[[pruning]]**: grow the tree fully, then walk back through it and replace branches that don’t pull their weight with leaves.',
         },
         {
           type: 'widget',
@@ -364,12 +364,12 @@ export const ch03: Chapter = {
     {
       id: 'ch03-svm',
       title: 'Support Vector Machines',
-      minutes: 8,
+      minutes: 10,
       blocks: [
         {
           type: 'p',
           md:
-            'Chapter 1 left the SVM with a boundary $\\mathbf{w}\\mathbf{x} - b = 0$, the constraints $y_i(\\mathbf{w}\\mathbf{x}_i - b) \\ge 1$, and the goal of minimizing $\\|\\mathbf{w}\\|$ (equivalently $\\frac{1}{2}\\|\\mathbf{w}\\|^2$, which suits quadratic-programming solvers). Two hard questions remained. **One:** what if noise, outliers or mislabeled points make perfect separation impossible? **Two:** what if the true boundary isn’t a line at all — say, one class forms a ring around the other?',
+            '[Chapter 1](sec:ch01-how-supervised-works) left the [[support-vector-machine|SVM]] with a [[decision-boundary|boundary]] $\\mathbf{w}\\mathbf{x} - b = 0$, the constraints $y_i(\\mathbf{w}\\mathbf{x}_i - b) \\ge 1$, and the goal of minimizing $\\|\\mathbf{w}\\|$ (equivalently $\\frac{1}{2}\\|\\mathbf{w}\\|^2$, which suits quadratic-programming solvers). Widening the [[margin]] is the whole game — and here is the detail that makes everything below possible: only the examples sitting *on* the margin hold it in place. Those few are the **[[support-vector|support vectors]]**. Delete any other point and the boundary does not budge, which means the fitted model depends on the data through a mere handful of examples. Two hard questions remained, though. **One:** what if noise, outliers or mislabeled points make perfect separation impossible? **Two:** what if the true boundary isn’t a line at all — say, one class forms a ring around the other?',
         },
         {
           type: 'formula',
@@ -383,19 +383,24 @@ export const ch03: Chapter = {
             { tex: '\\big)' },
           ],
           terms: [
-            { tex: '\\max(0, \\cdot)', explain: 'zero when the example is on the correct side with room to spare (constraint satisfied)' },
-            { tex: '1 - y_i(\\mathbf{w}\\mathbf{x}_i - b)', explain: 'grows the further a point strays past the margin onto the wrong side' },
+            { tex: '\\max(0, \\cdot)', explain: 'zero when the example is on the correct side with room to spare (constraint satisfied) — see [[hinge-loss]]' },
+            { tex: '1 - y_i(\\mathbf{w}\\mathbf{x}_i - b)', explain: 'grows the further a point strays past the [[margin]] onto the wrong side' },
           ],
         },
         {
           type: 'p',
           md:
-            'Question one is answered by the **hinge loss** above. Instead of demanding every constraint hold, the **soft-margin SVM** minimizes a compromise between margin width ($\\|\\mathbf{w}\\|^2$) and average hinge loss, weighted by a hyperparameter $C$. In the convention used by our playground below, high $C$ makes violations expensive — the boundary contorts to classify everything — while low $C$ shrugs off a few mistakes to keep the margin wide. Wide margins generalize; zero training errors on noisy data usually don’t. $C$ is chosen experimentally, like ID3’s $\\epsilon$ and $d$.',
+            'Question one is answered by the **[[hinge-loss|hinge loss]]** above. Instead of demanding every constraint hold, the **[[soft-margin-svm|soft-margin SVM]]** minimizes a compromise between margin width ($\\|\\mathbf{w}\\|^2$) and average hinge loss, weighted by a [[hyperparameter]] written [[svm-c|C]]. In the convention used by our playground below, high $C$ makes violations expensive — the boundary contorts to classify everything — while low $C$ shrugs off a few mistakes to keep the margin wide. Wide margins [[generalization|generalize]]; zero training errors on noisy data usually don’t. $C$ is chosen experimentally, like ID3’s $\\epsilon$ and $d$.',
         },
         {
           type: 'p',
           md:
-            'Question two has one of the most elegant answers in ML. If the classes aren’t linearly separable in the original space, *map them into a higher-dimensional space* where they are — a circle of points becomes a liftable bowl in 3D. Doing that mapping $\\phi$ explicitly would be brutally expensive. But the SVM optimization (in its Lagrange-multiplier form) touches the data **only through dot products** $\\mathbf{x}_i \\mathbf{x}_k$. So we swap in a **kernel function** that returns what the dot product *would be* in the high-dimensional space, without ever going there: that is the **kernel trick**. Example: $k(\\mathbf{x}_i, \\mathbf{x}_k) = (\\mathbf{x}_i \\mathbf{x}_k)^2$ behaves exactly like mapping $(q_1, q_2) \\mapsto (q_1^2, \\sqrt{2} q_1 q_2, q_2^2)$ first.',
+            'Question two has one of the most elegant answers in ML. If the classes aren’t linearly separable in the original space, *map them into a higher-dimensional space* where they are — a circle of points becomes a liftable bowl in 3D. Doing that mapping $\\phi$ explicitly would be brutally expensive. But the SVM optimization (in its Lagrange-multiplier form) touches the data **only through [[dot-product|dot products]]** $\\mathbf{x}_i \\mathbf{x}_k$. So we swap in a **[[kernel-function|kernel function]]** that returns what the dot product *would be* in the high-dimensional space, without ever going there: that is **[[kernel-trick]]**. Example: $k(\\mathbf{x}_i, \\mathbf{x}_k) = (\\mathbf{x}_i \\mathbf{x}_k)^2$ behaves exactly like mapping $(q_1, q_2) \\mapsto (q_1^2, \\sqrt{2} q_1 q_2, q_2^2)$ first — squaring one number in 2D does the work of a dot product in 3D.',
+        },
+        {
+          type: 'p',
+          md:
+            'That squaring kernel gives you conic boundaries, but you have to pick the right polynomial degree for each dataset. So in practice almost nobody starts there. The default first choice is the **[[rbf-kernel|RBF kernel]]** — short for *radial basis function*, and also called the Gaussian kernel — and the way to understand it is to stop thinking about mapping points anywhere at all. Think about **similarity** instead. Ask two examples a single question: *how close together are you?* Points sitting on top of each other are maximally similar and score $1$. Slide them apart and the score fades smoothly toward $0$. Crucially the score depends on the **distance** between them and nothing else — not their direction, not where they sit on the plane — and that is precisely what the word *radial* is telling you. Written down, the fading is a bell curve over distance:',
         },
         {
           type: 'formula',
@@ -409,10 +414,15 @@ export const ch03: Chapter = {
             },
           ],
           terms: [
-            { tex: "\\|\\mathbf{x} - \\mathbf{x}'\\|^2", explain: 'squared Euclidean distance between the two feature vectors' },
-            { tex: '\\sigma', explain: 'controls how fast similarity fades with distance: the analyst’s smooth-vs-curvy dial (widgets often use γ = 1/(2σ²))' },
-            { tex: 'k', explain: 'the RBF (radial basis function) kernel — its implicit feature space has infinitely many dimensions' },
+            { tex: "\\|\\mathbf{x} - \\mathbf{x}'\\|^2", explain: 'squared [[euclidean-distance|Euclidean distance]] between the two feature vectors — the only thing the kernel ever looks at' },
+            { tex: '\\sigma', explain: 'how fast similarity fades with distance: the smooth-vs-curvy dial, usually written as [[gamma-rbf|γ]] = 1/(2σ²)' },
+            { tex: 'k', explain: 'the [[rbf-kernel|RBF kernel]] — a bell curve over distance, whose implicit feature space has infinitely many dimensions' },
           ],
+        },
+        {
+          type: 'p',
+          md:
+            'Read the *picture* rather than the algebra. Every training example plants a soft bump centered on itself — positive for one class, negative for the other — and the boundary runs along the line where the bumps exactly cancel. Nothing about that line has to be straight: it can wrap around a cluster, enclose an island, or break into several disconnected pieces. That is question two, answered. The width of each bump is the one dial you have to set, written $\\sigma$ or, more often, [[gamma-rbf|γ]] $= 1/(2\\sigma^2)$. **Small γ** means broad, heavily overlapping bumps, and the boundary comes out smooth and nearly straight — it can [[underfitting|underfit]]. **Large γ** shrinks every bump to a pinprick around its own point, and the model stops generalizing and starts [[overfitting|memorizing]]. Because the RBF feature space is infinite-dimensional, a large enough γ can separate *any* finite dataset perfectly, noise included — which is a warning, not a feature. γ and [[svm-c|C]] have to be tuned together, and [Chapter 5](sec:ch05-tuning) shows how.',
         },
         {
           type: 'widget',
@@ -426,7 +436,7 @@ export const ch03: Chapter = {
         {
           type: 'hint',
           md:
-            'Two honesty notes: the book writes the soft-margin cost as $C\\|\\mathbf{w}\\|^2 + $ average hinge, so *its* $C$ plays the mirrored role of ours (most libraries use ours). And the playground’s RBF machine is a **kernel perceptron** — the same kernel trick with a simpler trainer than a full SVM.',
+            'Two honesty notes: the book writes the soft-margin cost as $C\\|\\mathbf{w}\\|^2 + $ average hinge, so *its* $C$ plays the mirrored role of ours (most libraries use ours). And the playground’s RBF machine is a **[[kernel-perceptron|kernel perceptron]]** — the same kernel trick with a simpler trainer than a full SVM, which is why it refits instantly while you drag a slider.',
         },
         {
           type: 'quiz',
@@ -491,7 +501,7 @@ export const ch03: Chapter = {
         {
           type: 'p',
           md:
-            '**k-Nearest Neighbors** is the algorithm that refuses to study. Every method so far digests the training data into parameters and can then throw the data away; kNN is **non-parametric** and **instance-based**: its "model" *is* the training set, kept in memory whole. When a new example $\\mathbf{x}$ arrives, kNN finds the $k$ stored examples closest to it and returns the **majority label** (classification) or the **average label** (regression). All the work happens at prediction time.',
+            '**[[k-nearest-neighbors|k-Nearest Neighbors]]** is the algorithm that refuses to study. Every method so far digests the training data into [[model-parameters|parameters]] and can then throw the data away; kNN is **[[non-parametric-model|non-parametric]]** and **[[instance-based-learning|instance-based]]**: its "model" *is* the training set, kept in memory whole. When a new example $\\mathbf{x}$ arrives, kNN finds the $k$ stored examples closest to it and returns the **majority label** ([[classification]]) or the **average label** ([[regression]]). All the work happens at prediction time.',
         },
         {
           type: 'formula',
@@ -505,14 +515,14 @@ export const ch03: Chapter = {
             },
           ],
           terms: [
-            { tex: 'd', explain: 'Euclidean distance — the straight-line, "as the crow flies" measure of closeness' },
+            { tex: 'd', explain: '[[euclidean-distance|Euclidean distance]] — the straight-line, "as the crow flies" measure of closeness' },
             { tex: '(x_i^{(j)} - x_k^{(j)})^2', explain: 'per-feature differences, squared and summed across all D dimensions' },
           ],
         },
         {
           type: 'p',
           md:
-            '"Closest" is a choice, though. A popular alternative is negative **cosine similarity**: $\\cos(\\angle(\\mathbf{x}_i, \\mathbf{x}_k))$ is $1$ for vectors pointing the same direction, $0$ for orthogonal ones, $-1$ for opposite ones — it compares *directions* and ignores magnitudes (multiply by $-1$ to turn similarity into a distance). Other options include Chebychev, Mahalanobis and Hamming distances. Both the metric and $k$ are **hyperparameters**: you pick them before learning starts, and the choice genuinely changes the answers.',
+            '"Closest" is a choice, though. A popular alternative is negative **[[cosine-similarity|cosine similarity]]**: $\\cos(\\angle(\\mathbf{x}_i, \\mathbf{x}_k))$ is $1$ for vectors pointing the same direction, $0$ for orthogonal ones, $-1$ for opposite ones — it compares *directions* and ignores magnitudes (multiply by $-1$ to turn similarity into a distance). Other options include Chebychev, Mahalanobis and Hamming [[distance-metric|distances]]. Both the metric and $k$ are **[[hyperparameter|hyperparameters]]**: you pick them before learning starts, and the choice genuinely changes the answers.',
         },
         {
           type: 'widget',

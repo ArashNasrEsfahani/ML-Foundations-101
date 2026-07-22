@@ -178,7 +178,7 @@ export function WordSpace({ challenge }: WidgetProps) {
       guide={[
         {
           control: 'explore',
-          what: 'Tapping a word underlines its five nearest neighbours by [[cosine-similarity]]. This is what [[word-embeddings]] buy you: distance on the page stands for similarity in meaning.',
+          what: 'Tapping a word underlines its five nearest neighbors by [[cosine-similarity]]. This is what [[word-embeddings]] buy you: distance on the page stands for similarity in meaning.',
         },
         {
           control: 'analogy',

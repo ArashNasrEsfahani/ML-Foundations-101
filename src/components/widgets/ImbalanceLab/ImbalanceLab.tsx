@@ -169,7 +169,7 @@ export function ImbalanceLab({ challenge }: WidgetProps) {
         },
         {
           control: 'overall accuracy',
-          what: 'Share of all 100 points labelled correctly, always scored on the original data — resampling changes what the model trains on, never the truth. 95% here means nothing on its own.',
+          what: 'Share of all 100 points labeled correctly, always scored on the original data — resampling changes what the model trains on, never the truth. 95% here means nothing on its own.',
         },
         {
           control: 'minority recall',

@@ -11,7 +11,7 @@ export const conceptsCh09: Concept[] = [
     id: 'density-estimation',
     term: 'density estimation',
     simple:
-      'Work out where the data likes to live. Given nothing but a heap of unlabelled measurements, build a picture of which values are common, which are rare, and which are so rare that seeing one should make you suspicious.',
+      'Work out where the data likes to live. Given nothing but a heap of unlabeled measurements, build a picture of which values are common, which are rare, and which are so rare that seeing one should make you suspicious.',
     technical:
       'The unsupervised job of recovering the [[probability-density-function|pdf]] a sample was drawn from. Two routes. *Parametric*: assume a family — a Gaussian, a mixture — and fit its parameters by [[maximum-likelihood]]; cheap and data-efficient, and wrong in a way you cannot detect when the family is wrong. *Nonparametric*: let the sample dictate the shape, as [[kernel-density-estimation]] does. Both get exponentially harder as dimensions pile up, since a fixed number of points spreads ever more thinly, which is why density-based [[outlier-detection]] usually runs on a reduced or learned representation rather than on raw inputs.',
     math:
@@ -26,7 +26,7 @@ export const conceptsCh09: Concept[] = [
     simple:
       'Put a small smooth hill on top of every data point and add all the hills together. Where the points crowd, the hills stack into a peak; where they are scattered, the surface stays low. The sum is your guess at the shape of the whole distribution.',
     technical:
-      'The nonparametric route to [[density-estimation]]. The kernel here is a *bump* — a shape that integrates to one, almost always the standard Gaussian — rather than the similarity function of [[kernel-function|the SVM sense]], although both amount to weighting neighbours smoothly. Which bump you choose barely matters; the [[bandwidth]] is the whole game. KDE is the density twin of [[kernel-regression]] from Chapter 7: identical weights, but where kernel regression averages the neighbours’ *targets*, KDE only counts how much neighbour is stacked overhead. Being [[non-parametric-model|non-parametric]], it stores every example and costs $O(N)$ per query.',
+      'The nonparametric route to [[density-estimation]]. The kernel here is a *bump* — a shape that integrates to one, almost always the standard Gaussian — rather than the similarity function of [[kernel-function|the SVM sense]], although both amount to weighting neighbors smoothly. Which bump you choose barely matters; the [[bandwidth]] is the whole game. KDE is the density twin of [[kernel-regression]] from Chapter 7: identical weights, but where kernel regression averages the neighbors’ *targets*, KDE only counts how much neighbor is stacked overhead. Being [[non-parametric-model|non-parametric]], it stores every example and costs $O(N)$ per query.',
     math:
       '$\\hat{f}_b(x) = \\dfrac{1}{Nb}\\sum_{i=1}^{N} k\\!\\left(\\dfrac{x - x_i}{b}\\right)$, with the Gaussian kernel $k(z) = \\frac{1}{\\sqrt{2\\pi}}e^{-z^2/2}$. The $1/(Nb)$ is what keeps $\\int \\hat{f}_b = 1$: each bump contributes exactly $1/N$. In $D$ dimensions the estimator reads $\\frac{1}{Nb^D}\\sum_i k\\!\\left(\\frac{\\lVert\\mathbf{x} - \\mathbf{x}_i\\rVert}{b}\\right)$, and the sample size needed to hold the error fixed grows like $b^{-D}$ — the curse of dimensionality in one exponent.',
     teachesAt: 'ch09-density',
@@ -63,7 +63,7 @@ export const conceptsCh09: Concept[] = [
     simple:
       'Sorting a pile of things into groups without being told what the groups are, or even how many there should be. The only evidence available is which things resemble which.',
     technical:
-      'Assigning a group id to every example from unlabelled data alone. With no ground truth there is no accuracy to report, so the answer is judged by an internal criterion ([[inertia]], density, likelihood) plus whether the groups mean anything to you. Every method smuggles in an assumption about what a cluster *is*: [[k-means]] says a round blob about a centre, [[dbscan|DBSCAN]] says a connected dense region, a [[gaussian-mixture-model|mixture model]] says a tilted ellipse. Pick the assumption rather than the algorithm — and remember the [[distance-metric|distance]] matters at least as much as the method.',
+      'Assigning a group id to every example from unlabeled data alone. With no ground truth there is no accuracy to report, so the answer is judged by an internal criterion ([[inertia]], density, likelihood) plus whether the groups mean anything to you. Every method smuggles in an assumption about what a cluster *is*: [[k-means]] says a round blob about a center, [[dbscan|DBSCAN]] says a connected dense region, a [[gaussian-mixture-model|mixture model]] says a tilted ellipse. Pick the assumption rather than the algorithm — and remember the [[distance-metric|distance]] matters at least as much as the method.',
     math:
       'A hard clustering is a map $a:\\{1,\\dots,N\\}\\to\\{1,\\dots,k\\}$; a [[soft-clustering|soft]] one is a set of weights $\\gamma_{ij}\\ge 0$ with $\\sum_j \\gamma_{ij} = 1$. The number of ways to split $N$ points into $k$ non-empty groups is the Stirling number $S(N,k)$, which is astronomically large even for tiny $N$ — so every practical method is an iterative or [[greedy-algorithm|greedy]] search and none of them is exhaustive.',
     statquest: 'clustering',
@@ -74,11 +74,11 @@ export const conceptsCh09: Concept[] = [
     id: 'k-means',
     term: 'k-means',
     simple:
-      'Guess where the centres of the groups are, hand every point to its nearest centre, then move each centre to the middle of the points it just collected. Repeat. After a few rounds the centres slide into place and stop moving.',
+      'Guess where the centers of the groups are, hand every point to its nearest center, then move each center to the middle of the points it just collected. Repeat. After a few rounds the centers slide into place and stop moving.',
     technical:
-      'Lloyd’s algorithm: alternate an assign step and an update step, each of which can only lower [[inertia]], so the loop must halt — at a local optimum, not the best one. The cluster shape is baked in: membership is decided by nearest centre, so the boundaries are straight and the cells convex, and it can never carve out a ring. It is dragged around by outliers, since the update is a plain mean, and it quietly prefers clusters of similar size and spread. Scale the features first, because [[centroid|centroids]] live in the data’s own units. Its trump card is speed — it is still the fastest thing in the room.',
+      'Lloyd’s algorithm: alternate an assign step and an update step, each of which can only lower [[inertia]], so the loop must halt — at a local optimum, not the best one. The cluster shape is baked in: membership is decided by nearest center, so the boundaries are straight and the cells convex, and it can never carve out a ring. It is dragged around by outliers, since the update is a plain mean, and it quietly prefers clusters of similar size and spread. Scale the features first, because [[centroid|centroids]] live in the data’s own units. Its trump card is speed — it is still the fastest thing in the room.',
     math:
-      'Minimize $J = \\sum_{i=1}^{N}\\lVert\\mathbf{x}_i - \\mathbf{c}_{a(i)}\\rVert^2$ over both the assignment $a$ and the centres $\\mathbf{c}_j$. Holding $\\mathbf{c}$ fixed, the best $a(i) = \\arg\\min_j \\lVert\\mathbf{x}_i - \\mathbf{c}_j\\rVert$; holding $a$ fixed, the best $\\mathbf{c}_j = \\frac{1}{|C_j|}\\sum_{i\\in C_j}\\mathbf{x}_i$, since the mean is what minimizes squared distance. That is coordinate descent on $J$ — and exactly the hard-assignment limit of [[expectation-maximization|EM]] for a mixture of spherical Gaussians. Finding the global minimum is NP-hard.',
+      'Minimize $J = \\sum_{i=1}^{N}\\lVert\\mathbf{x}_i - \\mathbf{c}_{a(i)}\\rVert^2$ over both the assignment $a$ and the centers $\\mathbf{c}_j$. Holding $\\mathbf{c}$ fixed, the best $a(i) = \\arg\\min_j \\lVert\\mathbf{x}_i - \\mathbf{c}_j\\rVert$; holding $a$ fixed, the best $\\mathbf{c}_j = \\frac{1}{|C_j|}\\sum_{i\\in C_j}\\mathbf{x}_i$, since the mean is what minimizes squared distance. That is coordinate descent on $J$ — and exactly the hard-assignment limit of [[expectation-maximization|EM]] for a mixture of spherical Gaussians. Finding the global minimum is NP-hard.',
     statquest: 'k-means clustering',
     teachesAt: 'ch09-kmeans',
     see: ['centroid', 'inertia', 'clustering', 'expectation-maximization'],
@@ -87,11 +87,11 @@ export const conceptsCh09: Concept[] = [
     id: 'centroid',
     term: 'centroid',
     simple:
-      'The centre of gravity of a group of points — the place you get by averaging them. In k-means it is both the thing that defines a cluster and the thing recomputed every round.',
+      'The center of gravity of a group of points — the place you get by averaging them. In k-means it is both the thing that defines a cluster and the thing recomputed every round.',
     technical:
       'A centroid is a point in feature space, not a data point: it can sit where no example does, which is why a "typical customer" produced this way can be a person who does not exist. The mean is chosen because it minimizes squared distance, which is what ties it to [[inertia]]; swap in the medoid — an actual example — and you get k-medoids, more robust to outliers and usable with a [[distance-metric|distance]] that has no notion of averaging. A centroid that ends a round with nothing assigned to it is an empty cluster, and implementations must decide whether to drop it or re-seed it somewhere useful.',
     math:
-      '$\\mathbf{c}_j = \\frac{1}{|C_j|}\\sum_{i\\in C_j}\\mathbf{x}_i$, the unique minimiser of $\\sum_{i\\in C_j}\\lVert\\mathbf{x}_i - \\mathbf{c}\\rVert^2$ — differentiate, set to zero, and the mean falls straight out. The set of points nearer to $\\mathbf{c}_j$ than to any other centre is its Voronoi cell, an intersection of half-spaces and therefore convex, which is the geometric reason k-means cannot express a ring.',
+      '$\\mathbf{c}_j = \\frac{1}{|C_j|}\\sum_{i\\in C_j}\\mathbf{x}_i$, the unique minimizer of $\\sum_{i\\in C_j}\\lVert\\mathbf{x}_i - \\mathbf{c}\\rVert^2$ — differentiate, set to zero, and the mean falls straight out. The set of points nearer to $\\mathbf{c}_j$ than to any other center is its Voronoi cell, an intersection of half-spaces and therefore convex, which is the geometric reason k-means cannot express a ring.',
     statquest: 'k-means clustering',
     teachesAt: 'ch09-kmeans',
     see: ['k-means', 'inertia', 'distance-metric'],
@@ -100,11 +100,11 @@ export const conceptsCh09: Concept[] = [
     id: 'inertia',
     term: 'inertia',
     simple:
-      'How tightly the clusters hold together: add up the squared distance from every point to the centre of its own group. Small means neat little balls, large means sprawl.',
+      'How tightly the clusters hold together: add up the squared distance from every point to the center of its own group. Small means neat little balls, large means sprawl.',
     technical:
       'Also called the within-cluster sum of squares. It is the objective k-means descends, which is precisely why it cannot be used naively to choose $k$: it falls monotonically as $k$ grows and reaches zero when every point is its own cluster. The elbow heuristic looks for where the fall flattens; the [[gap-statistic|gap statistic]] and [[prediction-strength]] turn that impression into something defensible. Comparing inertia across different feature scalings is meaningless, since the units change with the data.',
     math:
-      '$J = \\sum_{j=1}^{k}\\sum_{i\\in C_j}\\lVert\\mathbf{x}_i - \\mathbf{c}_j\\rVert^2$. Both k-means steps are monotone in $J$: reassigning a point to a nearer centre replaces one term with a smaller one, and re-averaging minimizes each inner sum exactly. Since the number of distinct assignments is finite and $J$ never increases, the loop terminates after finitely many iterations.',
+      '$J = \\sum_{j=1}^{k}\\sum_{i\\in C_j}\\lVert\\mathbf{x}_i - \\mathbf{c}_j\\rVert^2$. Both k-means steps are monotone in $J$: reassigning a point to a nearer center replaces one term with a smaller one, and re-averaging minimizes each inner sum exactly. Since the number of distinct assignments is finite and $J$ never increases, the loop terminates after finitely many iterations.',
     statquest: 'k-means clustering',
     teachesAt: 'ch09-kmeans',
     see: ['k-means', 'centroid', 'gap-statistic'],
@@ -126,9 +126,9 @@ export const conceptsCh09: Concept[] = [
     id: 'core-point',
     term: 'core point',
     simple:
-      'A point standing in a crowd — it has at least the required number of neighbours within reach. Only these points are allowed to spread a cluster outward; everything else is a passenger.',
+      'A point standing in a crowd — it has at least the required number of neighbors within reach. Only these points are allowed to spread a cluster outward; everything else is a passenger.',
     technical:
-      'Core status is the entire engine of [[dbscan|DBSCAN]]: membership propagates through core points and stops dead at non-core ones. Raising $n$ makes cores rarer, so clusters shrink and more points are declared noise; lowering it far enough makes every point core and merges the dataset into one blob. The point itself is normally counted inside its own neighbourhood, so $n = 1$ is degenerate and $n \\approx 2D$ is a common rule of thumb in $D$ dimensions.',
+      'Core status is the entire engine of [[dbscan|DBSCAN]]: membership propagates through core points and stops dead at non-core ones. Raising $n$ makes cores rarer, so clusters shrink and more points are declared noise; lowering it far enough makes every point core and merges the dataset into one blob. The point itself is normally counted inside its own neighborhood, so $n = 1$ is degenerate and $n \\approx 2D$ is a common rule of thumb in $D$ dimensions.',
     math:
       '$\\mathbf{x}$ is core iff $|N_\\epsilon(\\mathbf{x})| \\ge n$ with $N_\\epsilon(\\mathbf{x}) = \\{\\mathbf{x}_j : \\lVert\\mathbf{x} - \\mathbf{x}_j\\rVert \\le \\epsilon\\}$. Equivalently, a [[kernel-density-estimation|KDE]] built from a flat top-hat kernel of width $\\epsilon$ exceeds the threshold $n/(N\\cdot\\mathrm{vol}(\\epsilon))$ at $\\mathbf{x}$ — DBSCAN is density estimation with a hard cut-off in place of a smooth one.',
     statquest: 'DBSCAN',
@@ -150,11 +150,11 @@ export const conceptsCh09: Concept[] = [
   },
   {
     id: 'epsilon-neighborhood',
-    term: 'ε-neighbourhood',
+    term: 'ε-neighborhood',
     simple:
       'The circle you draw around a point to ask who is nearby. Its radius is the one number deciding what counts as close, and everything else in the algorithm follows from that choice.',
     technical:
-      'The $\\epsilon$-ball is DBSCAN’s entire notion of locality, and choosing its radius is the hardest practical part of the method. The standard diagnostic is a k-distance plot: for every point measure the distance to its $n$-th nearest neighbour, sort those distances, plot the curve, and take $\\epsilon$ at the knee where it turns sharply upward. Because it is a fixed radius in the raw feature space, unscaled features wreck it exactly as they wreck [[k-nearest-neighbors|kNN]] — and in very high dimensions all pairwise distances converge, so the ball is either empty or holds everything.',
+      'The $\\epsilon$-ball is DBSCAN’s entire notion of locality, and choosing its radius is the hardest practical part of the method. The standard diagnostic is a k-distance plot: for every point measure the distance to its $n$-th nearest neighbor, sort those distances, plot the curve, and take $\\epsilon$ at the knee where it turns sharply upward. Because it is a fixed radius in the raw feature space, unscaled features wreck it exactly as they wreck [[k-nearest-neighbors|kNN]] — and in very high dimensions all pairwise distances converge, so the ball is either empty or holds everything.',
     math:
       '$N_\\epsilon(\\mathbf{x}) = \\{\\mathbf{x}\'\\in\\mathcal{X} : d(\\mathbf{x},\\mathbf{x}\')\\le\\epsilon\\}$, usually with $d$ Euclidean. Its volume grows as $\\epsilon^D$, so the expected count is $\\mathbb{E}|N_\\epsilon(\\mathbf{x})| \\approx N f(\\mathbf{x})\\,V_D\\,\\epsilon^D$. A fixed $n$ therefore encodes a *density* threshold proportional to $\\epsilon^{-D}$ — which is the precise reason one $\\epsilon$ cannot serve two densities at once.',
     statquest: 'DBSCAN',
@@ -167,9 +167,9 @@ export const conceptsCh09: Concept[] = [
     simple:
       'DBSCAN with the awkward radius knob taken off. Rather than committing to one notion of nearby, it runs the whole family of radii at once, watches which clusters survive longest as the radius shrinks, and keeps those.',
     technical:
-      'Hierarchical DBSCAN. It rewrites distance as *mutual reachability* — ordinary distance inflated by how sparse the two points’ own neighbourhoods are — builds a minimum spanning tree on that, and cutting the tree at every height gives a whole hierarchy of clusterings. Instead of slicing at one height, which is all a fixed $\\epsilon$ can do, it scores each candidate cluster by how long it persists across heights and keeps the stable ones. Clusters of different densities can then coexist, noise still gets its own label, and only $n$ — the smallest group you would still call a cluster — is left to choose. Slower than k-means, and usually the right first thing to run on data you know nothing about.',
+      'Hierarchical DBSCAN. It rewrites distance as *mutual reachability* — ordinary distance inflated by how sparse the two points’ own neighborhoods are — builds a minimum spanning tree on that, and cutting the tree at every height gives a whole hierarchy of clusterings. Instead of slicing at one height, which is all a fixed $\\epsilon$ can do, it scores each candidate cluster by how long it persists across heights and keeps the stable ones. Clusters of different densities can then coexist, noise still gets its own label, and only $n$ — the smallest group you would still call a cluster — is left to choose. Slower than k-means, and usually the right first thing to run on data you know nothing about.',
     math:
-      'Let $d_{\\mathrm{core}}(\\mathbf{x})$ be the distance to the $n$-th nearest neighbour, and define $d_{\\mathrm{mreach}}(\\mathbf{x},\\mathbf{x}\') = \\max\\{d_{\\mathrm{core}}(\\mathbf{x}),\\, d_{\\mathrm{core}}(\\mathbf{x}\'),\\, d(\\mathbf{x},\\mathbf{x}\')\\}$, which pushes sparse points away from everything while leaving dense ones untouched. Cutting the minimum spanning tree of $d_{\\mathrm{mreach}}$ at height $\\epsilon$ reproduces DBSCAN exactly; HDBSCAN instead keeps the clusters maximizing the persistence $\\sum_{\\mathbf{x}\\in C}\\left(\\lambda_{\\mathbf{x}} - \\lambda_{\\mathrm{birth}}\\right)$ with $\\lambda = 1/\\epsilon$.',
+      'Let $d_{\\mathrm{core}}(\\mathbf{x})$ be the distance to the $n$-th nearest neighbor, and define $d_{\\mathrm{mreach}}(\\mathbf{x},\\mathbf{x}\') = \\max\\{d_{\\mathrm{core}}(\\mathbf{x}),\\, d_{\\mathrm{core}}(\\mathbf{x}\'),\\, d(\\mathbf{x},\\mathbf{x}\')\\}$, which pushes sparse points away from everything while leaving dense ones untouched. Cutting the minimum spanning tree of $d_{\\mathrm{mreach}}$ at height $\\epsilon$ reproduces DBSCAN exactly; HDBSCAN instead keeps the clusters maximizing the persistence $\\sum_{\\mathbf{x}\\in C}\\left(\\lambda_{\\mathbf{x}} - \\lambda_{\\mathrm{birth}}\\right)$ with $\\lambda = 1/\\epsilon$.',
     statquest: 'DBSCAN',
     teachesAt: 'ch09-dbscan',
     see: ['dbscan', 'epsilon-neighborhood', 'clustering'],
@@ -180,7 +180,7 @@ export const conceptsCh09: Concept[] = [
     simple:
       'Ask whether the grouping you found would survive being discovered twice. Split the data in half, cluster each half, and check whether pairs of points that shared a group in one half still share one in the other. Real structure replicates; an invented one does not.',
     technical:
-      'A way to choose $k$ that borrows the discipline of a [[test-set|held-out set]] from supervised learning. Cluster the training half and the test half separately at the same $k$, then assign every test point to the nearest *training* centre and count, inside each test cluster, the fraction of point pairs the training clustering also keeps together. Take the worst cluster’s fraction, so one incoherent group sinks the score rather than being averaged away. Keep the largest $k$ scoring above roughly 0.8, and average over restarts for anything as initialization-sensitive as [[k-means]].',
+      'A way to choose $k$ that borrows the discipline of a [[test-set|held-out set]] from supervised learning. Cluster the training half and the test half separately at the same $k$, then assign every test point to the nearest *training* center and count, inside each test cluster, the fraction of point pairs the training clustering also keeps together. Take the worst cluster’s fraction, so one incoherent group sinks the score rather than being averaged away. Keep the largest $k$ scoring above roughly 0.8, and average over restarts for anything as initialization-sensitive as [[k-means]].',
     math:
       'With test clusters $C_1,\\dots,C_k$ and a co-membership indicator $D[i,i\'] = 1$ when the training clustering puts $i$ and $i\'$ together, $ps(k) = \\min_{j}\\frac{1}{|C_j|(|C_j| - 1)}\\sum_{i\\ne i\'\\in C_j} D[i,i\']$. It is a minimum rather than a mean, and $ps(1) = 1$ trivially — which is why the rule keeps the *largest* $k$ clearing the bar rather than the best-scoring one.',
     teachesAt: 'ch09-dbscan',
@@ -243,7 +243,7 @@ export const conceptsCh09: Concept[] = [
     technical:
       'Three motives, in decreasing modern importance. Plotting: humans stop at three axes. Interpretability: a simple model over five meaningful directions can be explained, one over a thousand raw ones cannot. Speed, which barely matters now that algorithms shrug at width. Methods split into linear ([[principal-component-analysis|PCA]], which can only rotate and drop axes) and nonlinear ([[umap|UMAP]], t-SNE, [[autoencoder|autoencoders]]). One trap catches everybody once: the reduction must be fitted on the training set alone and then applied to validation and test, or you have leaked.',
     math:
-      'A map $g:\\mathbb{R}^{D}\\to\\mathbb{R}^{D_{new}}$ with $D_{new}\\ll D$, chosen to preserve some structure. PCA preserves variance and is linear, $g(\\mathbf{x}) = \\mathbf{W}^{\\top}(\\mathbf{x} - \\bar{\\mathbf{x}})$ with $\\mathbf{W}\\in\\mathbb{R}^{D\\times D_{new}}$ orthonormal. UMAP preserves a fuzzy neighbourhood graph and is not a formula at all — the output coordinates themselves are the free parameters of an optimization.',
+      'A map $g:\\mathbb{R}^{D}\\to\\mathbb{R}^{D_{new}}$ with $D_{new}\\ll D$, chosen to preserve some structure. PCA preserves variance and is linear, $g(\\mathbf{x}) = \\mathbf{W}^{\\top}(\\mathbf{x} - \\bar{\\mathbf{x}})$ with $\\mathbf{W}\\in\\mathbb{R}^{D\\times D_{new}}$ orthonormal. UMAP preserves a fuzzy neighborhood graph and is not a formula at all — the output coordinates themselves are the free parameters of an optimization.',
     statquest: 'PCA dimensionality reduction',
     teachesAt: 'ch09-pca',
     see: ['principal-component-analysis', 'umap', 'bottleneck-layer'],
@@ -254,7 +254,7 @@ export const conceptsCh09: Concept[] = [
     simple:
       'Find the direction in which the cloud of points is most stretched out and make that your new first axis. Find the most stretched direction at right angles to it for the second, and so on. Keep the first two or three and you have a flat picture that still shows most of the spread.',
     technical:
-      'PCA rotates the coordinate system onto the axes of greatest variance and then discards the rest. Those axes are not searched for — they are the eigenvectors of the covariance matrix of the mean-centred data, and each [[principal-component|component]]’s eigenvalue is exactly the variance captured along it, so sorting eigenvalues sorts components. Centring is mandatory and scaling usually is: PCA chases raw variance, so a length in millimetres will monopolize the first component over the identical length in metres for no reason worth having. Being linear, it can only rotate and flatten — a curved manifold such as a spiral stays a smear.',
+      'PCA rotates the coordinate system onto the axes of greatest variance and then discards the rest. Those axes are not searched for — they are the eigenvectors of the covariance matrix of the mean-centered data, and each [[principal-component|component]]’s eigenvalue is exactly the variance captured along it, so sorting eigenvalues sorts components. Centring is mandatory and scaling usually is: PCA chases raw variance, so a length in millimetres will monopolize the first component over the identical length in metres for no reason worth having. Being linear, it can only rotate and flatten — a curved manifold such as a spiral stays a smear.',
     math:
       'With $\\boldsymbol{\\Sigma} = \\frac{1}{N}\\sum_i(\\mathbf{x}_i - \\bar{\\mathbf{x}})(\\mathbf{x}_i - \\bar{\\mathbf{x}})^{\\top}$, the variance of the projections onto a unit direction $\\mathbf{u}$ is $\\mathbf{u}^{\\top}\\boldsymbol{\\Sigma}\\mathbf{u}$. Maximizing it subject to $\\lVert\\mathbf{u}\\rVert = 1$ gives the stationarity condition $\\boldsymbol{\\Sigma}\\mathbf{u} = \\lambda\\mathbf{u}$ — an eigenvector equation, with $\\mathbf{u}^{\\top}\\boldsymbol{\\Sigma}\\mathbf{u} = \\lambda$. So the top eigenvector is PC1 and its eigenvalue *is* the variance along it. In practice one takes the SVD $\\mathbf{X} = \\mathbf{U}\\mathbf{S}\\mathbf{V}^{\\top}$ and reads the components off $\\mathbf{V}$, which is numerically steadier than forming $\\boldsymbol{\\Sigma}$ at all.',
     statquest: 'principal component analysis PCA',
@@ -278,11 +278,11 @@ export const conceptsCh09: Concept[] = [
     id: 'umap',
     term: 'UMAP',
     simple:
-      'Lay the points out on a flat page so that things which were neighbours in the original space end up neighbours on the page, and things that were far apart stay apart. It is closer to arranging a seating plan than to taking a photograph.',
+      'Lay the points out on a flat page so that things which were neighbors in the original space end up neighbors on the page, and things that were far apart stay apart. It is closer to arranging a seating plan than to taking a photograph.',
     technical:
-      'Uniform Manifold Approximation and Projection. It builds a weighted neighbour graph in the original space — each point’s edge weights normalized by the distance to its own nearest neighbours, so dense and sparse regions are treated alike — then places low-dimensional points and drags them about by [[gradient-descent]] until their graph matches. Against t-SNE it is faster, keeps more of the global arrangement, and can transform new points without refitting everything. The warnings matter as much as the method: distances *between* clusters on a UMAP plot are only loosely meaningful, cluster sizes are not meaningful at all, and changing the neighbour count changes the picture. Read the output as a sketch to inspect, never as coordinates to model on.',
+      'Uniform Manifold Approximation and Projection. It builds a weighted neighbor graph in the original space — each point’s edge weights normalized by the distance to its own nearest neighbors, so dense and sparse regions are treated alike — then places low-dimensional points and drags them about by [[gradient-descent]] until their graph matches. Against t-SNE it is faster, keeps more of the global arrangement, and can transform new points without refitting everything. The warnings matter as much as the method: distances *between* clusters on a UMAP plot are only loosely meaningful, cluster sizes are not meaningful at all, and changing the neighbor count changes the picture. Read the output as a sketch to inspect, never as coordinates to model on.',
     math:
-      'In the high-dimensional space the directed edge weight is $\\exp\\!\\left(-\\dfrac{\\max\\left(0,\\, d(\\mathbf{x}_i,\\mathbf{x}_j) - \\rho_i\\right)}{\\sigma_i}\\right)$, where $\\rho_i$ is the distance to $i$’s nearest neighbour and $\\sigma_i$ is tuned so the weights of $i$’s edges sum to $\\log_2 k$; the weights are then symmetrized. In the low-dimensional space the weight is $\\left(1 + a\\lVert\\mathbf{y}_i - \\mathbf{y}_j\\rVert^{2b}\\right)^{-1}$, and the layout minimizes the fuzzy-set cross-entropy between the two sets of weights.',
+      'In the high-dimensional space the directed edge weight is $\\exp\\!\\left(-\\dfrac{\\max\\left(0,\\, d(\\mathbf{x}_i,\\mathbf{x}_j) - \\rho_i\\right)}{\\sigma_i}\\right)$, where $\\rho_i$ is the distance to $i$’s nearest neighbor and $\\sigma_i$ is tuned so the weights of $i$’s edges sum to $\\log_2 k$; the weights are then symmetrized. In the low-dimensional space the weight is $\\left(1 + a\\lVert\\mathbf{y}_i - \\mathbf{y}_j\\rVert^{2b}\\right)^{-1}$, and the layout minimizes the fuzzy-set cross-entropy between the two sets of weights.',
     statquest: 'UMAP',
     teachesAt: 'ch09-pca',
     see: ['dimensionality-reduction', 'principal-component-analysis', 'gradient-descent'],

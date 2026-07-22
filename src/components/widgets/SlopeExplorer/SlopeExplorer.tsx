@@ -54,11 +54,11 @@ const GUIDE: GuideEntry[] = [
   },
   {
     control: 'the contour rings',
-    what: 'Each ring joins the points where $g(x,y)$ has one fixed value, the way height lines work on a walking map. Rings packed close together mean steep ground, and the small dot at the centre is the bottom of the bowl.',
+    what: 'Each ring joins the points where $g(x,y)$ has one fixed value, the way height lines work on a walking map. Rings packed close together mean steep ground, and the small dot at the center is the bottom of the bowl.',
   },
   {
     control: 'the arrow',
-    what: 'The gradient drawn at the dot: it points along the steepest way *uphill*, always square to the ring it sits on. Its length grows with the steepness, which is why it shrinks to nothing at the centre.',
+    what: 'The gradient drawn at the dot: it points along the steepest way *uphill*, always square to the ring it sits on. Its length grows with the steepness, which is why it shrinks to nothing at the center.',
   },
   {
     control: 'gradient = [·, ·], length',

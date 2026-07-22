@@ -62,7 +62,7 @@ export const conceptsCh03: Concept[] = [
     simple:
       'A smooth S-shaped squash. Feed it any number, however large or negative, and it comes back between 0 and 1 — so it turns a raw score into something you can call a probability.',
     technical:
-      'Monotonic, differentiable everywhere, and centred so that an input of 0 gives 0.5. Its derivative has the tidy form $\\sigma(1-\\sigma)$, which is what makes [[backpropagation]] through it cheap. Its weakness is *saturation*: far from zero the curve is nearly flat, the gradient nearly zero, and learning stalls — the reason deep networks moved to [[relu]].',
+      'Monotonic, differentiable everywhere, and centered so that an input of 0 gives 0.5. Its derivative has the tidy form $\\sigma(1-\\sigma)$, which is what makes [[backpropagation]] through it cheap. Its weakness is *saturation*: far from zero the curve is nearly flat, the gradient nearly zero, and learning stalls — the reason deep networks moved to [[relu]].',
     math:
       '$\\sigma(z) = \\dfrac{1}{1 + e^{-z}}$, with $\\sigma\'(z) = \\sigma(z)\\left(1 - \\sigma(z)\\right)$ and $\\sigma(-z) = 1 - \\sigma(z)$. The inverse is the *logit*, $\\log\\frac{p}{1-p}$, so logistic regression is exactly a linear model of the log-odds.',
     statquest: 'logistic function sigmoid',
@@ -90,7 +90,7 @@ export const conceptsCh03: Concept[] = [
     technical:
       'Taking the log is safe because the logarithm is strictly increasing: whatever maximizes the likelihood maximizes its log. Three things are gained. Products become sums, so the gradient is a sum of per-example terms and [[stochastic-gradient-descent|SGD]] becomes possible. Numerical underflow disappears. And the resulting objective for a [[sigmoid]] output is exactly cross-entropy, which is [[convex]] in the weights.',
     math:
-      '$\\log L = \\sum_{i=1}^{N}\\left[y_i\\log f(\\mathbf{x}_i) + (1 - y_i)\\log\\!\\left(1 - f(\\mathbf{x}_i)\\right)\\right]$. Minimizing $-\\log L$ is the usual framing, since optimisers descend. With $f = \\sigma(\\mathbf{w}\\mathbf{x}+b)$ the gradient collapses to the strikingly simple $\\sum_i (y_i - f(\\mathbf{x}_i))\\,\\mathbf{x}_i$.',
+      '$\\log L = \\sum_{i=1}^{N}\\left[y_i\\log f(\\mathbf{x}_i) + (1 - y_i)\\log\\!\\left(1 - f(\\mathbf{x}_i)\\right)\\right]$. Minimizing $-\\log L$ is the usual framing, since optimizers descend. With $f = \\sigma(\\mathbf{w}\\mathbf{x}+b)$ the gradient collapses to the strikingly simple $\\sum_i (y_i - f(\\mathbf{x}_i))\\,\\mathbf{x}_i$.',
     teachesAt: 'ch03-logistic-regression',
     see: ['maximum-likelihood', 'gradient-descent'],
   },
@@ -212,7 +212,7 @@ export const conceptsCh03: Concept[] = [
     simple:
       'A separating line that is allowed to give up on a few stubborn points rather than contorting itself to catch every last one. One dial decides how much it is willing to tolerate.',
     technical:
-      'Real data overlaps, so demanding perfect separation either fails outright or produces a wildly overfitted boundary. The soft margin adds a [[hinge-loss]] term: the optimiser now balances a wide [[margin]] against the violations that width costs, with [[svm-c|C]] setting the exchange rate. This is [[regularization]] in disguise — $\\|\\mathbf{w}\\|^2$ is an L2 penalty, and the margin is what it buys.',
+      'Real data overlaps, so demanding perfect separation either fails outright or produces a wildly overfitted boundary. The soft margin adds a [[hinge-loss]] term: the optimizer now balances a wide [[margin]] against the violations that width costs, with [[svm-c|C]] setting the exchange rate. This is [[regularization]] in disguise — $\\|\\mathbf{w}\\|^2$ is an L2 penalty, and the margin is what it buys.',
     math:
       'Minimize $\\tfrac{1}{2}\\|\\mathbf{w}\\|^2 + C\\sum_{i=1}^{N}\\max\\!\\left(0,\\,1 - y_i(\\mathbf{w}\\mathbf{x}_i - b)\\right)$. The margin width is $2/\\|\\mathbf{w}\\|$, so shrinking $\\|\\mathbf{w}\\|$ widens it. Note the book writes this as $C\\|\\mathbf{w}\\|^2 + {}$average hinge, which mirrors the role of $C$ relative to the library convention above.',
     statquest: 'support vector machines part 2 polynomial kernel',
@@ -225,7 +225,7 @@ export const conceptsCh03: Concept[] = [
     simple:
       'The strictness dial. Turn it down and the line is relaxed — wide, smooth, willing to misplace a few points. Turn it up and it becomes a perfectionist, bending itself out of shape to catch every last one.',
     technical:
-      'C prices each unit of [[hinge-loss]] against margin width. Small C means a wide margin and many tolerated violations — high bias, low variance. Large C approaches the hard-margin SVM: it will contort the boundary around a single mislabelled point, which is textbook [[overfitting]]. There is no default worth trusting; C is tuned by [[cross-validation]], usually on a log scale.',
+      'C prices each unit of [[hinge-loss]] against margin width. Small C means a wide margin and many tolerated violations — high bias, low variance. Large C approaches the hard-margin SVM: it will contort the boundary around a single mislabeled point, which is textbook [[overfitting]]. There is no default worth trusting; C is tuned by [[cross-validation]], usually on a log scale.',
     math:
       'In $\\tfrac{1}{2}\\|\\mathbf{w}\\|^2 + C\\sum_i \\xi_i$ with slack $\\xi_i = \\max(0, 1 - y_i(\\mathbf{w}\\mathbf{x}_i - b))$, $C \\to 0$ minimizes $\\|\\mathbf{w}\\|$ alone (infinitely wide, useless margin) and $C \\to \\infty$ forces every $\\xi_i \\to 0$ (hard margin, only possible if the data is separable). $1/C$ plays the role $\\lambda$ plays in ridge regression.',
     teachesAt: 'ch03-svm',
@@ -237,7 +237,7 @@ export const conceptsCh03: Concept[] = [
     simple:
       'The handful of points that actually hold the boundary in place. Move one and the boundary moves; delete any of the others and nothing happens at all.',
     technical:
-      'The examples lying on or inside the margin — the only ones with non-zero weight in the fitted solution. This is why SVMs are memory-efficient at prediction time and why they are sensitive to mislabelled points *near the boundary* while being completely indifferent to outliers far on the correct side.',
+      'The examples lying on or inside the margin — the only ones with non-zero weight in the fitted solution. This is why SVMs are memory-efficient at prediction time and why they are sensitive to mislabeled points *near the boundary* while being completely indifferent to outliers far on the correct side.',
     math:
       'In the dual formulation $\\mathbf{w} = \\sum_i \\alpha_i y_i \\mathbf{x}_i$, and $\\alpha_i > 0$ only for support vectors; every other $\\alpha_i$ is exactly zero. Prediction $\\mathrm{sign}\\!\\left(\\sum_{i \\in SV} \\alpha_i y_i (\\mathbf{x}_i\\mathbf{x}) - b\\right)$ therefore touches only that subset — and, crucially, touches the data *only through dot products*.',
     teachesAt: 'ch03-svm',
@@ -298,7 +298,7 @@ export const conceptsCh03: Concept[] = [
     id: 'kernel-perceptron',
     term: 'kernel perceptron',
     simple:
-      'The simplest thing that can use a kernel: keep looping over the examples, and every time you get one wrong, add a bump centred on it. Do that enough times and the bumps add up to a working boundary.',
+      'The simplest thing that can use a kernel: keep looping over the examples, and every time you get one wrong, add a bump centered on it. Do that enough times and the bumps add up to a working boundary.',
     technical:
       'The mistake-driven cousin of the SVM. It uses the same [[kernel-trick]] but replaces margin maximization with a plain error-correcting loop, so it converges fast and is trivial to implement — at the cost of the SVM’s margin guarantees. It is what the playground in this chapter actually runs, because it retrains in milliseconds while you drag a slider.',
     math:
@@ -308,11 +308,11 @@ export const conceptsCh03: Concept[] = [
   },
   {
     id: 'k-nearest-neighbors',
-    term: 'k-nearest neighbours',
+    term: 'k-nearest neighbors',
     simple:
       'To label something new, look up the k most similar things you have already seen and take a vote. There is no training at all — the algorithm is the dataset.',
     technical:
-      'The canonical [[instance-based-learning|instance-based]] and [[non-parametric-model|non-parametric]] method. Small k gives a jagged boundary that chases noise ([[overfitting]]); large k smooths it toward the global majority ([[underfitting]]). Everything depends on the [[distance-metric|distance function]], so unscaled features quietly wreck it — one feature measured in thousands drowns out every other. Prediction costs $O(ND)$ per query, which is why approximate nearest-neighbour indexes exist.',
+      'The canonical [[instance-based-learning|instance-based]] and [[non-parametric-model|non-parametric]] method. Small k gives a jagged boundary that chases noise ([[overfitting]]); large k smooths it toward the global majority ([[underfitting]]). Everything depends on the [[distance-metric|distance function]], so unscaled features quietly wreck it — one feature measured in thousands drowns out every other. Prediction costs $O(ND)$ per query, which is why approximate nearest-neighbor indexes exist.',
     math:
       'Given a distance $d$, let $\\mathcal{N}_k(\\mathbf{x})$ be the $k$ closest training points. Classification predicts $\\arg\\max_y \\sum_{i \\in \\mathcal{N}_k(\\mathbf{x})}\\mathbb{1}[y_i = y]$; regression predicts $\\frac{1}{k}\\sum_{i\\in\\mathcal{N}_k(\\mathbf{x})} y_i$. Common distances: Euclidean $\\sqrt{\\sum_j (x^{(j)} - x\'^{(j)})^2}$ and [[cosine-similarity|cosine]].',
     statquest: 'k nearest neighbors',
@@ -325,7 +325,7 @@ export const conceptsCh03: Concept[] = [
     simple:
       'Compare two things by the direction they point rather than how big they are. A short document and a long one about the same subject point the same way, even though their word counts are nothing alike.',
     technical:
-      'The cosine of the angle between two vectors: 1 when parallel, 0 when perpendicular, −1 when opposed. Length-invariant, which is what makes it the default for text [[bag-of-words|bag-of-words]] vectors and for [[word-embeddings]], where magnitude mostly encodes frequency rather than meaning. On L2-normalized vectors it is a monotone function of Euclidean distance, so the two rank neighbours identically.',
+      'The cosine of the angle between two vectors: 1 when parallel, 0 when perpendicular, −1 when opposed. Length-invariant, which is what makes it the default for text [[bag-of-words|bag-of-words]] vectors and for [[word-embeddings]], where magnitude mostly encodes frequency rather than meaning. On L2-normalized vectors it is a monotone function of Euclidean distance, so the two rank neighbors identically.',
     math:
       '$s(\\mathbf{x}, \\mathbf{x}\') = \\dfrac{\\mathbf{x}\\mathbf{x}\'}{\\|\\mathbf{x}\\|\\,\\|\\mathbf{x}\'\\|} = \\dfrac{\\sum_j x^{(j)}x\'^{(j)}}{\\sqrt{\\sum_j (x^{(j)})^2}\\sqrt{\\sum_j (x\'^{(j)})^2}}$. Cosine *distance* is $1 - s$, which is not a true [[distance-metric|metric]] — it violates the triangle inequality.',
     teachesAt: 'ch03-knn',

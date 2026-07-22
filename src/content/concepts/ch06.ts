@@ -75,9 +75,9 @@ export const conceptsCh06: Concept[] = [
     id: 'tanh',
     term: 'tanh',
     simple:
-      'An S-shaped squash that maps any number into the range between minus one and plus one, sending zero to zero. It is the sigmoid, recentred so its output carries no built-in positive bias.',
+      'An S-shaped squash that maps any number into the range between minus one and plus one, sending zero to zero. It is the sigmoid, recentered so its output carries no built-in positive bias.',
     technical:
-      'A rescaled [[sigmoid]], and the standard hidden activation before [[relu]] displaced it. Being zero-centred helps: sigmoid outputs are all positive, so every weight feeding the next unit receives a gradient of the same sign and updates zig-zag toward the optimum. Its remaining flaw is saturation — the curve is nearly flat once the input passes about 3 in magnitude, so the derivative collapses and learning stalls, which is precisely the [[vanishing-gradient]] mechanism. It survives inside [[lstm|LSTM]] cells, where a bounded, zero-centred state is exactly the point.',
+      'A rescaled [[sigmoid]], and the standard hidden activation before [[relu]] displaced it. Being zero-centered helps: sigmoid outputs are all positive, so every weight feeding the next unit receives a gradient of the same sign and updates zig-zag toward the optimum. Its remaining flaw is saturation — the curve is nearly flat once the input passes about 3 in magnitude, so the derivative collapses and learning stalls, which is precisely the [[vanishing-gradient]] mechanism. It survives inside [[lstm|LSTM]] cells, where a bounded, zero-centered state is exactly the point.',
     math:
       '$\\tanh(z) = \\dfrac{e^{z} - e^{-z}}{e^{z} + e^{-z}} = 2\\sigma(2z) - 1$, so it genuinely *is* the sigmoid, stretched and shifted. Its derivative $1 - \\tanh^{2}(z)$ peaks at 1 when $z = 0$ and decays to 0 in both tails — better than the sigmoid’s maximum of $\\tfrac{1}{4}$, but still below 1 almost everywhere, so a product across many layers still shrinks.',
     teachesAt: 'ch06-neural-networks',
@@ -115,7 +115,7 @@ export const conceptsCh06: Concept[] = [
     simple:
       'Training neural networks with more than a couple of layers — and, these days, the whole modern toolkit that goes with them rather than any particular depth.',
     technical:
-      'The name dates from when more than two hidden layers was genuinely hard to train, because gradients either vanished or exploded on the way back. What changed was the equipment rather than the idea: [[relu|ReLU]], better initialization, [[batch-normalization]], [[gated-unit|gates]], [[skip-connection|skip connections]], [[adam]]-style optimisers, GPUs, and datasets large enough to feed the capacity. Today the word names a practice, not a layer count — plenty of production models get by on two or three hidden layers.',
+      'The name dates from when more than two hidden layers was genuinely hard to train, because gradients either vanished or exploded on the way back. What changed was the equipment rather than the idea: [[relu|ReLU]], better initialization, [[batch-normalization]], [[gated-unit|gates]], [[skip-connection|skip connections]], [[adam]]-style optimizers, GPUs, and datasets large enough to feed the capacity. Today the word names a practice, not a layer count — plenty of production models get by on two or three hidden layers.',
     math:
       'The difficulty was multiplicative. A gradient reaching layer 1 of an $L$-layer network carries the product $\\prod_{l=2}^{L}\\mathbf{W}_l^{\\top}\\mathrm{diag}\\!\\left(g^{\\prime}(\\mathbf{z}_l)\\right)$; if a typical factor has magnitude $\\rho$, the gradient scales as $\\rho^{L}$ — about $10^{-10}$ for $\\rho = 0.5$ and $L = 33$. Every item on the modern toolkit list is, one way or another, an attempt to hold $\\rho$ near 1.',
     statquest: 'neural networks deep learning',
@@ -140,7 +140,7 @@ export const conceptsCh06: Concept[] = [
     simple:
       'A network built for pictures. Instead of wiring every pixel to every unit, it trains one small pattern detector and slides it across the whole image, reusing the same detector everywhere.',
     technical:
-      'Two assumptions do all the work: patterns are *local* (a corner is settled by neighbouring pixels) and *translation-invariant* (an edge is an edge wherever it appears). Sharing one small [[filter]] across all positions cuts parameters by orders of magnitude and builds the invariance into the architecture instead of hoping the data will teach it. Stacked layers compose: edges into corners, corners into textures, textures into objects. The same idea runs in one dimension over text and audio, where the window slides along time.',
+      'Two assumptions do all the work: patterns are *local* (a corner is settled by neighboring pixels) and *translation-invariant* (an edge is an edge wherever it appears). Sharing one small [[filter]] across all positions cuts parameters by orders of magnitude and builds the invariance into the architecture instead of hoping the data will teach it. Stacked layers compose: edges into corners, corners into textures, textures into objects. The same idea runs in one dimension over text and audio, where the window slides along time.',
     math:
       'A layer with $F$ filters of size $k \\times k$ over a $C$-channel input holds $F(k^{2}C + 1)$ parameters, *independent of the image size* — sixty-four $3\\times3\\times3$ filters is 1792 numbers whether the image is $32\\times32$ or $4000\\times3000$. Its output is a volume of $F$ [[feature-map|feature maps]], each of side $\\left\\lfloor\\frac{n + 2p - k}{s}\\right\\rfloor + 1$ for [[padding]] $p$ and [[stride]] $s$.',
     statquest: 'convolutional neural networks',
@@ -177,7 +177,7 @@ export const conceptsCh06: Concept[] = [
     id: 'feature-map',
     term: 'feature map',
     simple:
-      'The picture a single detector produces: the same layout as the image, but every position holds how strongly the pattern was found there rather than a colour. Bright spots are sightings.',
+      'The picture a single detector produces: the same layout as the image, but every position holds how strongly the pattern was found there rather than a color. Bright spots are sightings.',
     technical:
       'One filter, one map. A layer with sixty-four filters emits sixty-four maps stacked into a *volume*, and the next layer convolves through that whole depth — which is how it detects patterns of patterns rather than patterns of pixels. Maps shrink with depth ([[stride]] and [[pooling]]) while their number grows, trading spatial resolution for semantic richness: early maps say *where the edges are*, late maps say *whether there is a face*, and barely where.',
     math:
@@ -243,7 +243,7 @@ export const conceptsCh06: Concept[] = [
     technical:
       'A lossy summary, and its fixed size is both the strength and the ceiling. Strength: a 200-token sentence costs no more memory than a 5-token one. Ceiling: everything must be squeezed into those few hundred numbers, and each step overwrites rather than appends, so old information decays as new arrives. That bottleneck is why [[attention]] was invented — it lets a decoder look back at every step’s state instead of only the last.',
     math:
-      'The state evolves as $\\mathbf{h}^{t} = g\\!\\left(\\mathbf{W}\\mathbf{x}^{t} + \\mathbf{U}\\mathbf{h}^{t-1} + \\mathbf{b}\\right)$, a nonlinear dynamical system in $\\mathbb{R}^{n}$ whose behaviour is governed by the spectral radius of $\\mathbf{U}$: below 1 the state contracts and forgets, above 1 it can blow up. The Jacobian $\\partial\\mathbf{h}^{t}/\\partial\\mathbf{h}^{t-1} = \\mathrm{diag}\\!\\left(g^{\\prime}(\\cdot)\\right)\\mathbf{U}$ is exactly the factor multiplied $T$ times over during [[backpropagation-through-time]].',
+      'The state evolves as $\\mathbf{h}^{t} = g\\!\\left(\\mathbf{W}\\mathbf{x}^{t} + \\mathbf{U}\\mathbf{h}^{t-1} + \\mathbf{b}\\right)$, a nonlinear dynamical system in $\\mathbb{R}^{n}$ whose behavior is governed by the spectral radius of $\\mathbf{U}$: below 1 the state contracts and forgets, above 1 it can blow up. The Jacobian $\\partial\\mathbf{h}^{t}/\\partial\\mathbf{h}^{t-1} = \\mathrm{diag}\\!\\left(g^{\\prime}(\\cdot)\\right)\\mathbf{U}$ is exactly the factor multiplied $T$ times over during [[backpropagation-through-time]].',
     statquest: 'recurrent neural networks',
     teachesAt: 'ch06-rnn',
     see: ['recurrent-neural-network', 'vanishing-gradient', 'gated-unit', 'attention'],
@@ -318,7 +318,7 @@ export const conceptsCh06: Concept[] = [
     simple:
       'A wire carrying a layer’s input straight past it, to be added back to the output. The layer then only has to learn the correction, and the training signal gets a clear road back to the earlier layers.',
     technical:
-      'The residual connection of ResNet, and the reason networks of a hundred layers train at all. A block computes *input plus correction* rather than replacing the input, so doing nothing is the default behaviour and a block with nothing useful to add can cheaply stay out of the way — whereas a plain stack must *learn* the identity, which turns out to be hard. On the backward pass the added path has derivative exactly 1, so gradients reach the bottom undiminished. The same idea powers transformers and U-Nets, and — with a learned valve instead of a bare wire — [[gated-unit|gated]] RNNs.',
+      'The residual connection of ResNet, and the reason networks of a hundred layers train at all. A block computes *input plus correction* rather than replacing the input, so doing nothing is the default behavior and a block with nothing useful to add can cheaply stay out of the way — whereas a plain stack must *learn* the identity, which turns out to be hard. On the backward pass the added path has derivative exactly 1, so gradients reach the bottom undiminished. The same idea powers transformers and U-Nets, and — with a learned valve instead of a bare wire — [[gated-unit|gated]] RNNs.',
     math:
       'A residual block computes $\\mathbf{h}_{l+1} = \\mathbf{h}_l + \\mathcal{F}(\\mathbf{h}_l)$, with Jacobian $\\mathbf{I} + \\partial\\mathcal{F}/\\partial\\mathbf{h}_l$. The gradient product over $L$ blocks expands into a sum over all path lengths, including the length-zero path of magnitude exactly 1 — so however small $\\partial\\mathcal{F}$ becomes, the [[vanishing-gradient]] product cannot collapse past it.',
     teachesAt: 'ch06-rnn',

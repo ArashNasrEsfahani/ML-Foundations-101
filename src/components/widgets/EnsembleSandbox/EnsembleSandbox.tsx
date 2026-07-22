@@ -138,7 +138,7 @@ export function EnsembleSandbox({ challenge }: WidgetProps) {
         },
         {
           control: 'Train accuracy',
-          what: 'Share of the training points labelled correctly, one number per model, so you can see whether adding trees actually bought anything.',
+          what: 'Share of the training points labeled correctly, one number per model, so you can see whether adding trees actually bought anything.',
         },
       ]}
       onReset={reset}

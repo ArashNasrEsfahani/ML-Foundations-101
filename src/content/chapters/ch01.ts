@@ -374,7 +374,7 @@ export const ch01: Chapter = {
         {
           type: 'p',
           md:
-            'Why should a boundary drawn from 10,000 old emails classify tomorrow’s email? Because of how the data was collected. If training examples are drawn *randomly and independently* by the same process that will produce future examples, then a new spam message is **statistically likely** to land near the other spam messages, and a new normal message near the normal ones. The boundary that separated the training clouds then, with high probability, separates the new arrivals too.',
+            'Why should a boundary drawn from 10,000 old emails classify tomorrow’s email? Because of how the data was collected. If training examples are drawn *randomly and independently* by the same process that will produce future examples, then a new spam message is **statistically likely** to land near the other spam messages, and a new normal message near the normal ones. The boundary that separated the training clouds then, with high probability, separates the new arrivals too. Performing on data it was never shown is the only thing a model is really for, and it has a name: **[[generalization]]**.',
         },
         {
           type: 'p',
