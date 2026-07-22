@@ -4,6 +4,7 @@ import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { Dot } from '../Plot';
 import { useRaf, usePlayState } from '../../../hooks/useRaf';
+import { useSpeed, SpeedControl } from '../SpeedControl';
 import { hashString } from '../../../lib/rng';
 import {
   createNet,
@@ -18,7 +19,15 @@ import { xorQuads, circleSet, spiralSet, type NNPoint } from '../../../content/d
 const SIZE = 340; // svg viewBox for the main pane
 const RASTER = 64; // canvas raster resolution
 const DOM = 1.05; // world half-extent: [-DOM, DOM]²
-const EPOCHS_PER_FRAME = 20;
+/**
+ * Milliseconds per epoch at normal speed — a wall-clock pace, deliberately not
+ * a count of epochs per animation frame. XOR is solved by about epoch 20, so
+ * even the slowest whole number of epochs per frame (one) would be over in a
+ * third of a second: the learning this widget exists to show would happen
+ * before the reader looked up from the Play button. 100 ms gives 10 epochs a
+ * second, 2 on slow, 40 on fast.
+ */
+const MS_PER_EPOCH = 100;
 const EPOCH_CAP = 8000;
 
 type DatasetKey = 'xor' | 'circle' | 'spiral';
@@ -142,6 +151,7 @@ export function TinyNetLab({ challenge }: WidgetProps) {
   const [lr, setLr] = useState(0.5);
   const [run, setRun] = useState(0);
   const [playing, togglePlay, setPlaying] = usePlayState(false);
+  const speed = useSpeed();
   const [stats, setStats] = useState({ epoch: 0, acc: 0, loss: NaN });
 
   const [burstKey, setBurstKey] = useState(0);
@@ -214,8 +224,16 @@ export function TinyNetLab({ challenge }: WidgetProps) {
     if (epoch >= EPOCH_CAP) setPlaying(false);
   };
 
-  // ~20 epochs per animation frame while playing
-  useRaf(() => trainEpochs(EPOCHS_PER_FRAME), playing);
+  // fraction of an epoch owed from the last frame, so a pace below one epoch
+  // per frame is expressible at all
+  const owed = useRef(0);
+  useRaf((dt) => {
+    owed.current += dt / speed.ms(MS_PER_EPOCH);
+    const n = Math.floor(owed.current);
+    if (n < 1) return; // nothing to draw either, so skip the repaint and the render
+    owed.current -= n;
+    trainEpochs(n);
+  }, playing);
 
   // challenge: ≥ 95% accuracy on the XOR dataset
   useEffect(() => {
@@ -253,13 +271,81 @@ export function TinyNetLab({ challenge }: WidgetProps) {
   const net = netRef.current;
 
   return (
-    <WidgetFrame title="TinyNet Lab" onReset={reset} challenge={challenge} challengeDone={done}>
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Filled dots are class 1, open dots class 0. Press <em>play</em> and watch gradient
-        descent bend the shaded decision boundary around the data. Darker gray = the network
-        votes class 1; mid-gray = unsure. Reset re-rolls the starting weights.
-      </p>
-
+    <WidgetFrame
+      title="TinyNet Lab"
+      intro={
+        <>
+          Filled dots are class 1, open dots class 0. Press <em>Play</em> and watch gradient
+          descent bend the shaded decision boundary around the data — at <em>slow</em> it moves
+          one epoch at a time, which is the whole thing worth seeing here.
+        </>
+      }
+      guide={[
+        {
+          control: 'XOR',
+          what: 'Two diagonal pairs of clusters: no straight line can separate them, so the hidden layer has to bend one. This is the set the challenge is scored on.',
+        },
+        {
+          control: 'Circle',
+          what: 'One class ringed by the other. Watch the boundary close into a loop rather than sweep across the plane.',
+        },
+        {
+          control: 'Spiral',
+          what: 'Two interleaved arms — the hardest set here, and the one where 2 hidden units visibly are not enough. Expect a long run and partial accuracy.',
+        },
+        {
+          control: 'hidden units',
+          what: 'How many neurons sit in the middle layer, i.e. the network’s [[model-capacity|capacity]] to bend the boundary. Moving it restarts the run with fresh weights.',
+        },
+        {
+          control: 'learning rate',
+          what: 'The size of every [[gradient-descent]] step — see [[learning-rate]]. `0.1` crawls smoothly downhill, `1.0` races and can make the loss bounce instead of settle.',
+        },
+        {
+          control: 'Play / Pause',
+          what: 'Trains [[epoch|epochs]] continuously at the pace set by *speed*. The run stops by itself at 8000 epochs.',
+        },
+        {
+          control: 'Step ×5',
+          what: 'Trains exactly five epochs and stops, so you can see what one nudge of [[backpropagation]] does to the boundary. Only available while paused.',
+        },
+        {
+          control: 'speed',
+          what: 'Epochs per second while playing: 2 on *slow*, 10 on *normal*, 40 on *fast*. XOR is solved by about epoch 20, so on slow you can watch that happen one epoch at a time.',
+        },
+        {
+          control: 'reset',
+          what: 'Re-rolls the starting weights and clears the loss history, keeping the same data. A run stuck at 50% often solves on the next roll.',
+        },
+        {
+          control: 'shaded background',
+          what: 'The network’s prediction at every point of the plane: dark gray = class 1, paper = class 0, mid-gray = unsure. That mid-gray ribbon *is* the decision boundary.',
+        },
+        {
+          control: 'epoch',
+          what: 'One epoch is one pass of backpropagation over all the points. It counts the epochs trained so far, not the frames drawn.',
+        },
+        {
+          control: 'accuracy',
+          what: 'Share of the training points currently labelled correctly. On XOR, 50% means the network has settled for a straight line and needs a reset.',
+        },
+        {
+          control: 'loss',
+          what: 'Mean squared error over the training points: how *wrong* the outputs are, not only how many are wrong. It falls long before the accuracy moves.',
+        },
+        {
+          control: 'loss (last 200 epochs)',
+          what: 'The recent loss curve, rescaled to its own window so its shape stays visible as the numbers shrink. Flat means the run has [[convergence|converged]] — or is stuck.',
+        },
+        {
+          control: 'line strength ∝ |weight|',
+          what: 'In the diagram, thickness is the size of a weight and dashed means negative. A few edges thickening while the rest fade is the network choosing which hidden units do the work.',
+        },
+      ]}
+      onReset={reset}
+      challenge={challenge}
+      challengeDone={done}
+    >
       {/* controls */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 10 }}>
         <span style={{ display: 'inline-flex', gap: 6 }}>
@@ -316,6 +402,7 @@ export function TinyNetLab({ challenge }: WidgetProps) {
             Step ×5
           </button>
         </span>
+        <SpeedControl value={speed.speed} onChange={speed.setSpeed} />
       </div>
 
       {/* main pane + side pane */}
@@ -370,7 +457,16 @@ export function TinyNetLab({ challenge }: WidgetProps) {
             line strength ∝ |weight| · dashed = negative
           </p>
           <LossSpark hist={lossHist.current} />
-          <p style={{ margin: 0, fontSize: '0.92rem', fontFamily: 'var(--font-mono)' }}>
+          {/* tabular figures: the counter ticks every frame, and proportional
+              digits would make the whole line shuffle sideways as it runs */}
+          <p
+            style={{
+              margin: 0,
+              fontSize: '0.92rem',
+              fontFamily: 'var(--font-mono)',
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
             epoch <strong>{stats.epoch}</strong> · accuracy{' '}
             <strong>{(stats.acc * 100).toFixed(0)}%</strong> · loss{' '}
             <strong>{Number.isFinite(stats.loss) ? stats.loss.toFixed(3) : '—'}</strong>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import {
@@ -83,6 +83,41 @@ const featuresUsed = (path: string): Set<string> =>
       .filter(Boolean)
       .map((seg) => seg.split(':')[0]),
   );
+
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'a circle in the tree',
+    what: 'Tap a bottom-of-the-tree circle to select it; a dashed ring marks the selection and the table above highlights exactly the mushrooms that reached it. Circles that already have branches below them are not selectable, because a split is made at a leaf.',
+  },
+  {
+    control: 'split on cap / color / dots',
+    what: 'Splits the selected leaf on that feature, giving it one child per value the feature takes. A feature already used higher up the same branch does not appear, since re-asking a settled question separates nothing.',
+  },
+  {
+    control: 'the gain bars',
+    what: 'How much of the selected leaf’s [[entropy]] each candidate feature would remove — see [[information-gain]]. The longest bar is the greedy choice, and a bar at full width means that split alone finishes the job.',
+  },
+  {
+    control: 'prune back',
+    what: 'Undoes the most recent split and folds its children back into their parent — see [[pruning]]. Use it when a split looked promising and left you with two impure leaves instead of one.',
+  },
+  {
+    control: 'entropy … bits',
+    what: 'How mixed the selected leaf is, in bits: 1 is a perfect 50/50 muddle and 0 is a leaf where every mushroom agrees. The whole game is driving this to 0 everywhere.',
+  },
+  {
+    control: 'after · gain',
+    what: '*after* is the entropy left once that split has been made, averaged over its children by size; *gain* is what you started with minus that. Bigger gain, cleaner split.',
+  },
+  {
+    control: '3|2',
+    what: 'The label inside each circle: mushrooms that reached it that are edible, then poisonous. A filled circle is a leaf that is all edible, an outlined one all poisonous, and anything shaded is still mixed.',
+  },
+  {
+    control: 'impure leaves',
+    what: 'How many bottom-of-the-tree circles still hold both edible and poisonous mushrooms. The challenge is to reach zero of them using no more than three splits.',
+  },
+];
 
 /**
  * Grow an ID3 tree by hand on the 12-mushroom table: pick a leaf, compare the
@@ -206,6 +241,14 @@ export function TreeBuilder({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Grow the mushroom tree"
+      intro={
+        <>
+          Twelve foraged mushrooms, three features, one question: which splits sort edible from
+          poisonous fastest? Tap a leaf in the tree to select it (dashed ring), check the gain
+          bars, then split. Nodes read <strong>edible | poisonous</strong>.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
@@ -222,11 +265,6 @@ export function TreeBuilder({ challenge }: WidgetProps) {
           pointer-events: none;
         }
       `}</style>
-      <p style={{ margin: '0 0 8px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Twelve foraged mushrooms, three features, one question: which splits sort edible from
-        poisonous fastest? Tap a leaf in the tree to select it (dashed ring), check the gain
-        bars, then split. Nodes read <strong>edible | poisonous</strong>.
-      </p>
 
       {/* the dataset */}
       <div style={{ overflowX: 'auto', marginBottom: 10 }}>

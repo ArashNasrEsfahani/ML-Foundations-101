@@ -17,22 +17,56 @@ export const ch08: Chapter = {
         {
           type: 'p',
           md:
-            'Fraud detection sounds glamorous until you meet the data: for every fraudulent transaction there are hundreds of genuine ones. Here is the trap — a model that predicts *“genuine”* for **everything** scores 99% accuracy while catching exactly **zero** fraud. On an **imbalanced dataset**, overall accuracy is a vanity metric; what matters is the per-class view, especially the **recall on the minority class**: of all the fraud cases, how many did we actually catch?',
+            'Fraud detection sounds glamorous until you meet the data: for every fraudulent transaction there are hundreds of genuine ones. Here is the trap — a model that predicts *“genuine”* for **everything** scores 99% accuracy while catching exactly **zero** fraud. On an **[[imbalanced-dataset|imbalanced dataset]]**, overall accuracy is a vanity metric. What matters is the per-class view — accuracy being useless on skewed data is the whole reason [precision and recall](sec:ch05-metrics) exist — and above all the **[[recall|recall on the minority class]]**: of all the fraud cases, how many did we actually catch?',
         },
         {
           type: 'p',
           md:
-            'Why do learners fall into the trap? Take soft-margin SVM: every misclassified example contributes the same cost. Noise guarantees some points end up on the wrong side, and since minority examples are few, the cheapest arrangement is often to sacrifice *them* — the algorithm nudges the boundary into minority territory to keep the numerous majority points happy. Most learning algorithms behave the same way on imbalanced data.',
+            'Why do learners fall into the trap? Take [soft-margin SVM](sec:ch03-svm): every misclassified example contributes the same cost. Noise guarantees some points end up on the wrong side, and since minority examples are few, the cheapest arrangement is often to sacrifice *them* — the algorithm nudges the boundary into minority territory to keep the numerous majority points happy. Most learning algorithms behave the same way on imbalanced data.',
         },
         {
           type: 'p',
           md:
-            'The fixes all amount to *making the minority count more*. **Class weights**: if your algorithm supports it (many SVM implementations do), set a higher misclassification cost for minority examples — the boundary shifts back, trading a few majority mistakes for minority coverage. **Oversampling**: make multiple copies of the minority examples so their class carries more weight. **Undersampling**: randomly remove majority examples instead. And you can synthesize *new* minority points: **SMOTE** and **ADASYN** pick a minority example $\\mathbf{x}_i$, choose one of its $k$ nearest minority neighbors $\\mathbf{x}_{zi}$, and interpolate: $\\mathbf{x}_{new} = \\mathbf{x}_i + \\lambda(\\mathbf{x}_{zi} - \\mathbf{x}_i)$ with random $\\lambda \\in [0, 1]$. ADASYN additionally generates more synthetics where minority examples are scarcest.',
+            'The fixes all amount to *making the minority count more*. **[[class-weights|Class weights]]**: if your algorithm supports it (many SVM implementations do), set a higher misclassification cost for minority examples — the boundary shifts back, trading a few majority mistakes for minority coverage. **[[oversampling|Oversampling]]**: make multiple copies of the minority examples so their class carries more weight. **[[undersampling|Undersampling]]**: randomly remove majority examples instead.',
         },
         {
           type: 'p',
           md:
-            'A practical footnote: decision trees and the ensembles built from them — random forest, gradient boosting — are often less rattled by imbalance out of the box. Still, check the minority recall before you celebrate.',
+            'The fourth option is the strange one: manufacture minority examples that were never observed. What *is* a synthetic example? Take two real fraud cases that sit close together in feature space — one at (amount 120, hour 03:00), another at (amount 200, hour 04:00) — and drop a brand-new point somewhere on the straight line between them, (amount 140, hour 03:15), say. No such transaction ever happened. The bet is that the region *between* two frauds is also fraud, so filling it in tells the classifier where the minority **territory** lies, instead of merely how tall the piles are on two isolated spots. Copies cannot do that: stack a point on itself ten times and the minority class is louder but no wider, and a flexible model will happily draw a tiny island around each tower.',
+        },
+        {
+          type: 'p',
+          md:
+            'That is **[[smote|SMOTE]]** — Synthetic Minority Over-sampling Technique. Pick a minority example $\\mathbf{x}_i$, pick one of its $k$ nearest *minority* neighbors $\\mathbf{x}_{zi}$, and interpolate:',
+        },
+        {
+          type: 'math',
+          tex: '\\mathbf{x}_{new} = \\mathbf{x}_i + \\lambda(\\mathbf{x}_{zi} - \\mathbf{x}_i), \\quad \\lambda \\in [0, 1]',
+        },
+        {
+          type: 'p',
+          md:
+            'Keeping $\\lambda$ inside $[0,1]$ is what confines the invented point to the segment joining two real ones; let it escape that range and you would be inventing fraud out beyond anywhere fraud has ever been seen. Two things go wrong even so. A *mislabeled* minority point stranded in majority territory gets synthetics manufactured all around it, so the noise is amplified rather than diluted. And in high dimensions the straight line between two neighbors can run through regions where no real example could live at all.',
+        },
+        {
+          type: 'p',
+          md:
+            '**[[adasyn|ADASYN]]** runs the same interpolation with a budget rather than a flat quota. It counts, for each minority point, how many of its neighbors belong to the majority class, and spends most of its synthetics on the points that are losing — the ones pressed up against the frontier — while a point buried deep inside a comfortable minority cluster gets almost none. The effect is to push the boundary outward where the fight actually is, instead of fattening the part that was already won. That same instinct is its weakness: a mislabeled point in enemy territory looks exactly like a hard frontier point from the inside, and gets amplified hardest of all.',
+        },
+        {
+          type: 'hint',
+          md:
+            'One procedural rule catches everybody at least once: resample *inside* each [[cross-validation]] fold, never before the split. Oversample first and copies of the same transaction land in both the training and the validation half — so the model is scored on rows it has already memorized, and the number that comes back is fiction.',
+        },
+        {
+          type: 'p',
+          md:
+            'There is also a fix that costs nothing at all: leave training alone and move the **[[decision-threshold|decision threshold]]** afterwards. A classifier that outputs a probability was never obliged to cut at 0.5 — cut at 0.05 instead and minority recall climbs immediately, at the price of precision. Sweeping the threshold and reading the [precision–recall curve](sec:ch05-metrics) is usually the first thing to try, before touching the data at all.',
+        },
+        {
+          type: 'p',
+          md:
+            'A practical footnote: decision trees and the ensembles built from them — [random forest](sec:ch07-ensembles-bagging), [gradient boosting](sec:ch07-boosting) — are often less rattled by imbalance out of the box, because a tree splits on purity rather than on a summed per-example cost, so a rare class can still earn a leaf of its own. Still, check the minority recall before you celebrate.',
         },
         {
           type: 'widget',
@@ -110,22 +144,27 @@ export const ch08: Chapter = {
         {
           type: 'p',
           md:
-            'Random forest combines hundreds of *weak* models of the same kind. A different play: combine **two or three strong models** built by *different* algorithms — say an SVM and a random forest — for one extra bump in performance. Three standard ways: **averaging** (average the predictions; works for regression and for classifiers that output scores), **majority vote** (each classifier votes; ties are broken randomly or answered with “don’t know” if a wrong answer is costly), and **stacking** (train a *meta-model* whose input is the base models’ outputs: from base classifiers $f_1, f_2$, build training examples $\\hat{\\mathbf{x}}_i = [f_1(\\mathbf{x}_i), f_2(\\mathbf{x}_i)]$ with the original label — per-class scores can join the features too).',
+            '[Random forest](sec:ch07-ensembles-bagging) combines hundreds of *weak* models of the same kind. A different play: combine **two or three strong models** built by *different* algorithms — say an SVM and a random forest — for one extra bump in performance. Three standard ways: **[[model-averaging|averaging]]** (average the predictions; works for regression and for classifiers that output scores), **majority vote** (each classifier votes; ties are broken randomly or answered with “don’t know” if a wrong answer is costly), and **[[stacking]]** (train a *meta-model* whose input is the base models’ outputs: from base classifiers $f_1, f_2$, build training examples $\\hat{\\mathbf{x}}_i = [f_1(\\mathbf{x}_i), f_2(\\mathbf{x}_i)]$ with the original label — per-class scores can join the features too).',
         },
         {
           type: 'p',
           md:
-            'Two health warnings. Always verify on the validation set that the combination actually beats every base model (and tune the stacked model’s hyperparameters with cross-validation). And remember *why* combining works: several strong, **uncorrelated** models that agree are probably agreeing on the truth. Stack three SVMs with slightly different hyperparameters and you’ll gain almost nothing — they make the same mistakes. Different algorithms, or different feature sets, are what buy independence.',
+            'Two health warnings. Always verify on the [validation set](sec:ch05-three-sets) that the combination actually beats every base model (and tune the stacked model’s hyperparameters with **[[cross-validation]]**). And remember *why* combining works: several strong, **uncorrelated** models that agree are probably agreeing on the truth. Stack three SVMs with slightly different hyperparameters and you’ll gain almost nothing — they make the same mistakes. Different algorithms, or different feature sets, are what buy independence.',
+        },
+        {
+          type: 'hint',
+          md:
+            'A trap specific to stacking. Build the meta-model’s training set from predictions the base models made about *their own* training data and those predictions come back flatteringly good — so the meta-model learns to trust an accuracy that will not survive contact with anything new. Generate the meta-features fold by fold instead, each base prediction made by a copy of the model that never saw that example, and the problem disappears.',
         },
         {
           type: 'p',
           md:
-            'Now the data side. **Multiple inputs** usually means *multimodal* data — say, a picture plus a caption, and the label says whether the caption describes the picture. Shallow options: train one model per modality and combine them as above, or just concatenate the feature vectors into one wider vector. Neural networks are more graceful: build one **subnetwork per input type** (a CNN reads the image, an RNN reads the text), take each subnetwork’s **embedding**, concatenate them, and put a classification layer — softmax or sigmoid — on top. Deep-learning libraries ship ready-made layers for concatenating or averaging subnetwork outputs.',
+            'Now the data side. **Multiple inputs** usually means *multimodal* data — say, a picture plus a caption, and the label says whether the caption describes the picture. Shallow options: train one model per modality and combine them as above, or just concatenate the feature vectors into one wider vector. Neural networks are more graceful: build one **subnetwork per input type** (a [CNN](sec:ch06-cnn) reads the image, an [RNN](sec:ch06-rnn) reads the text), take each subnetwork’s **[[embedding]]**, concatenate them, and put a classification layer — softmax or sigmoid — on top. Deep-learning libraries ship ready-made layers for concatenating or averaging subnetwork outputs.',
         },
         {
           type: 'p',
           md:
-            '**Multiple outputs** is the mirror problem: one input, several predictions — locate an object in an image *and* tag it as “person”, “cat” or “hamster”. When output combinations can’t be enumerated as fake classes, build a **shared encoder trunk with one head per output**: an encoder subnetwork produces the embedding; one head with ReLU outputs predicts the coordinates (positive reals — trained with MSE cost $C_1$); a second head with softmax predicts the tag (trained with cross-entropy cost $C_2$). You can’t optimize both costs at once, so you blend them with a hyperparameter $\\gamma \\in (0,1)$:',
+            '**Multiple outputs** is the mirror problem: one input, several predictions — locate an object in an image *and* tag it as “person”, “cat” or “hamster”. When output combinations can’t be enumerated as fake classes, build a **shared encoder trunk with one head per output**: an [[encoder-decoder|encoder]] subnetwork produces the embedding; one head with [[relu|ReLU]] outputs predicts the coordinates (positive reals — trained with MSE cost $C_1$); a second head with softmax predicts the tag (trained with cross-entropy cost $C_2$). You can’t optimize both costs at once, so you blend them with a hyperparameter $\\gamma \\in (0,1)$:',
         },
         {
           type: 'math',
@@ -200,32 +239,37 @@ export const ch08: Chapter = {
         {
           type: 'p',
           md:
-            'Training a neural network starts before the first gradient step: the data must be shaped for the network. Images get resized to identical dimensions, then standardized and normalized into $[0,1]$. Text gets **tokenized** — split into words, punctuation, symbols — then encoded as one-hot vectors or, usually better, **word embeddings** (bag of words can still serve a multilayer perceptron on longer texts). And resist the urge to reimplement this month’s exotic architecture from a paper: with clean, normalized, plentiful data, a boring proven architecture usually closes most of the gap — and actually ships.',
+            'Training a neural network starts before the first gradient step: the data must be shaped for the network. Images get resized to identical dimensions, then [standardized and normalized](sec:ch05-feature-engineering) into $[0,1]$. Text gets **tokenized** — split into words, punctuation, symbols — then encoded as one-hot vectors or, usually better, **[[word-embeddings|word embeddings]]** (bag of words can still serve a multilayer perceptron on longer texts). And resist the urge to reimplement this month’s exotic architecture from a paper: with clean, normalized, plentiful data, a boring proven architecture usually closes most of the gap — and actually ships.',
         },
         {
           type: 'p',
           md:
-            'For the architecture size, climb gradually: start with one or two layers, train, and check whether the model fits the training data well (low bias). If not, grow layer sizes and depth until it does. Once training fit is good but validation performance is poor (high variance), add **regularization**. If regularizing kills the training fit, grow the network slightly — and keep looping until both training and validation look healthy. Besides L1 and L2, neural networks have their own regularizers:',
+            'For the architecture size, climb gradually: start with one or two layers, train, and check whether the model fits the training data well (low [[model-bias|bias]]). If not, grow layer sizes and depth until it does. Once training fit is good but validation performance is poor (high [[model-variance|variance]]), add [regularization](sec:ch05-regularization). If regularizing kills the training fit, grow the network slightly — and keep looping until both training and validation look healthy. Besides L1 and L2, neural networks have their own regularizers:',
         },
         {
           type: 'p',
           md:
-            '**Dropout** is disarmingly simple: on every training pass, temporarily switch off a random fraction of units. The dropout rate (between 0 and 1, tuned on validation) controls the strength — the more units silenced, the stronger the regularizing push, because no unit can rely on a specific partner always being awake.',
+            '**[[dropout|Dropout]]** is disarmingly simple: on every training pass, temporarily switch off a random fraction of units. The dropout rate (between 0 and 1, tuned on validation) controls the strength — the more units silenced, the stronger the regularizing push, because no unit can rely on a specific partner always being awake.',
         },
         {
           type: 'p',
           md:
-            '**Early stopping** watches the validation set as epochs pass. Training cost keeps falling forever, but validation performance rises, peaks, and then *deteriorates* — the moment overfitting begins. Save the model after every epoch (these saves are called **checkpoints**), and either stop when validation performance starts dropping or train on and pick the best checkpoint afterward.',
+            '**[[early-stopping|Early stopping]]** watches the validation set as epochs pass. Training cost keeps falling forever, but validation performance rises, peaks, and then *deteriorates* — the moment overfitting begins. Save the model after every epoch (these saves are called **[[checkpointing|checkpoints]]**), and either stop when validation performance starts dropping or train on and pick the best checkpoint afterward.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Training on past the peak and picking the best checkpoint afterwards is almost always the better of the two. Validation curves are noisy, so a dip of one epoch means nothing and a stopping rule that fires on it quits early; and the saved optimizer state — momentum buffers, step counters, where the learning-rate schedule had got to — is what lets a run *resume* rather than restart after a crashed machine.',
         },
         {
           type: 'p',
           md:
-            '**Batch normalization** standardizes the outputs of each layer before the next layer consumes them. Technically it isn’t regularization — its headline benefits are faster and more stable training — but in practice it also has a regularizing effect. It’s nearly always worth trying: most libraries let you insert it between two layers with one line.',
+            '**[[batch-normalization|Batch normalization]]** standardizes the outputs of each layer before the next layer consumes them. Technically it isn’t regularization — its headline benefits are faster and more stable training — but in practice it also has a regularizing effect. It’s nearly always worth trying: most libraries let you insert it between two layers with one line.',
         },
         {
           type: 'p',
           md:
-            '**Data augmentation** manufactures extra labeled examples from the ones you have, by applying transformations that *keep the label true*: slightly zoom, rotate, flip, or darken an image, and a cat photo remains a cat photo. It regularizes almost any learner — not just networks — and is standard practice with images.',
+            '**[[data-augmentation|Data augmentation]]** manufactures extra labeled examples from the ones you have, by applying transformations that *keep the label true*: slightly zoom, rotate, flip, or darken an image, and a cat photo remains a cat photo. It regularizes almost any learner — not only networks — and is standard practice with images. The label-preserving condition is doing real work, though: flip a photograph of a cat and it is still a cat, but flip a photograph of the digit 2 and it is not a digit at all.',
         },
         {
           type: 'quiz',
@@ -294,7 +338,12 @@ export const ch08: Chapter = {
         {
           type: 'p',
           md:
-            '**Transfer learning** is arguably *the* place where neural networks leave shallow models in the dust. The setting: you have a good model trained on one big dataset (wild animals), and a new problem from a *different distribution* (domestic animals) with only a small labeled dataset. A shallow learner would force you to build another big dataset. With a deep network, you operate: **1)** take the big trained model, **2)** gather your small labeled dataset, **3)** remove the last layer or layers — the classification head that sits after the embedding, **4)** bolt on new layers shaped for your problem, **5)** *freeze* the parameters of every remaining old layer, **6)** train only the new layers on your small dataset. The early layers already know how to see edges, textures and shapes — knowledge that transfers.',
+            '**[[transfer-learning|Transfer learning]]** is arguably *the* place where neural networks leave shallow models in the dust. The setting: you have a good model trained on one big dataset (wild animals), and a new problem from a *different distribution* (domestic animals) with only a small labeled dataset. A shallow learner would force you to build another big dataset. With a deep network, you operate: **1)** take the big trained model, **2)** gather your small labeled dataset, **3)** remove the last layer or layers — the classification head that sits after the [[embedding]], **4)** bolt on new layers shaped for your problem, **5)** *freeze* the parameters of every remaining old layer, **6)** train only the new layers on your small dataset. The early layers already know [how to see edges, textures and shapes](sec:ch06-cnn) — knowledge that transfers.',
+        },
+        {
+          type: 'p',
+          md:
+            'Freezing does two jobs at once, and the second is the one people miss. It preserves the borrowed knowledge, yes — but it also cuts the number of trainable parameters from tens of millions down to a few thousand, and a small dataset cannot possibly estimate tens of millions of numbers without memorizing itself. Once the new head has settled, it is often worth *unfreezing* the top few old layers and continuing at a much smaller learning rate — fine-tuning. That usually buys a little more, provided the new dataset is large enough not to wash away the features you came for. The further the new problem sits from the original, the deeper you cut and the more you retrain.',
         },
         {
           type: 'p',
@@ -304,17 +353,22 @@ export const ch08: Chapter = {
         {
           type: 'p',
           md:
-            'From borrowed knowledge to raw speed: **algorithmic efficiency**. The **big O notation** classifies algorithms by how running time grows with input size $N$, ignoring constants ($5N^2$ is just $O(N^2)$). Example: to find the two most distant numbers in a set, a double loop compares every pair — $N^2$ comparisons, $O(N^2)$. A smarter single sweep tracks the running minimum and maximum: $O(N)$, and the answer is their pair. Both are “efficient” in the polynomial-time sense, but at big-data scale $O(N^2)$ crawls — practitioners hunt for $O(N)$, $O(N \\log N)$, even $O(\\log N)$.',
+            'From borrowed knowledge to raw speed: **algorithmic efficiency**. The **[[big-o-notation|big O notation]]** classifies algorithms by how running time grows with input size $N$, ignoring constants ($5N^2$ is just $O(N^2)$). Example: to find the two most distant numbers in a set, a double loop compares every pair — $N^2$ comparisons, $O(N^2)$. A smarter single sweep tracks the running minimum and maximum: $O(N)$, and the answer is their pair. Both are “efficient” in the polynomial-time sense, but at big-data scale $O(N^2)$ crawls — practitioners hunt for $O(N)$, $O(N \\log N)$, even $O(\\log N)$.',
         },
         {
           type: 'p',
           md:
-            'And a fistful of practical speed rules for scientific Python: **avoid loops** — write $\\mathbf{w}\\mathbf{x}$ as `numpy.dot(w, x)`, not an element-by-element loop; matrix and vector operations run in optimized C. Pick the **right data structure**: membership tests are fast in a `set` and slow in a `list`; key lookups belong in a `dict` (a hashmap). Prefer battle-tested libraries — numpy, scipy, scikit-learn — over hand-rolled code. Use **generators** to stream huge collections one element at a time, `cProfile` to find the real hotspots, and, when the algorithm itself can’t improve, `multiprocessing` or compilers like PyPy and Numba.',
+            'And a fistful of practical speed rules for scientific Python: **avoid loops** — write $\\mathbf{w}\\mathbf{x}$ as `numpy.dot(w, x)`, not an element-by-element loop; matrix and vector operations run in optimized C. Pick the **right data structure**: membership tests are fast in a `set` and slow in a `list`; key lookups belong in a `dict` (a hashmap). Prefer battle-tested libraries — numpy, scipy, [[scikit-learn]] — over hand-rolled code. Use **generators** to stream huge collections one element at a time, `cProfile` to find the real hotspots, and, when the algorithm itself can’t improve, `multiprocessing` or compilers like PyPy and Numba.',
         },
         {
           type: 'hint',
           md:
-            'The transfer-learning recipe has a hidden hyperparameter: *how many* layers to remove and replace. Like everything else, it’s decided on the validation set.',
+            'The two rules pull against each other, which is worth noticing. Big O compares *algorithms*; constants compare *implementations*. A vectorized numpy call and a Python loop can have identical complexity and differ by a factor of a hundred in wall-clock time — and no amount of that factor will save an $O(N^2)$ method once $N$ reaches a million. Fix the growth rate first, then the constant, and profile before you touch either.',
+        },
+        {
+          type: 'hint',
+          md:
+            'The transfer-learning recipe has a hidden hyperparameter: *how many* layers to remove and replace. Like everything else, it’s decided on the [validation set](sec:ch05-three-sets).',
         },
         {
           type: 'quiz',

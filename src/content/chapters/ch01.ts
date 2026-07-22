@@ -17,7 +17,7 @@ export const ch01: Chapter = {
         {
           type: 'p',
           md:
-            'Here is an honest way to start: **machines don’t actually learn**. What a “learning machine” really does is find a mathematical formula which, applied to a pile of inputs called the **training data**, produces the outputs we want. The useful part is that the same formula keeps producing correct outputs for *most new inputs too* — as long as those new inputs come from the same statistical distribution the training data came from.',
+            'Here is an honest way to start: **machines don’t actually learn**. What a “learning machine” really does is find a mathematical formula which, applied to a pile of inputs called the **[[dataset|training data]]**, produces the outputs we want. The useful part is that the same formula keeps producing correct outputs for *most new inputs too* — as long as those new inputs come from the same statistical distribution the training data came from.',
         },
         {
           type: 'p',
@@ -32,7 +32,12 @@ export const ch01: Chapter = {
         {
           type: 'p',
           md:
-            'Still, machine learning is a universally accepted name for a real and useful discipline: the science and engineering of building machines that do useful things **without being explicitly programmed** to do them. A more practical definition: solve a problem by 1) collecting a **dataset**, and 2) algorithmically building a **statistical model** from that dataset, which you then use to solve the original problem.',
+            'Still, **[[machine-learning|machine learning]]** is a universally accepted name for a real and useful discipline: the science and engineering of building machines that do useful things **without being explicitly programmed** to do them. A more practical definition: solve a problem by 1) collecting a **[[dataset]]**, and 2) algorithmically building a **[[model|statistical model]]** from that dataset, which you then use to solve the original problem.',
+        },
+        {
+          type: 'p',
+          md:
+            'One distinction is worth fixing before anything else, because every later chapter leans on it: the **learning algorithm** is the procedure, the **model** is what the procedure produces. Support Vector Machine is an algorithm; the particular boundary it fits to your 10,000 emails is a model. Run the same algorithm over a different pile of emails and you get a different model — which is why “the model” is always a statement about one specific dataset, and why swapping the data is a far bigger change than swapping the algorithm. [Chapter 2 collects the rest of this vocabulary](sec:ch02-ml-vocabulary) in one place.',
         },
         {
           type: 'quiz',
@@ -83,27 +88,63 @@ export const ch01: Chapter = {
       blocks: [
         {
           type: 'p',
-          md: 'Learning comes in four flavors: **supervised**, **unsupervised**, **semi-supervised**, and **reinforcement**.',
+          md:
+            'Learning comes in four flavors: **supervised**, **unsupervised**, **semi-supervised**, and **reinforcement**. What separates them is not the algorithm but the *kind of feedback* the machine gets — the full answer for every example, no answers at all, answers for a lucky few, or nothing but a score that arrives long after the decision that earned it.',
         },
         {
           type: 'p',
           md:
-            'In **supervised learning** the dataset is a collection of *labeled examples* $\\{(\\mathbf{x}_i, y_i)\\}_{i=1}^N$. Each $\\mathbf{x}_i$ is a **feature vector**: a list of values (features) that each describe the example in a fixed way — feature $j$ means the same thing for every example (height, weight, word counts, …). The **label** $y_i$ is what we want to predict: one of a finite set of **classes** (spam / not_spam), or a real number, or something more complex. The goal is a **model** that deduces the correct label from a new feature vector.',
+            'In **[[supervised-learning|supervised learning]]** the dataset is a collection of *labeled examples* $\\{(\\mathbf{x}_i, y_i)\\}_{i=1}^N$ — notation unpacked in [Chapter 2](sec:ch02-data-structures). Each $\\mathbf{x}_i$ is a **[[feature-vector|feature vector]]**: a list of values (features) that each describe the example in a fixed way — feature $j$ means the same thing for every example (height, weight, word counts, …). The **[[label]]** $y_i$ is what we want to predict: one of a finite set of **classes** (spam / not_spam), or a real number, or something more complex. The goal is a **model** that deduces the correct label from a new feature vector.',
         },
         {
           type: 'p',
           md:
-            'In **unsupervised learning** the examples come *without labels*: $\\{\\mathbf{x}_i\\}_{i=1}^N$. The model transforms each vector into something useful on its own: the id of a **cluster** it belongs to (clustering), a shorter vector (**dimensionality reduction**), or a score for how untypical it is (**outlier detection**).',
+            'Make that concrete. To guess whether a customer will renew a subscription you might describe each one with four numbers — months subscribed, logins last month, support tickets opened, price paid — so a single example is $\\mathbf{x}_i = [14, 22, 0, 9.99]$ with $y_i = 1$ for renewed. Ten thousand such rows are the entirety of what the algorithm sees: no names, no story, no idea what a “support ticket” is. Whatever it learns, it learns from the arithmetic of those four columns, which is worth remembering the next time a model surprises you.',
         },
         {
           type: 'p',
           md:
-            'In **semi-supervised learning** the dataset mixes a few labeled examples with many unlabeled ones. Extra unlabeled data may look like extra uncertainty, but it actually tells the algorithm more about where the data lives — a bigger sample sketches the underlying distribution better, and a good algorithm can exploit that.',
+            'In **[[unsupervised-learning|unsupervised learning]]** the examples come *without labels*: $\\{\\mathbf{x}_i\\}_{i=1}^N$. The model transforms each vector into something useful on its own: the id of a **cluster** it belongs to ([clustering](sec:ch09-kmeans)), a shorter vector ([dimensionality reduction](sec:ch09-pca)), or a score for how untypical it is ([outlier detection](sec:ch09-outliers)).',
         },
         {
           type: 'p',
           md:
-            'In **reinforcement learning** the machine “lives” in an environment. It perceives a **state**, executes **actions**, and collects **rewards**. Its goal is a **policy**: a function from states to the actions that maximize expected long-term reward. This suits *sequential* decision problems — game playing, robotics, logistics — and is a story of its own, mostly outside this course (as it is outside the book).',
+            'The catch is scoring. In supervised learning you count how many predictions were right; here there is no right answer to count against, so “did it work?” becomes a matter of internal measures and of whether anything downstream improved. A clustering that looks beautiful and turns out to have grouped your customers by nothing more interesting than time zone is not detectably wrong — it is only useless, and telling those two apart is the whole difficulty of the field.',
+        },
+        {
+          type: 'p',
+          md:
+            'In **[[semi-supervised-learning|semi-supervised learning]]** the dataset mixes a few labeled examples with many unlabeled ones. Extra unlabeled data may look like extra uncertainty, but it actually tells the algorithm more about where the data lives — a bigger sample sketches the underlying distribution better, and a good algorithm can exploit that.',
+        },
+        {
+          type: 'p',
+          md:
+            'Why should examples with no answers help at all? Picture two dense clouds of points with a thin gap between them, and only three points labeled. A boundary drawn from those three alone could sit almost anywhere; a boundary that must *also* avoid slicing through the middle of either cloud has hardly any room left. That is the assumption doing the work — examples in the same dense clump share a label — and when the assumption is false, the extra data drags the boundary confidently to the wrong place. [Chapter 7 gets into the recipes](sec:ch07-few-labels).',
+        },
+        {
+          type: 'p',
+          md:
+            'In **[[reinforcement-learning|reinforcement learning]]** the machine “lives” in an environment. It perceives a **state**, executes **actions**, and collects **rewards**. Its goal is a **[[policy]]**: a function from states to the actions that maximize expected long-term reward. This suits *sequential* decision problems — game playing, robotics, logistics — where there is no such thing as a single correct answer to copy, only a long chain of choices that ends well or badly.',
+        },
+        {
+          type: 'p',
+          md:
+            'Two things make this genuinely harder than supervised learning, and both are worth knowing even if you never train an agent. The first is **delayed reward**. A chess engine that loses in forty moves is handed one number at the end: it was told the game was lost, never which move lost it. Spreading that single verdict back across forty decisions is the *credit assignment* problem, and it has no counterpart in a setting where every example arrives with its own answer stapled to it.',
+        },
+        {
+          type: 'p',
+          md:
+            'The second is that the data is not handed over at all. A supervised learner is given its examples; an agent *generates* its own by acting, so a policy that never tries the unfamiliar door never finds out what is behind it. Trading **exploration** against exploiting what already works is the central tension of the field — and it means a reinforcement learner can fail not by fitting its data badly, but by never collecting the data that mattered.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Reinforcement learning is a course of its own, and this one leaves it here: every algorithm ahead assumes a fixed pile of examples that does not answer back. The phrase to search if you want the real thing is *Markov decision process* — states, actions, rewards, and a discount factor $\\gamma$ that gives “long-term” a precise meaning. At $\\gamma = 0.9$, a reward forty steps away is worth $0.9^{40} \\approx 1.5\\%$ of the same reward right now, which is how an agent ends up preferring a bird in the hand.',
+        },
+        {
+          type: 'hint',
+          md:
+            'These four are the traditional carve-up, not a law of nature. A great deal of modern practice sits in between: [[self-supervised-learning|self-supervised]] methods manufacture labels out of the raw data itself — hide a word, predict it; hide a patch of an image, predict that — and then run perfectly ordinary supervised learning on the result. It is how most large language and vision models are trained, and it needs no human labeler at all.',
         },
         {
           type: 'widget',
@@ -179,17 +220,22 @@ export const ch01: Chapter = {
         {
           type: 'p',
           md:
-            'Let’s walk one example end to end: **spam detection**. You gather 10,000 email messages, each labeled *spam* or *not_spam*. Machines can’t read email, so each message must become a feature vector. One classic recipe, **bag of words**, uses a dictionary of, say, 20,000 English words: feature $j$ is 1 if the message contains dictionary word $j$, else 0. Now every message is a 20,000-dimensional vector of 0s and 1s, paired with its label.',
+            'Let’s walk one example end to end: **spam detection**. You gather 10,000 email messages, each labeled *spam* or *not_spam*. Machines can’t read email, so each message must become a **[[feature-vector|feature vector]]**. One classic recipe, **[[bag-of-words|bag of words]]**, uses a dictionary of, say, 20,000 English words: feature $j$ is 1 if the message contains dictionary word $j$, else 0. Now every message is a 20,000-dimensional vector of 0s and 1s, paired with its label.',
         },
         {
           type: 'p',
           md:
-            'Labels also need to be numbers. The algorithm featured here — the **Support Vector Machine** — wants spam $= +1$ and not_spam $= -1$. At this point you have a **dataset** and a **learning algorithm**, and you apply the second to the first to get the **model**.',
+            'Two things about that vector are worth noticing before we move on. It is enormous and almost entirely zeros — a typical email uses a couple of hundred distinct dictionary words out of twenty thousand, so roughly 99% of every vector is 0, and any sensible implementation stores only the positions that are not. And it has discarded word order completely: “free money now” and “now money free” produce the identical vector. For spam that loss turns out to be survivable, because spam is mostly betrayed by its vocabulary. For translation it would be fatal. Choosing what the numbers should be, and what gets thrown away in the process, is [feature engineering](sec:ch05-feature-engineering) — and it decides more outcomes than the choice of algorithm does.',
         },
         {
           type: 'p',
           md:
-            'SVM views every feature vector as a point in high-dimensional space. It draws a **hyperplane** — the 20,000-dimensional version of a straight line — that separates the $+1$ points from the $-1$ points. Any boundary separating classes is called a **decision boundary**. The hyperplane is written with two **parameters**: a vector $\\mathbf{w}$ and a number $b$:',
+            'Labels also need to be numbers. The algorithm featured here — the **[[support-vector-machine|Support Vector Machine]]** — wants spam $= +1$ and not_spam $= -1$. At this point you have a **[[dataset]]** and a **learning algorithm**, and you apply the second to the first to get the **[[model]]**.',
+        },
+        {
+          type: 'p',
+          md:
+            'SVM views every feature vector as a point in high-dimensional space. It draws a **[[hyperplane]]** — a straight line’s counterpart in 20,000 dimensions — that separates the $+1$ points from the $-1$ points. Any boundary separating classes is called a **[[decision-boundary|decision boundary]]**. The hyperplane is written with two **[[model-parameters|parameters]]**: a vector $\\mathbf{w}$ and a number $b$:',
         },
         {
           type: 'formula',
@@ -221,7 +267,32 @@ export const ch01: Chapter = {
         {
           type: 'p',
           md:
-            'Learning means finding the best values $\\mathbf{w}^*$ and $b^*$. SVM asks for two things: classify every training example correctly, and do it with the widest possible **margin** — the distance from the boundary to the closest examples of each class. A wide margin buys **generalization**: future examples land on the correct side more reliably. Geometrically, the margin between the two “touching” hyperplanes is $\\frac{2}{\\|\\mathbf{w}\\|}$, so maximizing the margin means *minimizing* the norm $\\|\\mathbf{w}\\|$, subject to $y_i(\\mathbf{w}\\mathbf{x}_i - b) \\ge 1$ for every example.',
+            'Learning means finding the best values $\\mathbf{w}^*$ and $b^*$. But “best” needs saying carefully, because when two clouds of points can be separated at all, they can usually be separated in infinitely many ways — tilt the boundary a little, shift it a little, and it still gets every training example right. All of those boundaries score full marks on the data you already have. SVM breaks the tie with a second demand: sit as far as possible from *both* clouds.',
+        },
+        {
+          type: 'p',
+          md:
+            'The empty corridor between the boundary and the nearest examples on either side is the **[[margin]]**, and its width is what SVM maximizes. The argument for it is a bet about the future: a boundary squeezed up against a training point will misclassify any new point of that class that happens to land slightly further out, while a boundary with room to spare absorbs that scatter without changing its answer. Width, here, *is* **[[generalization]]** — bought in advance, out of data you have not seen yet.',
+        },
+        {
+          type: 'p',
+          md:
+            'Turning that into arithmetic takes one careful step, and it is the step most introductions skip. The expression $\\mathbf{w}\\mathbf{x} - b$ is *not* a distance: multiply both $\\mathbf{w}$ and $b$ by 10 and every score grows tenfold while the boundary has not moved an inch. The genuine distance from a point to the hyperplane is $\\frac{|\\mathbf{w}\\mathbf{x} - b|}{\\|\\mathbf{w}\\|}$ — dividing by the length of $\\mathbf{w}$ is what cancels the arbitrary scaling. SVM disposes of the ambiguity by *choosing* a scale: it insists the closest examples score exactly $\\pm 1$.',
+        },
+        {
+          type: 'p',
+          md:
+            'Everything follows from that choice. The nearest points now sit on the two “touching” hyperplanes $\\mathbf{w}\\mathbf{x} - b = 1$ and $\\mathbf{w}\\mathbf{x} - b = -1$, each at distance $\\frac{1}{\\|\\mathbf{w}\\|}$ from the boundary, so the corridor is $\\frac{2}{\\|\\mathbf{w}\\|}$ wide. Maximizing that fraction means *minimizing* the norm $\\|\\mathbf{w}\\|$ — and the requirement that no example strays into the corridor is written $y_i(\\mathbf{w}\\mathbf{x}_i - b) \\ge 1$ for every example, one inequality apiece, with the $\\pm 1$ label encoding quietly covering both classes in a single line.',
+        },
+        {
+          type: 'p',
+          md:
+            'Worth doing once with real numbers. Take two examples in two dimensions: a positive at $(1, 1)$ and a negative at $(-1, -1)$. The widest corridor between them runs through the origin at right angles to the segment joining them — the line $x^{(1)} + x^{(2)} = 0$. To make each point score exactly $\\pm 1$ we need $\\mathbf{w} = [0.5,\\, 0.5]$ and $b = 0$: then $\\mathbf{w}\\mathbf{x} = 0.5 + 0.5 = 1$ at the positive point and $-1$ at the negative one. Its length is $\\|\\mathbf{w}\\| = \\sqrt{0.25 + 0.25} \\approx 0.707$, so the margin is $2 / 0.707 \\approx 2.83$ — exactly the distance between the two points, which is what it should be when they are the only two.',
+        },
+        {
+          type: 'hint',
+          md:
+            'The scale-fixing move is not a trick played to make the algebra tidy — it is why the SVM objective is usually written $\\min \\frac{1}{2}\\|\\mathbf{w}\\|^2$ rather than “maximize the margin”. Squaring changes nothing about *where* the minimum sits (the norm is never negative), and the halving makes the derivative come out as a clean $\\mathbf{w}$ instead of $2\\mathbf{w}$.',
         },
         {
           type: 'widget',
@@ -235,7 +306,7 @@ export const ch01: Chapter = {
         {
           type: 'hint',
           md:
-            'Real SVMs also handle noise (some points can never be separated) with a penalty hyperparameter, and curved boundaries with **kernels** — both arrive in Chapter 3.',
+            'Real SVMs also handle noise (some points can never be separated) with a penalty [[hyperparameter]], and curved boundaries with **kernels** — both arrive in [Chapter 3](sec:ch03-svm).',
         },
         {
           type: 'quiz',
@@ -308,17 +379,22 @@ export const ch01: Chapter = {
         {
           type: 'p',
           md:
-            'It is not a guarantee — unlikely inputs happen, and the model will make errors on some of them. But *less likely situations mean fewer errors*: on typical data the correct predictions dominate. And the larger the training set, the smaller the chance that a new example looks unlike everything seen before.',
+            'It is not a guarantee — unlikely inputs happen, and the model will make errors on some of them. But *less likely situations mean fewer errors*: on typical data the correct predictions dominate. And the larger the training set, the smaller the chance that a new example looks unlike everything seen before. This is also the reason any number a model reports about itself has to be measured on [examples held back from training](sec:ch05-three-sets): performance on data the model was fitted to says nothing about the arrivals still to come.',
         },
         {
           type: 'p',
           md:
-            'This intuition explains why SVM chases the biggest margin: putting the boundary as far as possible from both classes minimizes the probability that a slightly unusual new example crosses to the wrong side.',
+            'This intuition explains why SVM chases the biggest **[[margin]]**: putting the boundary as far as possible from both classes minimizes the probability that a slightly unusual new example crosses to the wrong side.',
+        },
+        {
+          type: 'p',
+          md:
+            'The assumption has a name — the data is *independent and identically distributed* — and it is the one that breaks first in practice. Spammers read the same research you do and change their vocabulary. A camera is replaced with a different model. A pricing model trained before a crash meets the world after it. Nothing in training warns you when this happens, because training data cannot know about a world collected after it. This is why deployed models are monitored rather than trusted, and why the honest question about any model is not “is it accurate?” but “is the world still the one it was fitted to?” The nearer failure — a model that never generalized in the first place because it memorized its training set — is [overfitting](sec:ch05-overfitting), and Chapter 5 is largely about spotting it.',
         },
         {
           type: 'hint',
           md:
-            'Want the rigorous version? Look up **PAC learning** (“probably approximately correct”) — the theory that connects model error, training-set size, and the complexity of the model formula.',
+            'Want the rigorous version? **[[pac-learning|PAC learning]]** — “probably approximately correct” — makes the hedging precise. It fixes two tolerances: how much error you will accept, and how often you will accept being unlucky. Then it asks how many examples are needed to stay inside the first tolerance at least that often. The answer grows with the richness of the model formula, which is the formal statement of a claim this course makes over and over: a more flexible model needs more data to earn the same trust.',
         },
         {
           type: 'quiz',
@@ -473,7 +549,7 @@ export const ch01: Chapter = {
       ],
       answer: 1,
       explain:
-        'Among all boundaries that separate the classes, SVM picks the one that maximizes this distance. The norm $\\|\\mathbf{w}\\|$ is closely related — the margin equals $\\frac{2}{\\|\\mathbf{w}\\|}$ — but it is not itself the margin.',
+        'Among all boundaries that separate the classes, SVM picks the one that maximizes this distance — the [[margin]]. The norm $\\|\\mathbf{w}\\|$ is closely related, since the margin equals $\\frac{2}{\\|\\mathbf{w}\\|}$, but it is not itself the margin.',
     },
     {
       kind: 'numeric',
@@ -531,7 +607,7 @@ export const ch01: Chapter = {
       ],
       answer: 2,
       explain:
-        '“Probably approximately correct”: under what conditions will a learner probably produce an approximately correct classifier? The theory ties together how much data you have, how complex your model formula is, and how much error you are willing to tolerate.',
+        '“Probably approximately correct”: under what conditions will a learner probably produce an approximately correct classifier? [[pac-learning|The theory]] ties together how much data you have, how complex your model formula is, and how much error you are willing to tolerate.',
     },
     {
       kind: 'mcq',

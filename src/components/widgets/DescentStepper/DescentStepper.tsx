@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { makeFrame, Axes, Dot, PlotSvg } from '../Plot';
+import { useSpeed, SpeedControl } from '../SpeedControl';
 import { useTicker, usePlayState } from '../../../hooks/useRaf';
 import { spendingsSales } from '../../../content/datasets/spendingsSales';
 import { closedForm, gradStep, loss } from '../../../lib/ml/gd';
@@ -21,6 +22,8 @@ const DIVERGE_FACTOR = 10;
 const CONVERGE_RATIO = 1.02;
 const MAX_CHALLENGE_EPOCHS = 30;
 const LOG_LINES = 8;
+/** ms per epoch at normal speed — one epoch is a whole event, not a frame of one */
+const EPOCH_MS = 420;
 
 const FRAME_A = makeFrame(W, H, [W_LO, W_HI], [0, LOSS_HI]);
 const FRAME_B = makeFrame(W, H, [0, 52], [0, 30]);
@@ -55,6 +58,43 @@ function sliderToAlpha(t: number): number {
   return ALPHA_LO * Math.pow(ALPHA_HI / ALPHA_LO, t / 100);
 }
 
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'α',
+    what: 'The [[learning-rate]]: how far each epoch moves along the downhill direction. The scale is logarithmic, so the far left crawls in tiny steps and the far right leaps past the valley floor.',
+  },
+  {
+    control: '(reckless zone)',
+    what: 'A warning that α is now large enough for a step to overshoot the bottom of the bowl and land higher up the far wall. Runs started here usually end in [[divergence]] rather than a fit.',
+  },
+  {
+    control: 'Step',
+    what: 'Runs exactly one [[epoch]] — one gradient computed over all the data, one move of w and b. Use it when you want to see where a single update lands before committing to a run.',
+  },
+  { control: 'Play', what: 'Runs epochs back to back until you pause, or until the loss blows up. It becomes **Pause**, and the button stops the run without discarding the progress.' },
+  {
+    control: 'speed',
+    what: 'How long the widget waits between epochs while **Play** is running. Take it to *slow* to watch a single ball movement and its matching swing of the fitted line as one event.',
+  },
+  { control: 'Reset', what: 'Puts $w$ and $b$ back to 0 and clears the epoch log, leaving α where you set it. This is how you retry a diverged run with a smaller learning rate.' },
+  {
+    control: 'the ball (left pane)',
+    what: 'The current $w$ plotted against the loss it produces, with $b$ held at its current value so the bowl can be drawn as a curve. Watch it slide toward the low point rather than jumping past it.',
+  },
+  {
+    control: 'w*',
+    what: 'The dashed vertical line at the slope the closed-form solution picks — the bottom of the bowl. Converging means the ball parking on this line.',
+  },
+  {
+    control: 'loss (MSE)',
+    what: 'The [[mean-squared-error]] of the current line: the average squared vertical gap between each point and the line. Smaller is a better fit, and 0 is unreachable on noisy data.',
+  },
+  {
+    control: 'the epoch log',
+    what: 'The last eight epochs, newest first, with the $w$, $b$ and loss each one produced. A loss column that falls and then flattens is [[convergence]]; one that grows is the run diverging.',
+  },
+];
+
 /**
  * Gradient descent, one epoch at a time, on the spendings→sales line f(x) = wx + b.
  * Pane A: the loss bowl over w (b frozen at its current value) with the descent ball.
@@ -76,6 +116,7 @@ export function DescentStepper({ challenge }: WidgetProps) {
   const [sim, setSim] = useState<Sim>(initSim);
   const [sliderT, setSliderT] = useState(DEFAULT_T);
   const [playing, togglePlay, setPlaying] = usePlayState(false);
+  const speed = useSpeed();
   const alpha = sliderToAlpha(sliderT);
 
   const diverged = !Number.isFinite(sim.curLoss) || sim.curLoss > sim.initLoss * DIVERGE_FACTOR;
@@ -99,7 +140,7 @@ export function DescentStepper({ challenge }: WidgetProps) {
     });
   };
 
-  useTicker(doStep, playing && !diverged, 120);
+  useTicker(doStep, playing && !diverged, speed.ms(EPOCH_MS));
 
   useEffect(() => {
     if (diverged) setPlaying(false);
@@ -152,17 +193,20 @@ export function DescentStepper({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Descend the loss bowl"
+      intro={
+        <>
+          Each <strong>Step</strong> runs one epoch of gradient descent on the spendings→sales
+          data. The ball rolls down the loss bowl (left) while the line fits the points (right).
+          Get the loss within 2% of the closed-form optimum ({fmt(opt.loss)}) in at most{' '}
+          {MAX_CHALLENGE_EPOCHS} epochs — but mind the learning rate: too large and every step
+          lands higher than the last.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Each <strong>Step</strong> runs one epoch of gradient descent on the spendings→sales data.
-        The ball rolls down the loss bowl (left) while the line fits the points (right). Get the
-        loss within 2% of the closed-form optimum ({fmt(opt.loss)}) in at most {MAX_CHALLENGE_EPOCHS}{' '}
-        epochs — but mind the learning rate: too large and every step lands higher than the last.
-      </p>
-
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
         {/* the loss pane shakes once the run blows up */}
         <div style={{ flex: '1 1 260px', minWidth: 240 }} className={diverged ? 'anim-shake' : undefined}>
@@ -284,6 +328,7 @@ export function DescentStepper({ challenge }: WidgetProps) {
           )}
         </span>
         <span style={{ flex: 1 }} />
+        <SpeedControl value={speed.speed} onChange={speed.setSpeed} />
         <button onClick={doStep} disabled={diverged || playing}>
           Step
         </button>

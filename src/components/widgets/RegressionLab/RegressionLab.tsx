@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { makeFrame, Axes, Dot, PlotSvg } from '../Plot';
 import { EquationReadout, fmt, texSum } from '../EquationReadout';
+import { useSpeed, SpeedControl } from '../SpeedControl';
 import { useSvgDrag } from '../../../hooks/useDrag';
 import { useRaf } from '../../../hooks/useRaf';
 import { regress2d } from '../../../content/datasets/regress2d';
@@ -16,14 +17,45 @@ const HX1 = 1.5; // x positions of the two line handles
 const HX2 = 8.5;
 const START = { w: -0.4, b: 7 };
 const MAP = 90; // loss-map raster resolution
-const FIT_STEPS = 110; // gradient steps taken by auto-fit, one per animation frame
+const FIT_STEPS = 110; // gradient steps taken by auto-fit
 const FIT_LR = 0.035;
+const STEP_MS = 22; // wall-clock time one gradient step gets at normal speed
+
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'the ◇ handles',
+    what: 'Drag either one up or down to tilt and shift the line; the nearer handle is the one you grab. Everything else on the plot — the stems, the squares, the readout — is recomputed from wherever you leave them.',
+  },
+  {
+    control: 'the squares',
+    what: 'One per point, with a side equal to the vertical gap between the point and the line, so its **area** is that point’s squared error. Squaring is why a point twice as far away hurts four times as much, and why the fit swings toward outliers.',
+  },
+  {
+    control: 'the inset map',
+    what: 'Every possible line drawn as a single pixel: across is the slope $w$, down is the intercept $b$, and darker is worse. The small ring is the best line there is and the filled dot is the one you are currently holding.',
+  },
+  {
+    control: 'auto-fit (gradient descent)',
+    what: 'Hands the line to [[gradient-descent]] from wherever you left it and lets it walk downhill for 110 steps, tracing its path across the inset map. Start it from a badly wrong line to see the path curve.',
+  },
+  {
+    control: 'speed',
+    what: 'How fast auto-fit is allowed to run. Take it to *slow* to see the individual steps as separate moves, large at first and shrinking as the slope under the line flattens out.',
+  },
+  {
+    control: 'MSE',
+    what: 'The [[mean-squared-error]] of your current line: the average of all those square areas. It is the height of the valley at the dot in the inset map.',
+  },
+  {
+    control: 'MSE*',
+    what: 'The lowest MSE any straight line can reach on this data, marked by the ring in the inset map. It is not 0 because the points are not on a line — the challenge is to get within 5% of it.',
+  },
+];
 
 /**
  * Drag a regression line through a scatter; squared errors appear as literal
  * squares on each residual stem. An inset heatmap shows the MSE valley over
- * (w, b) space, and "auto-fit" walks gradient descent down into it — one step
- * per animation frame, so the line glides instead of stuttering.
+ * (w, b) space, and "auto-fit" walks gradient descent down into it.
  */
 export function RegressionLab({ challenge }: WidgetProps) {
   const { done, complete } = useChallenge(challenge);
@@ -33,6 +65,7 @@ export function RegressionLab({ challenge }: WidgetProps) {
 
   const [line, setLine] = useState(START);
   const [fitting, setFitting] = useState(false);
+  const speed = useSpeed();
   const stepsLeft = useRef(0);
   const grabbed = useRef<'h1' | 'h2' | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -49,23 +82,38 @@ export function RegressionLab({ challenge }: WidgetProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hit]);
 
-  // ---- auto-fit: one gradient step per frame (~60/s) so the motion is fluid
+  // ---- auto-fit, paced in wall-clock time rather than one step per frame: at
+  // `slow` there has to be visible daylight between two successive steps, which
+  // a per-frame loop cannot give. The frame still owns the redraw, so the inset
+  // map is never repainted more than once a frame however fast the descent runs.
   // The descent advances through a ref as well as through state, so a frame that
   // fires before React has committed the previous one still steps forward.
   const lineRef = useRef(line);
   lineRef.current = line;
-  useRaf(() => {
-    const next = descentStep(pts, lineRef.current.w, lineRef.current.b, FIT_LR);
-    lineRef.current = next;
-    trail.current.push(next);
-    setLine(next);
-    stepsLeft.current -= 1;
+  const owedMs = useRef(0);
+  useRaf((dt) => {
+    const perStep = speed.ms(STEP_MS);
+    owedMs.current += dt;
+    let next = lineRef.current;
+    let moved = false;
+    while (owedMs.current >= perStep && stepsLeft.current > 0) {
+      owedMs.current -= perStep;
+      next = descentStep(pts, next.w, next.b, FIT_LR);
+      trail.current.push(next);
+      stepsLeft.current -= 1;
+      moved = true;
+    }
+    if (moved) {
+      lineRef.current = next;
+      setLine(next);
+    }
     if (stepsLeft.current <= 0) setFitting(false);
   }, fitting);
 
   const autoFit = () => {
     trail.current = [{ ...line }];
     stepsLeft.current = FIT_STEPS;
+    owedMs.current = 0;
     setFitting(true);
   };
 
@@ -194,15 +242,18 @@ export function RegressionLab({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Fit the line, shrink the squares"
+      intro={
+        <>
+          Drag the diamond handles. Each point pays a penalty equal to the <em>area</em> of its
+          square — that is the squared error. The inset map shows MSE over all (w, b) pairs:
+          darker is worse, the small ring marks the optimum.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Drag the diamond handles. Each point pays a penalty equal to the <em>area</em> of its
-        square — that is the squared error. The inset map shows MSE over all (w, b) pairs:
-        darker is worse, the small ring marks the optimum.
-      </p>
       <div style={{ position: 'relative' }}>
         <PlotSvg
           frame={frame}
@@ -335,6 +386,7 @@ export function RegressionLab({ challenge }: WidgetProps) {
         }}
       >
         <span style={{ flex: 1 }} />
+        <SpeedControl value={speed.speed} onChange={speed.setSpeed} />
         <button onClick={autoFit} disabled={fitting}>
           <span key={fitting ? 'go' : 'idle'} className="anim-pop" style={{ display: 'inline-block' }}>
             {fitting ? 'descending…' : 'auto-fit (gradient descent)'}

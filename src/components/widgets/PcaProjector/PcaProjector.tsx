@@ -82,6 +82,47 @@ export function PcaProjector({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Cast the best shadow"
+      intro={
+        <>
+          Drag the square handle to rotate the projection axis through the data mean. Each point
+          drops onto the axis; the ticks are the 1D versions of your 2D data. Keep as much spread
+          (variance) as you can.
+        </>
+      }
+      guide={[
+        {
+          control: 'drag the ◆ handle',
+          what: 'Rotates the projection axis about the data mean, which is the only thing you control here. Every tick slides to the new shadow of its point as you turn it.',
+        },
+        {
+          control: 'Reveal PCs / Hide PCs',
+          what: 'Draws the answer: the long dashed line is the first principal component, the short one the second, at right angles to it — see [[principal-component-analysis]]. Try to find PC1 by hand before pressing it.',
+        },
+        {
+          control: 'reset',
+          what: 'Returns the axis to its deliberately bad starting angle and hides the components again.',
+        },
+        {
+          control: 'Captured variance',
+          what: 'The spread of the shadows along your axis, as a share of the total spread in both directions. The bar beside it is the same number.',
+        },
+        {
+          control: 'the ticks on the axis',
+          what: 'The 1D data you would keep if you threw the second dimension away. Ticks bunched together mean points that have become indistinguishable.',
+        },
+        {
+          control: 'the faint drop lines',
+          what: 'Each point’s distance from the axis — the part of it the projection discards. PCA is the choice of axis that makes these as short as possible.',
+        },
+        {
+          control: 'θ',
+          what: 'The axis angle in degrees. It only means anything modulo 180°, since an axis pointing one way and the other way is the same axis.',
+        },
+        {
+          control: 'of the best axis',
+          what: 'Variance kept as a share of what the *best possible* axis would keep. 100% means you are on PC1; the challenge wants 90%.',
+        },
+      ]}
       onReset={() => {
         setAngle(START_ANGLE);
         setShowPCs(false);
@@ -89,11 +130,6 @@ export function PcaProjector({ challenge }: WidgetProps) {
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Drag the square handle to rotate the projection axis through the data mean. Each point
-        drops onto the axis; the ticks are the 1D versions of your 2D data. Keep as much spread
-        (variance) as you can.
-      </p>
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10 }}>
         <button
           className={showPCs ? 'primary' : 'ghost'}

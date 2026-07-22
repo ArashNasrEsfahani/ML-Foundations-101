@@ -17,7 +17,7 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'Before the algorithms, the alphabet. A **scalar** is a single number — 15, or $-3.25$ — written as an italic letter like $x$ or $a$. A **vector** is an ordered list of scalars called *attributes*, written in bold: $\\mathbf{x}$, $\\mathbf{w}$. You can picture a vector two ways: as an arrow pointing somewhere, or as a point in multi-dimensional space — both pictures are the same list of numbers. Attribute $j$ of a vector is written with a superscript index: $x^{(j)}$. The index names a **dimension** — a fixed position in the list.',
+            'Before the algorithms, the alphabet. A **[[scalar]]** is a single number — 15, or $-3.25$ — written as an italic letter like $x$ or $a$. A **[[vector]]** is an ordered list of scalars called *attributes*, written in bold: $\\mathbf{x}$, $\\mathbf{w}$. You can picture a vector two ways: as an arrow pointing somewhere, or as a point in multi-dimensional space — both pictures are the same list of numbers. Attribute $j$ of a vector is written with a superscript index: $x^{(j)}$. The index names a **dimension** — a fixed position in the list. These are the same $\\mathbf{w}$ and $\\mathbf{x}$ that already turned up in [Chapter 1’s spam classifier](sec:ch01-how-supervised-works); this section is the belated explanation of what they were.',
         },
         {
           type: 'p',
@@ -27,12 +27,12 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'A **matrix** is a rectangular grid of numbers — rows by columns — written as a bold capital like $\\mathbf{W}$. A **set** is an *unordered* collection of *unique* elements, written calligraphically: $\\mathcal{S}$. Sets can be finite, like $\\{1, 3, 18\\}$, or infinite intervals: $[a, b]$ includes both endpoints, $(a, b)$ excludes them, and $\\mathbb{R}$ is all real numbers. $x \\in \\mathcal{S}$ says “$x$ belongs to $\\mathcal{S}$”; $\\cap$ intersects two sets, $\\cup$ unites them, and $|\\mathcal{S}|$ counts the elements.',
+            'A **[[matrix]]** is a rectangular grid of numbers — rows by columns — written as a bold capital like $\\mathbf{W}$. A **set** is an *unordered* collection of *unique* elements, written calligraphically: $\\mathcal{S}$. Sets can be finite, like $\\{1, 3, 18\\}$, or infinite intervals: $[a, b]$ includes both endpoints, $(a, b)$ excludes them, and $\\mathbb{R}$ is all real numbers. $x \\in \\mathcal{S}$ says “$x$ belongs to $\\mathcal{S}$”; $\\cap$ intersects two sets, $\\cup$ unites them, and $|\\mathcal{S}|$ counts the elements.',
         },
         {
           type: 'p',
           md:
-            'The single most common symbol in ML papers is capital sigma — a compact way to write “add all of these up”:',
+            'The single most common symbol in ML papers is **[[sigma-notation|capital sigma]]** — a compact way to write “add all of these up”:',
         },
         {
           type: 'formula',
@@ -57,7 +57,12 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'Capital pi is the same idea with multiplication instead of addition: $\\prod_{i=1}^{n} x_i \\stackrel{\\text{def}}{=} x_1 \\cdot x_2 \\cdot \\ldots \\cdot x_n$, where $a \\cdot b$ (or just $ab$) means $a$ times $b$. Both symbols also run over vector attributes, e.g. $\\sum_{j=1}^{m} x^{(j)}$.',
+            'Read it out loud and the fear drains away: “for $i$ from 1 to $n$, add up $x_i$”. Three questions unlock any sigma you meet — where does the counter start, where does it stop, what is the recipe for one term? Everything else is decoration. Two facts make sigmas easy to push around, and both get used every time somebody differentiates an error function: sums split, $\\sum_i (a_i + b_i) = \\sum_i a_i + \\sum_i b_i$, and constants slide out, $\\sum_i c\\,a_i = c\\sum_i a_i$.',
+        },
+        {
+          type: 'p',
+          md:
+            '**[[capital-pi-notation|Capital pi]]** is the same idea with multiplication instead of addition: $\\prod_{i=1}^{n} x_i \\stackrel{\\text{def}}{=} x_1 \\cdot x_2 \\cdot \\ldots \\cdot x_n$, where $a \\cdot b$ (or just $ab$) means $a$ times $b$. Both symbols also run over vector attributes, e.g. $\\sum_{j=1}^{m} x^{(j)}$. Pi shows up in almost exactly one place: combining the chances of independent events, which multiply. That is also its weakness — multiply four hundred numbers below 1 and a computer rounds the answer to zero — which is why the logarithm trick in [the Bayes section](sec:ch02-bayes) is not an optional flourish.',
         },
         {
           type: 'widget',
@@ -71,7 +76,7 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'Vectors support a few basic operations. The **sum** $\\mathbf{x} + \\mathbf{z}$ adds attribute by attribute; the difference subtracts the same way. Multiplying a vector by a scalar scales every attribute: $\\mathbf{x}c = [cx^{(1)}, \\dots, cx^{(m)}]$. The **dot product** is different — it takes two vectors of the *same* dimensionality and returns a single scalar:',
+            'Vectors support a few basic operations. The **sum** $\\mathbf{x} + \\mathbf{z}$ adds attribute by attribute; the difference subtracts the same way. Multiplying a vector by a scalar scales every attribute: $\\mathbf{x}c = [cx^{(1)}, \\dots, cx^{(m)}]$. The **[[dot-product|dot product]]** is different — it takes two vectors of the *same* dimensionality and returns a single scalar:',
         },
         {
           type: 'formula',
@@ -94,12 +99,22 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'A few more workhorses. A **function** $y = f(x)$ associates each element $x$ of its **domain** with a single element $y$ of its **codomain**; a bold $\\mathbf{f}(x)$ returns a whole vector. $\\max_{a \\in \\mathcal{A}} f(a)$ returns the *highest value* of $f$ over the set, while $\\arg\\max_{a \\in \\mathcal{A}} f(a)$ returns the *element that achieves it* — a distinction ML uses constantly. Finally, $a \\leftarrow f(x)$ is the **assignment operator**: variable $a$ *gets* the new value $f(x)$.',
+            'That definition says how to compute it and nothing about why anyone would want it. Two readings make it worth having. As a **weighted vote**: if $\\mathbf{x}$ records the features of an email and $\\mathbf{w}$ the weight the model places on each, then $\\mathbf{w}\\mathbf{x}$ totals up every piece of evidence, each scaled by how much it counts — which is precisely what the [spam classifier of Chapter 1](sec:ch01-how-supervised-works) computes before taking a sign. As **geometry**: $\\mathbf{w}\\mathbf{x} = \\|\\mathbf{w}\\|\\,\\|\\mathbf{x}\\|\\cos\\theta$, where $\\theta$ is the angle between the two arrows. Pointing the same way makes it large and positive, sitting at right angles makes it exactly zero, pointing oppositely makes it negative.',
+        },
+        {
+          type: 'p',
+          md:
+            'A worked case, so the geometry is not merely asserted. Let $\\mathbf{w} = [3, 4]$ and $\\mathbf{x} = [4, 3]$. Multiply and add: $12 + 12 = 24$. Both vectors have length 5, so $\\cos\\theta = 24/25 = 0.96$ — an angle of about $16^{\\circ}$, meaning the two nearly, but not quite, point the same way. And setting $\\mathbf{x} = \\mathbf{w}$ gives $\\mathbf{w}\\mathbf{w} = \\|\\mathbf{w}\\|^{2}$, which is where the $\\|\\mathbf{w}\\|^{2}$ in the SVM objective came from: it is a dot product wearing a different hat.',
+        },
+        {
+          type: 'p',
+          md:
+            'A few more workhorses. A **[[function-notation|function]]** $y = f(x)$ associates each element $x$ of its **domain** with a single element $y$ of its **codomain**; a bold $\\mathbf{f}(x)$ returns a whole vector. $\\max_{a \\in \\mathcal{A}} f(a)$ returns the *highest value* of $f$ over the set, while $\\arg\\max_{a \\in \\mathcal{A}} f(a)$ returns the *element that achieves it* — a distinction ML uses constantly. Finally, $a \\leftarrow f(x)$ is the **assignment operator**: variable $a$ *gets* the new value $f(x)$.',
         },
         {
           type: 'hint',
           md:
-            'Reading tip: $f(x) \\ge f(c)$ for all $x$ near $c$ means $c$ is a **local minimum**; the smallest of all local minima is the **global minimum**. You’ll meet both again the moment we start optimizing models.',
+            'Reading tip: $f(x) \\ge f(c)$ for all $x$ near $c$ means $c$ is a **[[local-minimum|local minimum]]**; the smallest of all local minima is the **[[global-minimum|global minimum]]**. You’ll meet both again the moment we start [optimizing models](sec:ch04-gradient-descent) — and the difference between them is the difference between an optimizer that works and one that gets stuck.',
         },
         {
           type: 'quiz',
@@ -169,17 +184,36 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'The **derivative** $f\'$ of a function $f$ describes how fast the function grows or shrinks. If the derivative is a constant — say 5, or $-3$ — the function climbs (or falls) at that same rate everywhere. If $f\'$ is itself a function, the pace changes from region to region: where $f\'(x) > 0$ the function is rising at $x$, where $f\'(x) < 0$ it is falling, and where $f\'(x) = 0$ the slope is horizontal — flat ground. Finding a derivative is called **differentiation**.',
+            'The **[[derivative]]** $f\'$ of a function $f$ describes how fast the function grows or shrinks. If the derivative is a constant — say 5, or $-3$ — the function climbs (or falls) at that same rate everywhere. If $f\'$ is itself a function, the pace changes from region to region: where $f\'(x) > 0$ the function is rising at $x$, where $f\'(x) < 0$ it is falling, and where $f\'(x) = 0$ the slope is horizontal — flat ground. Finding a derivative is called **differentiation**.',
         },
         {
           type: 'p',
           md:
-            'Derivatives of basic functions are known facts: if $f(x) = x^2$ then $f\'(x) = 2x$; if $f(x) = 2x$ then $f\'(x) = 2$; the derivative of any constant is 0. For composed functions there is the **chain rule**: if $F(x) = f(g(x))$ then $F\'(x) = f\'(g(x))\\,g\'(x)$. Example: $F(x) = (5x+1)^2$ is the square (outer $f$) of $5x+1$ (inner $g$), so $F\'(x) = 2(5x+1) \\cdot 5 = 50x + 10$.',
+            'Where does that number come from? Take two points on the curve, draw the straight line through them, measure its slope — then slide the second point towards the first and watch the slope settle. For $f(x) = x^2$ near $x = 3$: over a step of $0.1$ the rise is $3.1^2 - 3^2 = 0.61$, a slope of $6.1$. Over a step of $0.01$ the rise is $0.0601$, a slope of $6.01$. Over $0.001$, a slope of $6.001$. The number it closes in on — 6 — is the derivative at $x = 3$, and the rule $f\'(x) = 2x$ agrees. That limiting process *is* the definition; the rules below are shortcuts that save you from doing it by hand every time.',
         },
         {
           type: 'p',
           md:
-            'The **gradient** generalizes the derivative to functions with several inputs. A **partial derivative** focuses on one input and treats every other input as a frozen constant. For $f([x^{(1)}, x^{(2)}]) = ax^{(1)} + bx^{(2)} + c$: differentiating with respect to $x^{(1)}$ gives $a$ (the $bx^{(2)}$ and $c$ terms are constants, contributing 0), and with respect to $x^{(2)}$ gives $b$. The gradient collects them into a vector:',
+            'Derivatives of basic functions are known facts: if $f(x) = x^2$ then $f\'(x) = 2x$; if $f(x) = 2x$ then $f\'(x) = 2$; the derivative of any constant is 0. For composed functions there is the **[[chain-rule|chain rule]]**: if $F(x) = f(g(x))$ then $F\'(x) = f\'(g(x))\\,g\'(x)$. The multiplication is the whole content of it, and gears make it obvious — if a gear turns 3 times for every turn of the handle, and a drum turns 5 times for every turn of that gear, the drum turns 15 times per turn of the handle. Rates through a chain multiply. Example: $F(x) = (5x+1)^2$ is the square (outer $f$) of $5x+1$ (inner $g$), so $F\'(x) = 2(5x+1) \\cdot 5 = 50x + 10$.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Keep the chain rule in view; it is not one topic among many. [Backpropagation](sec:ch06-neural-networks) — the algorithm that trains every neural network in existence — is the chain rule applied over and over, from the loss backwards to each individual weight, and it is nothing else besides.',
+        },
+        {
+          type: 'p',
+          md:
+            'The **[[gradient]]** generalizes the derivative to functions with several inputs. Start with one input at a time. A **[[partial-derivative|partial derivative]]** asks: standing on a hillside, if I walk due east and refuse to move north at all, how steeply does the ground rise? Every other input is frozen — and a frozen variable is a constant, which is why its terms differentiate to zero and drop out of the answer.',
+        },
+        {
+          type: 'p',
+          md:
+            'For $f([x^{(1)}, x^{(2)}]) = ax^{(1)} + bx^{(2)} + c$: differentiating with respect to $x^{(1)}$ gives $a$ (the $bx^{(2)}$ and $c$ terms are constants, contributing 0), and with respect to $x^{(2)}$ gives $b$. Something less flat makes the point better. For $f(x, y) = x^2 y$ the partials are $\\frac{\\partial f}{\\partial x} = 2xy$ and $\\frac{\\partial f}{\\partial y} = x^2$, which at the point $(2, 3)$ come to $12$ and $4$. Check the first against plain arithmetic: nudge $x$ from 2 to 2.01 and $f$ moves from $12$ to $12.1203$ — a rise of $0.1203$ for a step of $0.01$, a rate of $12.03$, closing on 12 as the step shrinks. The symbol is doing exactly what the nudge does.',
+        },
+        {
+          type: 'p',
+          md: 'The gradient collects the partials into a vector:',
         },
         {
           type: 'formula',
@@ -203,7 +237,12 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'The gradient has a beautiful geometric meaning: it points in the direction of **steepest increase** — uphill — and its length says how steep the climb is. Walk against it ($-\\nabla f$) and you descend as fast as possible. Try both pictures below.',
+            'The gradient has a geometric meaning worth more than the formula: it points in the direction of **steepest increase** — uphill — and its length says how steep that climb is. On $f(x,y) = x^2y$ at the point $(2,3)$ the gradient is $[12, 4]$: mostly east, a little north, with a steepness of $\\sqrt{12^2 + 4^2} \\approx 12.65$. Walk against it, along $-\\nabla f$, and you descend as fast as the surface allows.',
+        },
+        {
+          type: 'p',
+          md:
+            'Why *that* direction and no other? Because the slope you feel walking in some direction $\\mathbf{u}$ is the [[dot-product|dot product]] $\\nabla f \\cdot \\mathbf{u}$ — and a dot product is largest when the two vectors point the same way. So the steepest direction is the gradient’s own, and the directions at right angles to it are exactly the ones along which the function does not change at all (walking around a hill rather than up it). Try both pictures below.',
         },
         {
           type: 'widget',
@@ -217,7 +256,12 @@ export const ch02: Chapter = {
         {
           type: 'hint',
           md:
-            'Remember “zero slope = flat ground”. Training a model is largely a hunt for the place where the gradient of an error function is zero — Chapter 4 turns this into the **gradient descent** algorithm.',
+            'Remember “zero slope = flat ground”. Training a model is largely a hunt for the place where the gradient of an error function is zero — [Chapter 4](sec:ch04-gradient-descent) turns this into the **[[gradient-descent|gradient descent]]** algorithm.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Flat ground is not automatically the bottom. A zero gradient marks a [[local-minimum|local minimum]], a maximum and a plateau alike, and on the error surface of a large model there are astronomically many of all three. This is why Chapter 4 spends its time on *how to walk downhill* rather than on solving for the flat spot directly: for anything past a straight line, solving is not on the table.',
         },
         {
           type: 'quiz',
@@ -274,17 +318,22 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'A **random variable**, written as an italic capital like $X$, is a variable whose values are numerical outcomes of a random phenomenon: a coin flip (0 for heads, 1 for tails), a die roll, the height of the next stranger you pass. Random variables come in two kinds: **discrete** and **continuous**.',
+            'A **[[random-variable|random variable]]**, written as an italic capital like $X$, is a variable whose values are numerical outcomes of a random phenomenon: a coin flip (0 for heads, 1 for tails), a die roll, the height of the next stranger you pass. Random variables come in two kinds: **discrete** and **continuous**.',
         },
         {
           type: 'p',
           md:
-            'A **discrete** random variable takes countably many distinct values. Its distribution is a list of probabilities, one per value, called the **probability mass function** (pmf) — for example $\\Pr(X = red) = 0.3$, $\\Pr(X = yellow) = 0.45$, $\\Pr(X = blue) = 0.25$. Every probability is $\\ge 0$ and the whole list sums to exactly 1.',
+            'A **discrete** random variable takes countably many distinct values. Its distribution is a list of probabilities, one per value, called the **[[probability-mass-function|probability mass function]]** (pmf) — for example $\\Pr(X = red) = 0.3$, $\\Pr(X = yellow) = 0.45$, $\\Pr(X = blue) = 0.25$. Every probability is $\\ge 0$ and the whole list sums to exactly 1.',
         },
         {
           type: 'p',
           md:
-            'A **continuous** random variable (height, weight, time) takes infinitely many values in an interval — so the probability of any *exact* value is zero, and a list won’t do. Instead its distribution is a curve, the **probability density function** (pdf): a nonnegative function whose total area under the curve equals 1. Probability lives in *areas* under the pdf, not in single points.',
+            'A **continuous** random variable (height, weight, time) takes infinitely many values in an interval — so the probability of any *exact* value is zero, and a list won’t do. Instead its distribution is a curve, the **[[probability-density-function|probability density function]]** (pdf): a nonnegative function whose total area under the curve equals 1. Probability lives in *areas* under the pdf, not in single points.',
+        },
+        {
+          type: 'p',
+          md:
+            'Two numbers summarize a whole distribution, and between them they answer most practical questions: where it sits, and how spread out it is. Where it sits is the **[[expectation]]** — mean, average, expected value, $\\mu$, four names for one thing. Balance the list of probabilities on a pencil, and the expectation is the point where it balances.',
         },
         {
           type: 'formula',
@@ -308,16 +357,26 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'The expectation is a *probability-weighted* average — frequent values pull it harder than rare ones. For a continuous variable the sum becomes an integral, $\\mathbb{E}[X] = \\int_{\\mathbb{R}} x f_X(x)\\,dx$, which is just “summation for continuous domains”. The second statistic you’ll meet everywhere is the **standard deviation** $\\sigma \\stackrel{\\text{def}}{=} \\sqrt{\\mathbb{E}[(X - \\mu)^2]}$, which measures how widely values spread around the mean; its square $\\sigma^2$ is the **variance**.',
+            'The expectation is a *probability-weighted* average — frequent values pull it harder than rare ones. A fair die gives $\\frac{1+2+3+4+5+6}{6} = 3.5$, which repays a moment’s thought: the expectation is a value the die can never show. It is what the average of many rolls approaches, not a forecast of any single roll. For a continuous variable the sum becomes an integral, $\\mathbb{E}[X] = \\int_{\\mathbb{R}} x f_X(x)\\,dx$ — “summation for continuous domains”, and nothing more alarming than that.',
         },
         {
           type: 'p',
           md:
-            'In practice we rarely know the true distribution — we only observe some values of $X$. Those observed values are **examples**, and the collection is a **sample** or dataset. A statistic computed from a sample, written $\\hat{\\theta}(S_X)$, is an **unbiased estimator** of a true statistic $\\theta$ if $\\mathbb{E}[\\hat{\\theta}(S_X)] = \\theta$: average the estimate over unlimited fresh samples and you’d hit the true value exactly. The classic example — the **sample mean** is an unbiased estimator of the true expectation:',
+            'Spread is measured by the **[[variance]]**: take each value’s distance from the mean, square it so that overshooting and undershooting both count as spread, and average the results. For the fair die that is $\\frac{1}{6}\\sum_{x=1}^{6}(x - 3.5)^2 \\approx 2.92$. Squaring leaves the answer in squared units — squared pips, squared pounds — which nobody can picture, so it is usually reported as its square root, the **[[standard-deviation|standard deviation]]** $\\sigma \\stackrel{\\text{def}}{=} \\sqrt{\\mathbb{E}[(X - \\mu)^2]}$, about $1.71$ for the die. A typical roll lands roughly 1.7 away from 3.5, which sounds like the die you know.',
+        },
+        {
+          type: 'p',
+          md:
+            'In practice we rarely know the true distribution — we only observe some values of $X$. Those observed values are **examples**, and the collection is a **sample** or dataset. A statistic computed from a sample, written $\\hat{\\theta}(S_X)$, is an **[[unbiased-estimator|unbiased estimator]]** of a true statistic $\\theta$ if $\\mathbb{E}[\\hat{\\theta}(S_X)] = \\theta$: average the estimate over unlimited fresh samples and you’d hit the true value exactly. This is not an academic nicety — every number you will ever report about a model, its accuracy and its error alike, is an estimate of this kind, computed on [data held back from training](sec:ch05-three-sets) that stands in for a world you cannot sample completely. The classic example — the **sample mean** is an unbiased estimator of the true expectation:',
         },
         {
           type: 'math',
           tex: '\\hat{\\mu} \\;=\\; \\frac{1}{N} \\sum_{i=1}^{N} x_i',
+        },
+        {
+          type: 'hint',
+          md:
+            'The famous trap sits one step further on. The obvious sample variance, $\\frac{1}{N}\\sum_i (x_i - \\hat{\\mu})^2$, is *biased* — it comes out systematically too small. The deviations are measured from the sample’s own mean, which by construction sits closer to the sample than the true mean does, so the spread is understated every time. Dividing by $N - 1$ instead of $N$ corrects it exactly, and that is the entire reason for a denominator that otherwise looks like a typo.',
         },
         {
           type: 'quiz',
@@ -380,7 +439,7 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'The **conditional probability** $\\Pr(X = x \\mid Y = y)$ is the probability that $X$ equals $x$ *given that* we already know $Y$ equals $y$. **Bayes’ Rule** lets you flip a conditional around — compute the one you want from the one you know:',
+            'The **[[conditional-probability|conditional probability]]** $\\Pr(X = x \\mid Y = y)$ is the probability that $X$ equals $x$ *given that* we already know $Y$ equals $y$. The bar means “given”, and what it does is restrict attention to the slice of the world where the condition holds. **[[bayes-rule|Bayes’ Rule]]** lets you flip such a conditional around — compute the one you want from the one you know:',
         },
         {
           type: 'formula',
@@ -399,13 +458,13 @@ export const ch02: Chapter = {
           terms: [
             {
               tex: '\\Pr(X = x \\mid Y = y)',
-              explain: 'the posterior: what you want to know after seeing the evidence',
+              explain: 'the [[posterior]]: what you want to know after seeing the evidence',
             },
             {
               tex: '\\Pr(Y = y \\mid X = x)',
-              explain: 'the likelihood: how probable the evidence is if X were true',
+              explain: 'the [[likelihood]]: how probable the evidence is if X were true',
             },
-            { tex: '\\Pr(X = x)', explain: 'the prior: how probable X was before any evidence' },
+            { tex: '\\Pr(X = x)', explain: 'the [[prior]]: how probable X was before any evidence' },
             {
               tex: '\\Pr(Y = y)',
               explain: 'the evidence: the total probability of seeing Y = y at all',
@@ -415,7 +474,22 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'Why does this matter so much? Because intuition routinely ignores the **prior**. A test that is right 90% of the time *sounds* convincing — but if the illness it detects affects only 1% of people, most positive results come from the enormous healthy majority triggering false alarms. Counting dots makes this impossible to miss:',
+            'It looks like something you have to take on trust; it is two lines of algebra. The probability of both things happening can be written in either order — $\\Pr(X, Y) = \\Pr(X \\mid Y)\\Pr(Y)$, and equally $\\Pr(X, Y) = \\Pr(Y \\mid X)\\Pr(X)$. Set those two equal, divide through by $\\Pr(Y)$, and Bayes’ Rule falls out. Nothing has been added along the way: it is the definition of conditional probability, rearranged so that the conditional you know sits on the right and the one you want sits on the left.',
+        },
+        {
+          type: 'p',
+          md:
+            'Why does this matter so much? Because intuition routinely ignores the **[[prior]]**. A test that is right 90% of the time *sounds* convincing — but if the illness it detects affects only 1% of people, most positive results come from the enormous healthy majority triggering false alarms.',
+        },
+        {
+          type: 'p',
+          md:
+            'Count it out. Take 1,000 people; 1% are ill, so 10 are ill and 990 are not. The test catches 90% of the ill: 9 true positives. It also wrongly flags 10% of the healthy: 99 false alarms. So 108 people test positive and 9 of them are actually ill — a **[[posterior]]** of $9/108 \\approx 8.3\\%$. The test did nothing wrong. It is outnumbered: there are 99 healthy people for every ill one, and a 10% error rate applied to a crowd that size produces far more false positives than there are ill people in the room at all.',
+        },
+        {
+          type: 'p',
+          md:
+            'There is a version of the same arithmetic that fits on a beer mat. Work in **odds** rather than probabilities, and the rule becomes: posterior odds = [[likelihood|likelihood ratio]] × prior odds. Here the prior odds are $1{:}99$, and the likelihood ratio — how much more often a positive shows up in the ill than in the healthy — is $0.9 / 0.1 = 9$. So the posterior odds are $9{:}99$, roughly $1{:}11$, which is the same $8.3\\%$ arrived at in one multiplication. In this form the lesson is unmissable: evidence *multiplies* your odds, it does not replace them, so a strong test applied to a rare condition still leaves you a long way from certainty. Counting dots makes it impossible to miss:',
         },
         {
           type: 'widget',
@@ -429,12 +503,17 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'Bayes’ Rule also powers **parameter estimation**. Suppose you model $X$’s unknown distribution with a formula $f_{\\boldsymbol\\theta}$ that has tunable parameters — for instance the Gaussian, whose parameter vector is $\\boldsymbol\\theta = [\\mu, \\sigma]$. Start from a guessed **prior** $\\Pr(\\theta = \\hat\\theta)$ over candidate values, then feed examples in one at a time: each pass through Bayes’ Rule turns the prior into a posterior $\\Pr(\\theta = \\hat\\theta \\mid X = x)$, which becomes the prior for the next example. The best single value is picked by **maximum a posteriori** (MAP): $\\theta^* = \\arg\\max_{\\theta} \\prod_{i=1}^{N} \\Pr(\\theta = \\hat\\theta \\mid X = x_i)$.',
+            'Bayes’ Rule also powers **parameter estimation**. Suppose you model $X$’s unknown distribution with a formula $f_{\\boldsymbol\\theta}$ that has tunable parameters — for instance the Gaussian, whose parameter vector is $\\boldsymbol\\theta = [\\mu, \\sigma]$. Start from a guessed **prior** $\\Pr(\\theta = \\hat\\theta)$ over candidate values, then feed examples in one at a time: each pass through Bayes’ Rule turns the prior into a posterior $\\Pr(\\theta = \\hat\\theta \\mid X = x)$, which becomes the prior for the next example. The best single value is picked by **[[maximum-a-posteriori|maximum a posteriori]]** (MAP): $\\theta^* = \\arg\\max_{\\theta} \\prod_{i=1}^{N} \\Pr(\\theta = \\hat\\theta \\mid X = x_i)$.',
+        },
+        {
+          type: 'p',
+          md:
+            'One line of that is worth unpacking, because it is where regularization secretly comes from. Take the logarithm of $\\Pr(x \\mid \\theta)\\Pr(\\theta)$ and the product becomes $\\log\\Pr(x \\mid \\theta) + \\log\\Pr(\\theta)$: a term measuring fit, plus a term depending only on the parameters. Drop the prior and you have plain [[maximum-likelihood]]. Keep a prior that prefers small parameter values and the second term turns into a penalty on large weights — which is exactly the [[l2-regularization|L2 penalty]] of [Chapter 5](sec:ch05-regularization). Two of the most useful ideas in the book turn out to be one idea, seen from opposite ends.',
         },
         {
           type: 'hint',
           md:
-            'Multiplying many probabilities produces astronomically tiny numbers that computers can’t store. The standard trick: maximize the *logarithm* instead — the log turns the product $\\prod$ into a sum $\\sum$, and machines are much happier adding.',
+            'Multiplying many probabilities produces astronomically tiny numbers that computers can’t store. The standard trick: maximize the *logarithm* instead — the log turns the product $\\prod$ into a sum $\\sum$, and machines are much happier adding. The same move reappears the moment [logistic regression is fitted](sec:ch03-logistic-regression), where it has a name of its own: the [[log-likelihood]].',
         },
         {
           type: 'quiz',
@@ -498,22 +577,32 @@ export const ch02: Chapter = {
         {
           type: 'p',
           md:
-            'Two kinds of knobs live inside every learning setup, and confusing them is the classic beginner mistake. **Parameters** are the variables that *define the model itself* — the learning algorithm adjusts them directly from the training data (the SVM’s $\\mathbf{w}^*$ and $b^*$ from Chapter 1). **Hyperparameters** are properties of the *algorithm*, not the model: the analyst must fix them *before* training starts, because the algorithm cannot learn them from data. How to choose them well is a Chapter 5 story.',
+            'Two kinds of knobs live inside every learning setup, and confusing them is the classic beginner mistake. **[[model-parameters|Parameters]]** are the variables that *define the model itself* — the learning algorithm adjusts them directly from the training data (the SVM’s $\\mathbf{w}^*$ and $b^*$ from [Chapter 1](sec:ch01-how-supervised-works)). **[[hyperparameter|Hyperparameters]]** are properties of the *algorithm*, not the model: the analyst must fix them *before* training starts, because the algorithm cannot learn them from data. How to choose them well is [a Chapter 5 story](sec:ch05-tuning).',
         },
         {
           type: 'p',
           md:
-            '**Classification** means assigning a **label** from a finite set of **classes** to an unlabeled example — spam detection is the flagship case. Two classes (sick/healthy, spam/not_spam) make it **binary classification**; three or more make it **multiclass** — though each example still gets exactly one label. **Regression** instead predicts a real-valued **target**: estimating a house price from its area, bedrooms and location. Both are solved the same way at heart: feed labeled examples to a learning algorithm, get a model, apply it to new examples.',
+            'When you are unsure which one you are holding, there is a quick test. Could the algorithm settle it by looking harder at the training data? If yes, it is a parameter. If asking the training data would always return the same unhelpful answer — “more flexibility, please, and no penalties” — it is a hyperparameter, and it has to be decided elsewhere, on examples the model was never fitted to.',
         },
         {
           type: 'p',
           md:
-            '**Model-based** algorithms — most of them — use the training data to build a compact model with learned parameters, then *throw the data away*: a trained SVM keeps only $\\mathbf{w}^*$ and $b^*$. **Instance-based** algorithms keep the whole dataset *as* the model. The best-known is **k-Nearest Neighbors** (kNN): to label a new example it looks at the $k$ closest training examples in feature space and outputs the label it sees most often in that neighborhood.',
+            '**[[classification]]** means assigning a **label** from a finite set of **classes** to an unlabeled example — spam detection is the flagship case. Two classes (sick/healthy, spam/not_spam) make it **[[binary-classification|binary classification]]**; three or more make it **[[multiclass-classification|multiclass]]** — though each example still gets exactly one label.',
         },
         {
           type: 'p',
           md:
-            'Finally, **shallow** versus **deep**. A shallow algorithm learns its parameters *directly from the features* of the training examples — most supervised algorithms work this way. The notorious exception is the **neural network** with more than one **layer** between input and output: a **deep** network. In deep learning, most parameters learn not from the raw features but *from the outputs of preceding layers*. If that sounds abstract, relax — Chapter 6 opens the box.',
+            '**[[regression]]** instead predicts a real-valued **target**: estimating a house price from its area, bedrooms and location. Both are solved the same way at heart — feed labeled examples to a learning algorithm, get a model, apply it to new examples, and [Chapter 3](sec:ch03-linear-regression) works through one of each. The difference that matters is what “wrong” means. A classifier is either right or it is not; a regressor is wrong *by an amount*, so its error has to care how far off it landed, and its scores are distances rather than counts.',
+        },
+        {
+          type: 'p',
+          md:
+            '**[[model-based-learning|Model-based]]** algorithms — most of them — use the training data to build a compact model with learned parameters, then *throw the data away*: a trained SVM keeps only $\\mathbf{w}^*$ and $b^*$. **[[instance-based-learning|Instance-based]]** algorithms keep the whole dataset *as* the model. The best-known is **k-Nearest Neighbors** (kNN): to label a new example it looks at the $k$ closest training examples in feature space and outputs the label it sees most often in that neighborhood — [Chapter 3 builds one](sec:ch03-knn).',
+        },
+        {
+          type: 'p',
+          md:
+            'Finally, **shallow** versus **deep**. A shallow algorithm learns its parameters *directly from the features* of the training examples — most supervised algorithms work this way. The notorious exception is the **neural network** with more than one **layer** between input and output: a **deep** network. In deep learning, most parameters learn not from the raw features but *from the outputs of preceding layers*. If that sounds abstract, relax — [Chapter 6](sec:ch06-neural-networks) opens the box.',
         },
         {
           type: 'quiz',

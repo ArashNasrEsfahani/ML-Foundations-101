@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { makeFrame, Axes, Dot, PlotSvg } from '../Plot';
@@ -22,6 +22,42 @@ function seedPoints(): KnnPoint[] {
   for (let i = 0; i < 3; i++) pts.push({ x: 7 + jitter(), y: 3.5 + jitter(), label: -1 });
   return pts;
 }
+
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'the plot',
+    what: 'Tap anywhere inside the axes to drop a point there, or to rub one out when the eraser is selected. The regions repaint about a tenth of a second after every change, so a burst of taps settles once rather than flickering.',
+  },
+  {
+    control: 'pen: class A ●',
+    what: 'Every tap now drops a filled point of the first class. The shaded half of the plot is the territory this class currently owns.',
+  },
+  { control: 'class B ○', what: 'The same, for the second class. Sixty points is the cap across both classes together.' },
+  {
+    control: 'eraser',
+    what: 'A tap now deletes the nearest point instead of adding one, provided you land close enough to it. Removing a single point near a boundary is the quickest way to see how little [[k-nearest-neighbors]] needs to change its mind.',
+  },
+  {
+    control: 'k',
+    what: 'How many neighbours get a vote on each spot of the plot. At $k = 1$ every stray point carves out its own island of territory; raising it makes the vote a majority and smooths those islands away.',
+  },
+  {
+    control: 'euclidean',
+    what: 'Measures neighbour distance as straight-line distance across the plot, the ordinary meaning of *near*. This is the setting the regions look like a map under.',
+  },
+  {
+    control: 'cosine',
+    what: 'Measures the angle from the origin instead of the distance, so two points on the same ray count as identical however far apart they are — see [[cosine-similarity]]. The regions become pie slices radiating from the corner.',
+  },
+  {
+    control: 'compare k=1 vs k=7',
+    what: 'Refits both neighbourhood sizes over the whole plot and reports the share of it they label differently. The challenge wants at least 8%, which needs points placed so that a lone neighbour and a majority of seven genuinely disagree.',
+  },
+  {
+    control: 'the two grays',
+    what: 'The darker shading is the region predicted class A, the lighter one class B, evaluated on a grid rather than solved exactly. There is no line to draw here — the boundary is whatever the votes happen to produce.',
+  },
+];
 
 /**
  * Paint your own dataset and watch kNN carve the plane. Compare k = 1 against
@@ -140,16 +176,19 @@ export function KnnPainter({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Paint a neighborhood"
+      intro={
+        <>
+          Tap the plot to drop points of the selected class; kNN repaints its regions after
+          every change. Cosine ignores position and only looks at <em>direction from the
+          origin</em> — watch the regions turn into pie slices. To win the challenge, craft a
+          dataset where k = 1 and k = 7 tell different stories.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Tap the plot to drop points of the selected class; kNN repaints its regions after
-        every change. Cosine ignores position and only looks at <em>direction from the
-        origin</em> — watch the regions turn into pie slices. To win the challenge, craft a
-        dataset where k = 1 and k = 7 tell different stories.
-      </p>
       <div
         style={{
           display: 'flex',

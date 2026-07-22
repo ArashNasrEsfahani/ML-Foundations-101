@@ -24,7 +24,7 @@ import { TeX } from '../lesson/TeX';
 export function fmt(n: number, dp = 2): string {
   if (!Number.isFinite(n)) return '—';
   const r = Number(n.toFixed(dp));
-  // Number("-0.00") is -0, whose toFixed still prints the sign; normalise it.
+  // Number("-0.00") is -0, whose toFixed still prints the sign; normalize it.
   const safe = Object.is(r, -0) ? 0 : r;
   return safe.toFixed(dp);
 }

@@ -11,6 +11,7 @@ import { SettingsPage } from './components/settings/SettingsPage';
 import { CertificatePage } from './components/finale/CertificatePage';
 import { PlacementQuiz } from './components/placement/PlacementQuiz';
 import { AboutBook } from './components/about/AboutBook';
+import { GlossaryPage } from './components/glossary/GlossaryPage';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/testout/:chapterId" element={<BossExam testOut />} />
           <Route path="/placement" element={<PlacementQuiz />} />
           <Route path="/about" element={<AboutBook />} />
+          <Route path="/glossary" element={<GlossaryPage />} />
           <Route path="/final" element={<BossExam />} />
           <Route path="/badges" element={<BadgesPage />} />
           <Route path="/settings" element={<SettingsPage />} />

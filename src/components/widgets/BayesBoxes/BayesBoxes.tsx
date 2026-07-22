@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { TeX } from '../../lesson/TeX';
@@ -54,6 +54,30 @@ function Slider({
     </label>
   );
 }
+
+/** three sliders that all move the same final number, for three different reasons */
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'prior P(sick)',
+    what: 'How common the illness is before anybody is tested — the share of the 1000 dots that are genuinely ill. This is the number people leave out of the reasoning, and it is the one that decides the answer.',
+  },
+  {
+    control: 'sensitivity P(+ | sick)',
+    what: 'The share of ill people the test catches. Push it all the way to 99% and watch how little the final percentage moves — a test cannot find more sick people than there are.',
+  },
+  {
+    control: 'false positives P(+ | healthy)',
+    what: 'The share of healthy people the test wrongly flags. Because the healthy group is enormous, a rate of a few percent here produces more positives than the entire ill population.',
+  },
+  {
+    control: 'the dot grid',
+    what: 'One dot per person: filled means ill, outlined means healthy, and full brightness means the test came back positive. The bright dots are the whole population of people who would be worried by their result.',
+  },
+  {
+    control: 'P(sick | +)',
+    what: 'The chance that somebody who tested positive is actually ill — the bright filled dots as a fraction of all bright dots. The challenge is to get it above 50%, which needs either a rarer false-positive rate or a commoner illness.',
+  },
+];
 
 /**
  * Natural-frequency view of Bayes' rule: 1000 dots, three sliders,
@@ -132,15 +156,17 @@ export function BayesBoxes({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="1000 people take the test"
+      intro={
+        <>
+          Screening 1000 people for a rare illness — every dot is one person. Slide the three
+          dials and watch who ends up testing positive.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Screening 1000 people for a rare illness — every dot is one person. Slide the three
-        dials and watch who ends up testing positive.
-      </p>
-
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 18px', marginBottom: 10, fontSize: '0.85rem' }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
           <svg width={14} height={14} aria-hidden>

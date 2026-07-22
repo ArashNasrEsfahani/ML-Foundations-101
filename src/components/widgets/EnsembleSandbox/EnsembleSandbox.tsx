@@ -104,15 +104,47 @@ export function EnsembleSandbox({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Grow a forest"
+      intro={
+        <>
+          Two noisy classes: filled dots vs open circles (about 12% of the labels are flipped on
+          purpose). Compare one small tree with a bagged forest, then slide the forest up to 30
+          trees and watch the boundary settle down.
+        </>
+      }
+      guide={[
+        {
+          control: 'one deep-ish tree',
+          what: 'A single depth-2 [[decision-tree]] fitted to all the data. Its boundary is a handful of hard axis-aligned cuts, and it commits to every flipped label it can reach.',
+        },
+        {
+          control: 'bagged forest',
+          what: 'The same kind of tree grown many times over on bootstrap resamples, then put to a majority vote — [[bagging]]. Each tree sees a different draw of the data, so their mistakes do not line up.',
+        },
+        {
+          control: 'trees',
+          what: 'How many trees vote, from 1 to 30. Only active in forest mode; watch the boundary stop twitching as the count rises, then stop improving.',
+        },
+        {
+          control: 'reset',
+          what: 'Back to the single tree with the forest set to 10.',
+        },
+        {
+          control: 'the gray wash',
+          what: 'For one tree, the two decision regions. For a forest, the *fraction of trees* voting for the darker class — a soft gradient marks ground the committee is split over, which a single tree can never show.',
+        },
+        {
+          control: 'dashed rings',
+          what: 'Points the current model gets wrong. Some of them are the deliberately flipped labels: a model that rings none of them has memorized the noise.',
+        },
+        {
+          control: 'Train accuracy',
+          what: 'Share of the training points labelled correctly, one number per model, so you can see whether adding trees actually bought anything.',
+        },
+      ]}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Two noisy classes: filled dots vs open circles (about 12% of the labels are flipped on
-        purpose). Compare one small tree with a bagged forest — the forest’s shading is its vote
-        fraction, so a soft gradient means the trees disagree there.
-      </p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
         <button
           className={mode === 'tree' ? 'primary' : ''}

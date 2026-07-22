@@ -109,15 +109,63 @@ export function ThresholdRoc({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="One threshold, every metric"
+      intro={
+        <>
+          Each dot is one example with the model&rsquo;s confidence score: filled = actually spam,
+          open = actually normal. Drag the vertical line — everything to its <em>right</em> gets
+          predicted spam.
+        </>
+      }
+      guide={[
+        {
+          control: 'drag the ◆ handle',
+          what: 'Moves the [[decision-threshold]] *t* across the score axis. The model’s scores never change; you are only choosing where to cut them into a yes and a no.',
+        },
+        {
+          control: 'reset',
+          what: 'Puts the threshold back at t = 0.50, the default nobody should accept without checking.',
+        },
+        {
+          control: 'the shaded region',
+          what: 'Everything the model calls spam at this threshold. Drag left and it swallows more of both distributions.',
+        },
+        {
+          control: 'TP · FN · FP · TN',
+          what: 'The [[confusion-matrix]]: correctly caught spam, missed spam, false alarms, correctly passed mail. All four counts total 100 whatever the threshold — they only trade places.',
+        },
+        {
+          control: 'precision',
+          what: '[[precision]] — of everything flagged spam, the share that really was: `TP / (TP + FP)`. Raise the threshold and it climbs, because only the confident flags survive.',
+        },
+        {
+          control: 'recall (TPR)',
+          what: '[[recall]] — of all the real spam, the share caught: `TP / (TP + FN)`. It is the same number as the true positive rate on the ROC axis.',
+        },
+        {
+          control: 'accuracy',
+          what: 'Share of all 100 examples labelled correctly. It hides the trade the other two show, which is why it is the last number to look at.',
+        },
+        {
+          control: 'the ROC curve',
+          what: 'Every threshold at once, plotted as (FPR, TPR) — see [[roc-curve]]. The ball is your current threshold; dragging the handle slides it along the fixed curve.',
+        },
+        {
+          control: 'AUC',
+          what: 'Area under that curve — see [[auc]]. 1.0 is a model that ranks every spam above every non-spam, 0.5 is a coin flip, and it does not depend on the threshold at all.',
+        },
+        {
+          control: 'the dashed diagonal',
+          what: 'Where a model that guesses at random would sit. Any curve hugging it carries no information.',
+        },
+        {
+          control: 'the dashed box',
+          what: 'The challenge region: TPR ≥ 0.9 with FPR ≤ 0.2. Steer the ball into it.',
+        },
+      ]}
       onReset={() => setThreshold(START_T)}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Each dot is one example with the model&rsquo;s confidence score: filled = actually spam,
-        open = actually normal. Drag the vertical line — everything to its <em>right</em> gets
-        predicted spam.
-      </p>
 
       {/* Pane A: score strips + draggable threshold */}
       <svg

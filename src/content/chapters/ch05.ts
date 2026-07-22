@@ -17,12 +17,12 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            'Real projects never hand you a ready-to-train dataset. You get logs, spreadsheets, text — raw material. **Feature engineering** is the craft of turning that raw material into feature vectors, and it eats most of a data analyst’s time and creativity. The goal is *informative* features: ones with high **predictive power**, so that a model built on them predicts labels well. A model that already does well on its own training data is said to have **low bias** — good features make that possible.',
+            'Real projects never hand you a ready-to-train dataset. You get logs, spreadsheets, text — raw material. **[[feature-engineering|Feature engineering]]** is the craft of turning that raw material into feature vectors, and it eats most of a data analyst’s time and creativity. The goal is *informative* features: ones with high **predictive power**, so that a model built on them predicts labels well. A model that already does well on its own training data is said to have **low [[model-bias|bias]]** — good features make that possible.',
         },
         {
           type: 'p',
           md:
-            'Some algorithms only digest numbers, so categorical features need converting. The standard trick is **one-hot encoding**: a category with three values becomes three binary features —',
+            'Some algorithms only digest numbers, so categorical features need converting. The standard trick is **[[one-hot-encoding|one-hot encoding]]**: a category with three values becomes three binary features —',
         },
         {
           type: 'list',
@@ -31,17 +31,22 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            'Why not just write red $=1$, yellow $=2$, green $=3$ and keep one feature? Because numbers carry an *order*: 2 sits between 1 and 3, and yellow would suddenly sit “between” red and green. If the categories have no real order, the algorithm will hunt for a regularity that doesn’t exist — a shortcut to overfitting. One-hot costs extra dimensions but tells no lies. (If the values *are* ordered, like poor/decent/good/excellent, plain numbers 1–4 are fine.)',
+            'Why not just write red $=1$, yellow $=2$, green $=3$ and keep one feature? Because numbers carry an *order*: 2 sits between 1 and 3, and yellow would suddenly sit “between” red and green. If the categories have no real order, the algorithm will hunt for a regularity that doesn’t exist — a shortcut to [[overfitting]]. One-hot costs extra dimensions but tells no lies. (If the values *are* ordered, like poor/decent/good/excellent, plain numbers 1–4 are fine.)',
         },
         {
           type: 'p',
           md:
-            'The opposite move is **binning** (bucketing): chop a numeric feature into ranges and encode which bin the value falls into — ages 0–5 in one bin, 6–10 in the next, and so on. A well-chosen binning hands the algorithm a useful hint — *within this range, the exact value doesn’t matter* — which can let it learn from fewer examples.',
+            'The bill arrives when a category has many values. A colour column with three levels costs three columns; a *city* column with 800 levels costs 800, nearly all of them zero nearly all of the time, and each one has to earn its weight from however few examples share that city. High **[[cardinality]]** is where one-hot stops being free. The standard escapes: fold every level below some count into a single *other* bucket; replace the level by a number derived from it (how often it occurs, or the average label for it, computed on training data only); or — once you reach user ids and product ids — hand the problem to an [[embedding-layer|embedding]], which learns a short dense vector per level instead of one axis each.',
         },
         {
           type: 'p',
           md:
-            'Numeric features also come in wildly different ranges, and that hurts gradient-based training: if $x^{(1)}$ lives in $[0, 1000]$ and $x^{(2)}$ in $[0, 0.0001]$, the derivative with respect to the big feature dominates every update. **Normalization** squeezes a feature into a standard range such as $[0, 1]$:',
+            'The opposite move is **[[binning|binning]]** (bucketing): chop a numeric feature into ranges and encode which bin the value falls into — ages 0–5 in one bin, 6–10 in the next, and so on. A well-chosen binning hands the algorithm a useful hint — *within this range, the exact value doesn’t matter* — which can let it learn from fewer examples. It also lets a straight-line model express a relationship that bends: risk is high for the very young *and* the very old, which no single weight on age can say, but four bin weights can.',
+        },
+        {
+          type: 'p',
+          md:
+            'Numeric features also come in wildly different ranges, and that hurts [gradient-based training](sec:ch04-gradient-descent): if $x^{(1)}$ lives in $[0, 1000]$ and $x^{(2)}$ in $[0, 0.0001]$, the derivative with respect to the big feature dominates every update. **[[normalization|Normalization]]** squeezes a feature into a standard range such as $[0, 1]$:',
         },
         {
           type: 'formula',
@@ -56,7 +61,7 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            '**Standardization** (z-score normalization) instead rescales a feature so it has mean $0$ and standard deviation $1$, like a standard normal distribution:',
+            '**[[standardization|Standardization]]** (z-score normalization) instead rescales a feature so it has mean $0$ and [[standard-deviation|standard deviation]] $1$, like a standard normal distribution:',
         },
         {
           type: 'formula',
@@ -77,12 +82,17 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            'Finally, real datasets have holes: some examples arrive with **missing feature values**. Your options: drop those examples (affordable only if data is plentiful), use an algorithm that tolerates gaps, or fill the holes with a **data imputation** technique — replace the gap with the feature’s dataset-wide *mean*; with a value *outside* the normal range (so the model can learn “this was missing”); with a mid-range value (so it barely influences the prediction); or even train a small regression model that predicts the missing feature from the other features. With lots of data, you can also add a binary *was-it-missing* indicator feature.',
+            'Finally, real datasets have holes: some examples arrive with **missing feature values**. Your options: drop those examples (affordable only if data is plentiful), use an algorithm that tolerates gaps, or fill the holes with a **[[data-imputation|data imputation]]** technique — replace the gap with the feature’s dataset-wide *mean*; with a value *outside* the normal range (so the model can learn “this was missing”); with a mid-range value (so it barely influences the prediction); or even train a small regression model that predicts the missing feature from the other features. With lots of data, you can also add a binary *was-it-missing* indicator feature.',
         },
         {
           type: 'hint',
           md:
             'Whatever imputation you pick, apply the **same** technique to incomplete examples at prediction time. And since you can’t know in advance which technique works best, try several and keep the one that scores highest — imputation is one more thing to tune.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Notice how many of these transforms are *fitted*: the $min$ and $max$, the $\\mu$ and $\\sigma$, the mean that fills a hole, the list of levels one-hot knows about. Every one of them is a number learned from data — so compute them on [the training slice alone](sec:ch05-three-sets) and reuse those exact values everywhere else. Fitting a scaler on the whole dataset and splitting afterwards is the commonest way a beginner’s validation score comes out mysteriously good and refuses to reproduce in production.',
         },
         {
           type: 'quiz',
@@ -144,17 +154,22 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            'So far “dataset” and “training set” were used as synonyms. In practice you carve your labeled data into **three** parts: a **training set**, a **validation set**, and a **test set**. First **shuffle** the examples, *then* split — otherwise a sorted file (say, all spam first) would send whole classes into one subset. The training set is the big slice; the two **holdout sets** are smaller, roughly equal, and the learning algorithm is *forbidden* from touching them while building the model.',
+            'So far “dataset” and “training set” were used as synonyms. In practice you carve your labeled data into **three** parts: a **[[training-set|training set]]**, a **[[validation-set|validation set]]**, and a **[[test-set|test set]]**. First **shuffle** the examples, *then* split — otherwise a sorted file (say, all spam first) would send whole classes into one subset. The training set is the big slice; the two **holdout sets** are smaller, roughly equal, and the learning algorithm is *forbidden* from touching them while building the model.',
         },
         {
           type: 'p',
           md:
-            'Why can’t you just evaluate on the training data? Because a model that simply memorizes every training example would score perfectly and be useless. What you actually care about is performance on examples the algorithm never saw — that’s the whole point of building a model.',
+            'Why can’t you just evaluate on the training data? Because a model that simply memorizes every training example would score perfectly and be useless. What you actually care about is [[generalization|performance on examples the algorithm never saw]] — that’s the whole point of building a model.',
         },
         {
           type: 'p',
           md:
-            'And why *two* holdout sets? Because they answer different questions. The **validation set** is your workbench: you use it to compare learning algorithms and to pick hyperparameter values. But all that picking slowly leaks information — the winner is partly tuned *to* the validation set. So you keep a **test set** locked away and open it only once, at the end, to honestly assess the model before it ships.',
+            'And why *two* holdout sets? Because they answer different questions. The **validation set** is your workbench: you use it to compare learning algorithms and to pick [[hyperparameter|hyperparameter]] values. But all that picking slowly leaks information — the winner is partly tuned *to* the validation set. So you keep a **test set** locked away and open it only once, at the end, to honestly assess the model before it ships.',
+        },
+        {
+          type: 'p',
+          md:
+            'How much does that leak matter? Suppose you compare 20 candidates on 1,000 validation examples. Each score carries a standard error of roughly one and a half percentage points, and you are reporting the *best* of 20 draws from that noise — so the winner is flattered by two or three points before it has done anything clever. On the test set, chosen once and never optimized against, that flattery disappears. This is the entire argument for the third slice: not that validation numbers are wrong, but that the *maximum* of many noisy numbers is biased upward, and the model you ship is always a maximum.',
         },
         {
           type: 'p',
@@ -162,9 +177,14 @@ export const ch05: Chapter = {
             'Splits are a judgment call, not a law. The old rule of thumb is **70% / 15% / 15%**. With millions of examples, holding out 15% twice is wasteful — **95% / 2.5% / 2.5%** still leaves tens of thousands of holdout examples.',
         },
         {
+          type: 'p',
+          md:
+            'One caveat the rule of thumb hides: *random* splitting assumes your examples are independent, and often they aren’t. Twenty scans of the same patient, forty reviews by the same user, a hundred sentences from the same document, or a price series where yesterday nearly determines today — split those at random and near-duplicates land on both sides. The model then recognizes examples rather than patterns, and your holdout score is fiction that production will correct. Split by the *group* instead (all of a patient’s scans on one side), and for anything with a time axis split by time: train on the past, judge on the future, exactly as the deployed model will have to.',
+        },
+        {
           type: 'hint',
           md:
-            'The validation and test sets are together called **holdout sets** — held out of training, held in reserve for judgment.',
+            'The validation and test sets are together called **[[holdout|holdout sets]]** — held out of training, held in reserve for judgment. When a class is rare, split them *stratified*: fix the class proportions in each slice instead of leaving them to chance, or a 2%-positive dataset can hand you a validation set with three positives in it.',
         },
         {
           type: 'quiz',
@@ -232,17 +252,51 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            'A model that makes many mistakes *on its own training data* has **high bias** — it **underfits**. Two usual suspects: the model is too simple for the shape of the data (a straight line forced through a curved cloud), or the features don’t carry enough signal (predicting cancer from height and blood pressure — no model can conjure a relationship that isn’t there). The fixes are symmetric: use a more expressive model, or engineer more informative features.',
+            'A model that makes many mistakes *on its own training data* has **high [[model-bias|bias]]** — it **[[underfitting|underfits]]**. Two usual suspects: the model is too simple for the shape of the data (a straight line forced through a curved cloud), or the features don’t carry enough signal (predicting cancer from height and blood pressure — no model can conjure a relationship that isn’t there). The fixes are symmetric: use a more expressive model, or engineer more informative features.',
         },
         {
           type: 'p',
           md:
-            'The opposite disease is **overfitting**: excellent on training data, poor on holdout data. Statisticians call it **high variance** — resample the training set and you’d get a noticeably different model, because the model is bending itself around the *specific* noise, quirks, and sampling accidents of the examples it happened to see. Typical causes: a model too complex for the data (very deep trees, big neural networks), or too many features for too few examples. Even a plain linear model overfits happily when dimensions vastly outnumber examples.',
+            'The opposite disease is **[[overfitting]]**: excellent on training data, poor on holdout data. Statisticians call it **high [[model-variance|variance]]** — resample the training set and you’d get a noticeably different model, because the model is bending itself around the *specific* noise, quirks, and sampling accidents of the examples it happened to see. Typical causes: a model too complex for the data ([very deep trees](sec:ch03-decision-trees), [big neural networks](sec:ch06-neural-networks)), or too many features for too few examples. Even a plain linear model overfits happily when dimensions vastly outnumber examples.',
         },
         {
           type: 'p',
           md:
-            'Polynomial regression makes the whole tradeoff visible with one knob: the **degree** is the model’s capacity. Degree 1 is a stiff ruler — it underfits a wavy dataset. Around the right degree, the curve follows the underlying shape. Push the degree high enough and the polynomial has spare capacity to thread through every noisy point — training error keeps melting toward zero while validation error takes off. Try it:',
+            'The two words are worth pinning down, because both get used loosely. *Bias* is the error the model would still make if you handed it infinite data — it is a property of the model family, not of your sample. *Variance* is how much the fitted model would jump around if you redrew the sample. Squared error decomposes exactly into the two of them plus the noise in the labels themselves, and that third term is a floor nobody gets under:',
+        },
+        {
+          type: 'formula',
+          tex: '\\mathbb{E}\\big[(y - f(\\mathbf{x}))^2\\big] = \\mathrm{bias}^2 + \\mathrm{variance} + \\sigma^2',
+          parts: [
+            { tex: '\\mathbb{E}\\big[(y - f(\\mathbf{x}))^2\\big]', label: 'the error you would actually measure' },
+            { tex: '=' },
+            { tex: '\\mathrm{bias}^2', label: 'how wrong the average model is' },
+            { tex: '+' },
+            { tex: '\\mathrm{variance}', label: 'how much this model differs from that average' },
+            { tex: '+' },
+            { tex: '\\sigma^2', label: 'noise in the labels — nobody’s fault' },
+          ],
+          terms: [
+            {
+              tex: '\\mathrm{bias}^2',
+              explain:
+                'the gap between the truth and the *average* model you would get across many redrawn training sets — [[model-bias|bias]] does not shrink with more data',
+            },
+            {
+              tex: '\\mathrm{variance}',
+              explain:
+                'how far one fitted model strays from that average — [[model-variance|variance]] falls roughly like 1/N as examples accumulate',
+            },
+            {
+              tex: '\\sigma^2',
+              explain: 'irreducible noise in y itself: two identical examples with different labels can never both be right',
+            },
+          ],
+        },
+        {
+          type: 'p',
+          md:
+            'Polynomial regression makes the whole tradeoff visible with one knob: the **degree** is the model’s [[model-capacity|capacity]] — it is [linear regression](sec:ch03-linear-regression) with powers of the feature bolted on. Degree 1 is a stiff ruler; it underfits a wavy dataset. Around the right degree, the curve follows the underlying shape. Push the degree high enough and the polynomial has spare capacity to thread through every noisy point — training error keeps melting toward zero while validation error takes off. Try it:',
         },
         {
           type: 'widget',
@@ -261,9 +315,14 @@ export const ch05: Chapter = {
         {
           type: 'list',
           items: [
-            'If a model **overfits**, you can: pick a simpler model, reduce the dimensionality of the data, gather more training examples, or *regularize* — the most widely used cure, coming next.',
+            'If a model **overfits**, you can: pick a simpler model, reduce the [[dimensionality-reduction|dimensionality]] of the data, gather more training examples, or *[[regularization|regularize]]* — the most widely used cure, coming next.',
             'If a model **underfits**, go the other way: more capacity, or better features.',
           ],
+        },
+        {
+          type: 'hint',
+          md:
+            'Before you spend a month collecting more data, work out whether more data can help. Plot both errors against training-set *size* rather than capacity. If the two curves converge on a high value, you are bias-limited and another million rows will change nothing — you need a better model or better features. If a wide gap persists with the validation curve still falling, you are variance-limited, and more data is exactly the right purchase. One afternoon of plotting settles an argument that otherwise runs for weeks.',
         },
         {
           type: 'quiz',
@@ -302,7 +361,7 @@ export const ch05: Chapter = {
                 ['Good fit', 'low error on training and validation alike'],
               ],
               explain:
-                'Bias = can’t even fit what it saw; variance = fits what it saw too literally; a good fit balances the two.',
+                'Bias = can’t even fit what it saw; variance = fits what it saw too literally; a good fit balances the two — the [[bias-variance-tradeoff|bias–variance tradeoff]].',
             },
             {
               kind: 'mcq',
@@ -330,12 +389,12 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            '**Regularization** is an umbrella term for methods that push the learning algorithm toward a *less complex* model. You accept slightly higher bias in exchange for a big drop in variance — the famous **bias–variance tradeoff**. The mechanism is simple: add a penalty to the objective that grows when the model gets more complex, so the optimizer must now buy complexity with training-error savings.',
+            '**[[regularization|Regularization]]** is an umbrella term for methods that push the learning algorithm toward a *less complex* model. You accept slightly higher bias in exchange for a big drop in variance — the famous **[[bias-variance-tradeoff|bias–variance tradeoff]]**. The mechanism is simple: add a penalty to the objective that grows when the model gets more complex, so the optimizer must now buy complexity with training-error savings.',
         },
         {
           type: 'p',
           md:
-            'For linear regression, complexity lives in the weights. **L1 regularization** penalizes the sum of their absolute values:',
+            'For linear regression, complexity lives in the weights. **[[l1-regularization|L1 regularization]]** penalizes the sum of their absolute values:',
         },
         {
           type: 'formula',
@@ -353,17 +412,17 @@ export const ch05: Chapter = {
             { tex: '\\Bigg]' },
           ],
           terms: [
-            { tex: 'C', explain: 'a hyperparameter you tune: how much simplicity matters relative to fitting the data' },
-            { tex: '|\\mathbf{w}|', explain: 'the L1 penalty: |w^{(1)}| + |w^{(2)}| + … + |w^{(D)}|' },
+            { tex: 'C', explain: 'a [[hyperparameter]] you tune: how much simplicity matters relative to fitting the data' },
+            { tex: '|\\mathbf{w}|', explain: 'the L1 penalty: |w^{(1)}| + |w^{(2)}| + … + |w^{(D)}| — every weight counted at face value' },
             {
               tex: '\\frac{1}{N}\\sum_{i=1}^{N}(f_{\\mathbf{w},b}(\\mathbf{x}_i) - y_i)^2',
-              explain: 'the ordinary training loss (mean squared error) from Chapter 3',
+              explain: 'the ordinary training loss — the [[mean-squared-error]] of Chapter 3',
             },
           ],
         },
         {
           type: 'p',
-          md: '**L2 regularization** penalizes the sum of *squared* weights instead:',
+          md: '**[[l2-regularization|L2 regularization]]** penalizes the sum of *squared* weights instead:',
         },
         {
           type: 'formula',
@@ -393,7 +452,59 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            'The two penalties behave differently in a useful way. **L1** (called **lasso**) tends to drive many weights to *exactly zero*, producing a **sparse model** — effectively performing **feature selection** for free, which is great for explainability. **L2** (called **ridge**) shrinks weights smoothly without zeroing them, is differentiable (so gradient descent applies cleanly), and usually wins on pure holdout performance. **Elastic net** blends both. Neural networks add their own regularizers — **dropout**, **batch normalization** — plus non-mathematical tricks with a regularizing effect like **data augmentation** and **early stopping** (Chapter 8).',
+            'The two penalties behave differently in a way that is usually stated and rarely explained. **L1** (called **lasso**) drives many weights to *exactly zero*, producing a **[[sparse-model|sparse model]]** — [[feature-selection|feature selection]] for free, which is a gift for explainability. **L2** (called **ridge**) shrinks weights smoothly and essentially never lands on zero. Why should squaring make that much difference? Two ways to see it.',
+        },
+        {
+          type: 'p',
+          md:
+            '**The shape of the budget.** Penalizing a quantity is the same as capping it: minimizing error $+ C\\cdot\\text{penalty}$ gives, for some budget $t$, the same answer as minimizing error subject to $\\text{penalty} \\le t$. So picture the two budgets in a plane with $w^{(1)}$ on one axis and $w^{(2)}$ on the other. The L2 budget $\\left(w^{(1)}\\right)^2 + \\left(w^{(2)}\\right)^2 \\le t$ is a **circle**. The L1 budget $\\left|w^{(1)}\\right| + \\left|w^{(2)}\\right| \\le t$ is a **diamond** — a square standing on its corner, and those corners sit *on the axes*, where one of the weights is exactly zero.',
+        },
+        {
+          type: 'p',
+          md:
+            'Now draw the training error. Around the unregularized best fit it forms a set of nested ellipses, each one a contour of equal error, growing outward from the optimum. The regularized solution is where the smallest such ellipse first touches the budget region. Touch a **circle** and the contact point can be anywhere on it — the chance of landing precisely on an axis is zero, so both weights come out small but non-zero. Touch a **diamond** and the corners stick out toward the ellipse: unless the ellipse arrives at an unusually flat angle, it hits a corner first. A corner *is* a zero weight. That is the whole of the sparsity story — L1 is sparse because its budget has corners, and L2 is not because a circle has none.',
+        },
+        {
+          type: 'p',
+          md:
+            '**The size of the push.** The same fact in the language of gradients. The pull L2 exerts on a weight is proportional to that weight, $2w$: at $w = 0.01$ it is a nudge of $0.02$, at $w = 0.0001$ it is almost nothing, so the weight glides toward zero and never gets there. The pull L1 exerts is $\\pm C$ — the *same size regardless of how small the weight is*. A weight the data does not need has nothing to push back with, so the constant pull carries it to zero and pins it there. Squaring is what makes the penalty polite near the origin; absolute value keeps it insistent.',
+        },
+        {
+          type: 'p',
+          md:
+            'Numbers make it concrete. Take a tidy case — features that don’t overlap — where both penalties have a closed form, and a strength of $\\lambda = 0.3$. L1 subtracts $0.3$ from the size of every weight and clips at zero; L2 divides every weight by $1 + \\lambda$:',
+        },
+        {
+          type: 'list',
+          items: [
+            'A strong weight of $0.80$ → **L1** gives $0.80 - 0.30 = 0.50$; **L2** gives $0.80 / 1.3 \\approx 0.62$. Both shrink it; neither kills it.',
+            'A weak weight of $0.20$ → **L1** gives $\\max(0,\\ 0.20 - 0.30) = 0$ — *gone*; **L2** gives $0.20/1.3 \\approx 0.15$, still in the model.',
+            'A whisper of a weight, $0.01$ → **L1** gives $0$; **L2** gives $0.0077$, and no value of $\\lambda$ short of infinity will ever make it exactly $0$.',
+          ],
+        },
+        {
+          type: 'p',
+          md:
+            'That is the practical difference: L1 hands you a shortlist, L2 hands you a full list with the volume turned down. Both are worth having, which is why **[[elastic-net|elastic net]]** adds the two penalties together — you keep L1’s corners, and L2 rounds off its worst habit, which is picking one feature out of a correlated group at random and discarding its twins. On raw holdout error, though, L2 usually edges L1 out; sparsity is bought, not free.',
+        },
+        {
+          type: 'p',
+          md:
+            'Weight penalties are only one branch of the family. [Neural networks](sec:ch06-neural-networks) add regularizers of their own, and two of the most effective techniques are not penalties at all:',
+        },
+        {
+          type: 'list',
+          items: [
+            '**[[dropout]]** — switch off a random subset of a network’s units on every training pass, so no unit can lean on any other and the network learns several independent routes to the answer.',
+            '**[[batch-normalization]]** — recentre and rescale the numbers flowing between layers; mainly a training accelerant, mildly a regularizer, since each example’s normalization depends on whichever examples share its batch.',
+            '**[[data-augmentation]]** — invent new training examples by altering existing ones in ways that don’t change the label (a mirrored cat is still a cat). This attacks the *sample size* rather than the model, which is why it works so well when labels are scarce.',
+            '**[[early-stopping]]** — watch the validation curve and stop when it turns upward. Training length behaves like a capacity dial, so stopping early is regularization by wall clock, and it costs nothing.',
+          ],
+        },
+        {
+          type: 'hint',
+          md:
+            'Two details that trip people up. First, the intercept $b$ is normally left *out* of the penalty: shrinking it toward zero would assert that the target is centered on zero, which is a claim about your units, not about complexity. Second, the letter moves around. This chapter writes the strength as $C$; ridge and lasso libraries usually call it `alpha`, while SVM and logistic-regression libraries use $C$ for its **inverse** — so a large $C$ means *more* regularization here and *less* there. Read the documentation before you sweep the range.',
         },
         {
           type: 'quiz',
@@ -459,12 +570,12 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            'Once trained, a model faces the test set. For **regression** the ritual is short: check that the model beats the **mean model** (the baseline that always predicts the average label), then compare MSE on training versus test data — a test MSE *substantially higher* than the training MSE is the smell of overfitting. For **classification**, there’s a richer toolbox, and it all starts with one table.',
+            'Once trained, a model faces the test set. For **[[regression]]** the ritual is short: check that the model beats the **mean model** (the baseline that always predicts the average label), then compare MSE on training versus test data — a test MSE *substantially higher* than the training MSE is the smell of [[overfitting]]. For **classification**, there’s a richer toolbox, and it all starts with one table.',
         },
         {
           type: 'p',
           md:
-            'The **confusion matrix** crosses what was *true* with what was *predicted*. For spam detection, its four cells are:',
+            'The **[[confusion-matrix|confusion matrix]]** crosses what was *true* with what was *predicted*. For spam detection, its four cells are:',
         },
         {
           type: 'list',
@@ -478,42 +589,77 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            'Two headline metrics fall straight out of the table. **Precision** asks: *of everything I flagged, how much was really spam?*',
+            'Let’s put real numbers in those cells and carry them all the way through, because the definitions alone are slippery. A filter is run over a test set of **1,000 messages**, of which **100 are genuinely spam**. It flags **90 messages**, and **80 of those flags are correct**. That fixes the whole table:',
+        },
+        {
+          type: 'list',
+          items: [
+            '$TP = 80$ — spam caught.',
+            '$FP = 10$ — the 90 flags minus the 80 correct ones: ten real messages sent to the spam folder.',
+            '$FN = 20$ — the 100 real spams minus the 80 caught: twenty landed in the inbox.',
+            '$TN = 890$ — everything else. Check the total: $80 + 10 + 20 + 890 = 1000$, and the truth column adds up too ($80 + 20 = 100$ spam, $10 + 890 = 900$ legitimate).',
+          ],
+        },
+        {
+          type: 'p',
+          md:
+            'Two headline metrics fall straight out of the table. **[[precision]]** asks: *of everything I flagged, how much was really spam?*',
         },
         {
           type: 'formula',
           tex: '\\text{precision} = \\frac{TP}{TP + FP}',
           terms: [
-            { tex: 'TP', explain: 'correct positive predictions' },
-            { tex: 'TP + FP', explain: 'everything the model predicted as positive — right or wrong' },
+            { tex: 'TP', explain: 'correct positive predictions — 80 in the worked example' },
+            { tex: 'TP + FP', explain: 'everything the model predicted as positive, right or wrong — 80 + 10 = 90 flags' },
           ],
         },
         {
           type: 'p',
-          md: '**Recall** asks the mirror question: *of all the real spam out there, how much did I catch?*',
+          md:
+            'For our filter: $80 / 90 \\approx 0.89$. Nine out of ten trips to the spam folder were deserved. **[[recall]]** asks the mirror question: *of all the real spam out there, how much did I catch?*',
         },
         {
           type: 'formula',
           tex: '\\text{recall} = \\frac{TP}{TP + FN}',
           terms: [
-            { tex: 'TP', explain: 'the positives the model caught' },
-            { tex: 'TP + FN', explain: 'all examples that are actually positive — caught or missed' },
+            { tex: 'TP', explain: 'the positives the model caught — 80' },
+            { tex: 'TP + FN', explain: 'all examples that are actually positive, caught or missed — 80 + 20 = 100 spams' },
           ],
         },
         {
           type: 'p',
           md:
-            'The two pull against each other, and you almost always trade one for the other. Most classifiers output a confidence score, and you choose a **decision threshold**: predict positive only above it. Raise the threshold and the model flags less, more carefully — precision up, recall down. Lower it and the net widens — recall up, precision down. For spam you’d favor precision (a friend’s email in the spam folder hurts more than one spam getting through); for disease screening you’d favor recall.',
+            'For our filter: $80 / 100 = 0.80$. Four out of five spams stopped, one in five still in your inbox. Notice the two numbers answer to different denominators — 90 flags against 100 spams — which is why they can drift apart so dramatically, and why a single one of them is never a report.',
         },
         {
           type: 'p',
           md:
-            '**Accuracy** $= \\frac{TP + TN}{TP + TN + FP + FN}$ is the fraction of all predictions that were right. It’s honest when all mistakes cost the same — and a liar when classes are imbalanced: with 99% non-spam, the do-nothing model that flags nothing scores 99% accuracy while catching zero spam. When mistakes differ in importance, use **cost-sensitive accuracy**: assign a cost to FP and to FN, multiply those two counts by their costs, then compute accuracy from the reweighted numbers.',
+            'The two pull against each other, and you almost always trade one for the other. Most classifiers output a confidence score, and you choose a **[[decision-threshold|decision threshold]]**: predict positive only above it. Raise the threshold and the model flags less, more carefully — precision up, recall down. Lower it and the net widens — recall up, precision down. For spam you’d favor precision (a friend’s email in the spam folder hurts more than one spam getting through); for disease screening you’d favor recall.',
         },
         {
           type: 'p',
           md:
-            'To see a classifier’s *whole* behavior instead of one threshold, sweep the threshold and plot the **ROC curve**: **TPR** $= \\frac{TP}{TP+FN}$ (identical to recall) against **FPR** $= \\frac{FP}{FP+TN}$. Threshold 0 flags everything — both rates hit 1. Threshold above every score flags nothing — both rates are 0. The **area under the curve (AUC)** compresses the picture to one number: 1.0 is a perfect ranking, 0.5 is coin-flipping, and below 0.5 means something is wired backwards. A good operating point is TPR close to 1 with FPR still near 0 — go find one:',
+            'Watch it happen on the same model. Raise the threshold so it only flags what it is really sure about: now it flags **60** messages, **58** of them spam. The table becomes $TP = 58$, $FP = 2$, $FN = 42$, $TN = 898$ — and precision jumps to $58/60 \\approx 0.97$ while recall collapses to $58/100 = 0.58$. Nothing about the model changed. One number moved, and the filter went from *catches most spam, occasionally eats a real email* to *almost never eats a real email, lets four spams in ten through*. Which of those you want is a decision about consequences, not about machine learning.',
+        },
+        {
+          type: 'p',
+          md:
+            'When you want *one* number, the usual compromise is the **[[f1-score|F1 score]]**: the harmonic mean $2PR/(P+R)$ of precision and recall. Harmonic rather than plain average, because it refuses to be rescued by one good half — a model that flags everything has recall 1.0 and precision 0.1, whose ordinary average is a respectable 0.55 and whose $F_1$ is a truthful 0.18. Our first setting scores $F_1 = 0.84$; the strict one scores $0.73$. The strict filter looked better on precision alone and is worse overall — which is exactly the mistake $F_1$ exists to prevent.',
+        },
+        {
+          type: 'p',
+          md:
+            '**[[accuracy]]** $= \\frac{TP + TN}{TP + TN + FP + FN}$ is the fraction of all predictions that were right — $(80 + 890)/1000 = 0.97$ for our filter, which sounds superb until you notice that flagging *nothing at all* would have scored $900/1000 = 0.90$. Ninety percent of the gap to perfection was free. Accuracy is honest when all mistakes cost the same, and a liar when classes are imbalanced: with 99% non-spam, the do-nothing model scores 99% while catching zero spam. When mistakes differ in importance, use **[[cost-sensitive-accuracy|cost-sensitive accuracy]]**: assign a cost to FP and to FN, multiply those two counts by their costs, then compute accuracy from the reweighted numbers. Price a lost real email at ten times a delivered spam and our filter carries a cost of $10 \\times 10 + 1 \\times 20 = 120$, against the strict setting’s $10 \\times 2 + 1 \\times 42 = 62$ — under *those* prices the strict filter wins comfortably, and the ranking flips again if you value the two mistakes equally.',
+        },
+        {
+          type: 'p',
+          md:
+            'Rather than argue over one threshold, sweep them all. The **[[roc-curve|ROC curve]]** plots **[[true-positive-rate|TPR]]** $= \\frac{TP}{TP+FN}$ (identical to recall) against **[[false-positive-rate|FPR]]** $= \\frac{FP}{FP+TN}$, one point per threshold. Our two settings are two points on it: $(\\mathrm{FPR}, \\mathrm{TPR}) = (10/900,\\ 0.80) = (0.011,\\ 0.80)$ for the lenient one and $(2/900,\\ 0.58) = (0.002,\\ 0.58)$ for the strict one. Threshold 0 flags everything, so both rates hit 1 — the top-right corner. A threshold above every score flags nothing, so both are 0. The curve joins the corners through every setting in between.',
+        },
+        {
+          type: 'p',
+          md:
+            'The **[[auc|area under the curve (AUC)]]** compresses the picture to one number: 1.0 is a perfect ranking, 0.5 is coin-flipping, and below 0.5 means something is wired backwards. It has a reading worth memorizing — AUC is exactly the probability that the model gives a randomly chosen spam a higher score than a randomly chosen real message. An AUC of 0.93 means: pick one of each at random, and 93 times in 100 the spam scores higher. That is a statement about *ranking*, and it is why AUC needs no threshold: it is the same number whichever threshold you eventually pick. A good operating point is TPR close to 1 with FPR still near 0 — go find one:',
         },
         {
           type: 'widget',
@@ -527,7 +673,12 @@ export const ch05: Chapter = {
         {
           type: 'hint',
           md:
-            'ROC analysis needs a model that outputs scores or probabilities (logistic regression, neural nets, tree ensembles…). Metrics defined for two classes extend to many: pick one class as “positive”, lump the rest as “negative”, repeat per class.',
+            'ROC analysis needs a model that outputs scores or probabilities ([logistic regression](sec:ch03-logistic-regression), neural nets, tree ensembles…). Metrics defined for two classes extend to many: pick one class as “positive”, lump the rest as “negative”, repeat per class.',
+        },
+        {
+          type: 'hint',
+          md:
+            'One warning about ROC when positives are rare. FPR divides by the *negatives*, and when there are 100,000 of them, 500 false alarms is an FPR of 0.005 — a rounding error on the plot. Precision divides by the flags you actually raised, so it would report that those 500 false alarms drown your 50 real hits: precision 0.09. Same model, same numbers, opposite verdicts. On heavily [[imbalanced-dataset|imbalanced data]] plot precision against recall instead, and quote the area under *that* curve.',
         },
         {
           type: 'quiz',
@@ -602,17 +753,27 @@ export const ch05: Chapter = {
         {
           type: 'p',
           md:
-            '**Hyperparameters** — $C$ for SVM or regularization, $\\epsilon$ and $d$ for ID3, $\\alpha$ for gradient descent — are the knobs the learning algorithm *doesn’t* set for itself. You, the analyst, must find good values experimentally. The simplest systematic recipe is **grid search**: pick a handful of candidate values per hyperparameter, train one model per *combination* on the training set, score each on the validation set, and keep the winner. With ranges you don’t know yet, sample on a logarithmic scale — $[0.001, 0.01, 0.1, 1, 10, 100, 1000]$ — then search more finely around the best cell. Only after all choosing is done do you confirm the final model on the test set.',
+            '**[[hyperparameter|Hyperparameters]]** — $C$ for [an SVM](sec:ch03-svm) or for regularization, $\\epsilon$ and $d$ for [ID3](sec:ch03-decision-trees), $\\alpha$ for [gradient descent](sec:ch04-gradient-descent) — are the knobs the learning algorithm *doesn’t* set for itself. You, the analyst, must find good values experimentally. The simplest systematic recipe is **[[grid-search|grid search]]**: pick a handful of candidate values per hyperparameter, train one model per *combination* on the training set, score each on the validation set, and keep the winner. With ranges you don’t know yet, sample on a logarithmic scale — $[0.001, 0.01, 0.1, 1, 10, 100, 1000]$ — then search more finely around the best cell. Only after all choosing is done do you confirm the final model on the test set.',
         },
         {
           type: 'p',
           md:
-            'Grid search gets expensive fast — combinations multiply. **Random search** samples combinations from distributions you specify, with a fixed trial budget. **Bayesian optimization** goes further: it uses past results to decide which values to try next. There are also gradient-based and evolutionary tuning techniques, with library support for nearly any algorithm.',
+            'Grid search gets expensive fast — combinations multiply. **[[random-search|Random search]]** samples combinations from distributions you specify, with a fixed trial budget. **[[bayesian-optimization|Bayesian optimization]]** goes further: it uses past results to decide which values to try next. There are also gradient-based and evolutionary tuning techniques, with library support for nearly any algorithm.',
         },
         {
           type: 'p',
           md:
-            'One problem remains: what if you don’t have enough data to spare a decent validation set? **Cross-validation** simulates one. Keep a real test set aside; split the rest into $k$ equal **folds** (five is the everyday choice). Train $k$ times: each round holds out one fold as a temporary validation set and trains on the other $k-1$. Average the $k$ scores — that mean is your validation metric for the hyperparameter values being tried, and every example got to be validation data exactly once. When cross-validation has crowned the best hyperparameters, retrain once on *all* the training data with those values, then assess on the untouched test set.',
+            'Random search sounds like a lazy fallback and is usually the better tool, for a reason worth seeing. Suppose two hyperparameters, one that matters enormously and one that barely does — and you don’t know in advance which is which. A $5 \\times 5$ grid costs 25 fits and tries exactly **five** distinct values of the important knob, testing each one five times over while the irrelevant knob wobbles. Twenty-five random draws cost the same 25 fits and try **twenty-five** distinct values of it. The grid spent 80% of its budget re-measuring things that don’t move the score. And the arithmetic is friendly: if the good region covers the best 5% of the space, $n$ random draws miss it with probability $0.95^{n}$, so 60 draws find it about 95% of the time — no matter how many hyperparameters you were searching over.',
+        },
+        {
+          type: 'p',
+          md:
+            'One problem remains: what if you don’t have enough data to spare a decent validation set? **[[cross-validation|Cross-validation]]** simulates one. Keep a real test set aside; split the rest into $k$ equal **folds** (five is the everyday choice). Train $k$ times: each round holds out one fold as a temporary validation set and trains on the other $k-1$. Average the $k$ scores — that mean is your validation metric for the hyperparameter values being tried, and every example got to be validation data exactly once. When cross-validation has crowned the best hyperparameters, retrain once on *all* the training data with those values, then assess on the untouched test set.',
+        },
+        {
+          type: 'p',
+          md:
+            'Why five and not two, or fifty? Each fit trains on $\\frac{k-1}{k}$ of the data, so two folds train on half your data and report a pessimistic score for a model that will eventually see all of it. Push $k$ up to $N$ — one example held out at a time, **leave-one-out** — and the bias vanishes, but you pay $N$ fits, and the $N$ training sets are so nearly identical that their scores rise and fall together, which makes the average less reliable than it looks. Five or ten sits in the dip between those two failures, which is the whole reason everyone uses them.',
         },
         {
           type: 'widget',
@@ -622,6 +783,11 @@ export const ch05: Chapter = {
             label: 'run a full 5-fold round',
             xp: 15,
           },
+        },
+        {
+          type: 'hint',
+          md:
+            'Everything the [feature-engineering section](sec:ch05-feature-engineering) fits — scalers, imputers, encoders, feature choices — has to be re-fitted *inside* each fold, on that fold’s training portion only. Scale the whole dataset first and then cross-validate and the held-out fold has already whispered its mean and its range to the model. The score comes out a point or two high, the cause is invisible, and library `Pipeline` objects exist precisely so you never have to remember this by hand.',
         },
         {
           type: 'quiz',

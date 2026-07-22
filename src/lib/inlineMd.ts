@@ -1,6 +1,6 @@
 /**
  * The tokenizer behind the markdown-lite used in lesson prose: `**bold**`,
- * `*em*`, `` `code` `` and `$tex$`.
+ * `*em*`, `` `code` ``, `$tex$`, `[[concept]]` and `[text](target)`.
  *
  * Kept separate from the React renderer so it can be tested in a plain node
  * environment, and written as a scanner rather than a regex because the two
@@ -9,13 +9,21 @@
  * *inside* TeX — `$(\mathbf{w}^*, b^*)$`. A scanner can consume maths and code
  * as opaque spans while hunting for a closing emphasis marker; an alternation
  * regex cannot.
+ *
+ * `[[gradient-descent]]` marks a term the reader can unfold into three depths;
+ * `[[gradient-descent|walking downhill]]` does the same under different words.
+ * `[text](sec:ch04-gradient-descent)` is a jump to another lesson, and
+ * `[text](https://…)` an ordinary outbound link. Both bracket forms fall back
+ * to literal text when they are not closed, so a stray `[` is harmless.
  */
 export type InlineToken =
   | { kind: 'text'; text: string }
   | { kind: 'code'; text: string }
   | { kind: 'math'; tex: string }
   | { kind: 'strong'; children: InlineToken[] }
-  | { kind: 'em'; children: InlineToken[] };
+  | { kind: 'em'; children: InlineToken[] }
+  | { kind: 'concept'; id: string; text?: string }
+  | { kind: 'link'; href: string; children: InlineToken[] };
 
 /**
  * Index of the next `marker` at this nesting level, skipping over `$…$` and
@@ -75,6 +83,37 @@ export function tokenizeInline(md: string): InlineToken[] {
         });
         i = end + marker.length;
         continue;
+      }
+    } else if (md.startsWith('[[', i)) {
+      const end = md.indexOf(']]', i + 2);
+      if (end > i + 2) {
+        const inner = md.slice(i + 2, end);
+        const bar = inner.indexOf('|');
+        const id = (bar < 0 ? inner : inner.slice(0, bar)).trim();
+        const text = bar < 0 ? undefined : inner.slice(bar + 1);
+        // an id is a slug; anything else is prose that happened to sit in
+        // double brackets, and prose should be left exactly as written
+        if (/^[a-z0-9-]+$/.test(id)) {
+          flush();
+          out.push({ kind: 'concept', id, text });
+          i = end + 2;
+          continue;
+        }
+      }
+    } else if (c === '[') {
+      const close = findClose(md, i + 1, ']');
+      if (close > i + 1 && md[close + 1] === '(') {
+        const paren = md.indexOf(')', close + 2);
+        if (paren > close + 2) {
+          flush();
+          out.push({
+            kind: 'link',
+            href: md.slice(close + 2, paren),
+            children: tokenizeInline(md.slice(i + 1, close)),
+          });
+          i = paren + 1;
+          continue;
+        }
       }
     }
 

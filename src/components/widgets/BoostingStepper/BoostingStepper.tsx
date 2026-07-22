@@ -3,6 +3,8 @@ import { WidgetFrame } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { makeFrame, Axes, Dot, PlotSvg } from '../Plot';
+import { useTicker } from '../../../hooks/useRaf';
+import { useSpeed, SpeedControl } from '../SpeedControl';
 import { boost2d } from '../../../content/datasets/noisy2d';
 import {
   adaboost,
@@ -28,6 +30,8 @@ export function BoostingStepper({ challenge }: WidgetProps) {
   const pts = useMemo(() => boost2d() as Pt2L[], []);
   const model = useMemo(() => adaboost(pts, MAX_ROUNDS), [pts]);
   const [round, setRound] = useState(0);
+  const [auto, setAuto] = useState(false);
+  const speed = useSpeed();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const frame = makeFrame(W, H, [0, 10], [0, 10]);
@@ -94,7 +98,21 @@ export function BoostingStepper({ challenge }: WidgetProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goalMet]);
 
-  const reset = () => setRound(0);
+  // no stumps left to add, or the committee already agrees with every label
+  const canAdd = round < maxRound && !(round > 0 && combinedErrors === 0);
+  const addStump = () => setRound((r) => Math.min(maxRound, r + 1));
+
+  // 1 s a round: the new stump draws itself across the plot in 0.42 s and the
+  // re-weighted points take another half-second to swell
+  useTicker(addStump, auto && canAdd, speed.ms(1000));
+  useEffect(() => {
+    if (!canAdd) setAuto(false);
+  }, [canAdd]);
+
+  const reset = () => {
+    setAuto(false);
+    setRound(0);
+  };
 
   const inner = {
     left: `${(frame.pad.l / W) * 100}%`,
@@ -110,6 +128,59 @@ export function BoostingStepper({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Boost the stumps"
+      intro={
+        <>
+          Each round trains one decision stump on the <em>weighted</em> data, then inflates the
+          weights of the points it got wrong — bigger dot = heavier weight. Add stumps one at a
+          time and watch the committee close in on the points nobody could classify.
+        </>
+      }
+      guide={[
+        {
+          control: 'Add stump',
+          what: 'Runs one round of [[adaboost|AdaBoost]]: fit the best single-split stump to the current weights, score it, then re-weight the points. Greys out when the vote is already perfect or the 12 rounds are spent.',
+        },
+        {
+          control: 'Run rounds / Pause',
+          what: 'Adds stumps on a timer and stops on its own at zero combined errors.',
+        },
+        {
+          control: 'speed',
+          what: 'Time per round: 5 s on *slow*, 1 s on *normal*, 250 ms on *fast*. On slow you can follow which points swell after each stump — that reweighting is the whole algorithm.',
+        },
+        {
+          control: 'reset',
+          what: 'Empties the committee back to round 0, with every point at equal weight.',
+        },
+        {
+          control: 'round n / 12',
+          what: 'How many [[weak-learner|weak learners]] have joined the vote. [[boosting|Boosting]] is built to work with a fixed, small budget of them.',
+        },
+        {
+          control: 'dot size',
+          what: 'The example’s current weight. Points the committee keeps getting wrong swell each round, which is what drags the next stump over to look at them.',
+        },
+        {
+          control: 'dashed rings',
+          what: 'Points the *combined* weighted vote still misclassifies — not the newest stump alone. They should thin out round by round.',
+        },
+        {
+          control: 'the stump lines',
+          what: 'Each round’s single split: the newest is solid, older ones fade to dashed. One stump is a straight cut, but a weighted stack of them is not.',
+        },
+        {
+          control: 'weighted error ε',
+          what: 'The share of *weight* (not of points) that stump got wrong, measured under the weights it was trained on. Anything below 0.5 is better than a coin flip and is worth a vote.',
+        },
+        {
+          control: 'vote α',
+          what: 'How much that stump counts in the final vote, $\\alpha = \\tfrac12\\ln\\frac{1-\\varepsilon}{\\varepsilon}$. A stump with a low ε speaks loudly; one near 0.5 barely whispers.',
+        },
+        {
+          control: 'shaded background',
+          what: 'The weighted vote across the plane, dark for one class and pale for the other. The washed-out band in between is where the committee is split.',
+        },
+      ]}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
@@ -126,20 +197,24 @@ export function BoostingStepper({ challenge }: WidgetProps) {
           transition: r 0.5s cubic-bezier(0.22, 0.8, 0.3, 1), opacity 0.3s ease;
         }
       `}</style>
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Each round trains one decision stump on the <em>weighted</em> data, then inflates the
-        weights of the points it got wrong — bigger dot = heavier weight. Dashed rings mark points
-        the combined vote still misclassifies.
-      </p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
         <button
           className="primary"
-          onClick={() => setRound((r) => Math.min(maxRound, r + 1))}
-          disabled={round >= maxRound || (round > 0 && combinedErrors === 0)}
+          onClick={addStump}
+          disabled={!canAdd || auto}
           style={{ padding: '5px 14px', fontSize: '0.9rem' }}
         >
           Add stump
         </button>
+        <button
+          className="ghost"
+          onClick={() => setAuto((a) => !a)}
+          disabled={!canAdd}
+          style={{ padding: '5px 12px', fontSize: '0.9rem' }}
+        >
+          {auto ? 'Pause' : 'Run rounds'}
+        </button>
+        <SpeedControl value={speed.speed} onChange={speed.setSpeed} />
         <span style={{ fontSize: '0.9rem', color: 'var(--graphite)' }}>
           round{' '}
           <strong key={round} className="anim-bump" style={{ display: 'inline-block', fontWeight: 400 }}>

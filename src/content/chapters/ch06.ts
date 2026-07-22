@@ -17,7 +17,7 @@ export const ch06: Chapter = {
         {
           type: 'p',
           md:
-            'Surprise: you already know a neural network. **Logistic regression is one** — a single unit that weighs its inputs, adds a bias, and squashes the result. A neural network just does that trick *repeatedly*: it is a mathematical function built by **nesting** simpler functions. For a three-layer network that returns one number:',
+            'Surprise: you already know a **[[neural-network|neural network]]**. A single [[unit|unit]] weighs its inputs, adds a bias, and squashes the result — which is precisely [logistic regression](sec:ch03-logistic-regression), under a new name and drawn as a circle. A neural network does that trick *repeatedly*: it is a mathematical function built by **nesting** simpler functions. For a three-layer network that returns one number:',
         },
         {
           type: 'math',
@@ -26,7 +26,7 @@ export const ch06: Chapter = {
         {
           type: 'p',
           md:
-            'Each **layer** $f_l$ has exactly the same anatomy: a linear transformation followed by a fixed nonlinear function, the **activation**:',
+            'Each **[[layer]]** $f_l$ has exactly the same anatomy: a linear transformation followed by a fixed nonlinear function, the **[[activation-function|activation]]**:',
         },
         {
           type: 'formula',
@@ -48,12 +48,12 @@ export const ch06: Chapter = {
             {
               tex: '\\mathbf{W}_l',
               explain:
-                'a matrix of weights: one row per unit of the layer, each row a little linear model of its own; learned from data',
+                'a matrix of weights: one row per [[unit]] of the layer, each row a little linear model of its own; learned from data',
             },
             { tex: '\\mathbf{b}_l', explain: 'one bias number per unit, collected in a vector; also learned' },
             {
               tex: 'g_l',
-              explain: 'the activation function — a fixed, usually nonlinear function chosen before training starts',
+              explain: 'the [[activation-function|activation function]] — fixed, usually nonlinear, chosen before training starts',
             },
             {
               tex: 'f_l(\\mathbf{z})',
@@ -64,12 +64,17 @@ export const ch06: Chapter = {
         {
           type: 'p',
           md:
-            'Why a matrix $\\mathbf{W}_l$ and not a single weight vector? Because a layer holds many **units**, and each unit $u$ owns one row $\\mathbf{w}_{l,u}$: it computes $\\mathbf{w}_{l,u}\\mathbf{z} + b_{l,u}$ and passes the result through $g_l$. In a **multilayer perceptron** (the “vanilla” network) every unit receives *all* outputs of the previous layer — such layers are called **fully-connected**. The last layer usually has one unit: give it a linear activation and you have a regression model; give it the logistic (sigmoid) function and you have a binary classifier.',
+            'Why a matrix $\\mathbf{W}_l$ and not a single weight vector? Because a layer holds many **[[unit|units]]**, and each unit $u$ owns one row $\\mathbf{w}_{l,u}$: it computes $\\mathbf{w}_{l,u}\\mathbf{z} + b_{l,u}$ and passes the result through $g_l$. In a **[[multilayer-perceptron|multilayer perceptron]]** (the “vanilla” network) every unit receives *all* outputs of the previous layer — such layers are called **fully-connected**. The last layer usually has one unit: give it a linear activation and you have a regression model; give it the logistic ([[sigmoid]]) function and you have a binary classifier.',
         },
         {
           type: 'p',
           md:
             'The nonlinearity is not decoration — it is the whole point. $\\mathbf{W}_l\\mathbf{z} + \\mathbf{b}_l$ is a linear function, and a linear function of a linear function is *still linear*. Strip the activations out and a 50-layer tower collapses into one straight-line model that no amount of depth can save. The activations are what let the network bend.',
+        },
+        {
+          type: 'p',
+          md:
+            'That composition is also what separates this chapter from the previous ones. Trees, SVMs and linear models are **[[shallow-learning|shallow]]**: they fit their parameters straight to the features you handed them, so how well they can possibly do is decided by your [[feature-engineering|feature engineering]]. A deep network learns its own intermediate representations — layer 1 invents features out of the input, layer 2 invents features out of those. **[[deep-learning|Deep learning]]** is the name for training such networks, and today it names the modern toolkit rather than any particular depth: two or three hidden layers is entirely ordinary in production. The word carries the history of a period when three layers genuinely could not be trained, which is a story the [recurrent section](sec:ch06-rnn) picks up.',
         },
         {
           type: 'p',
@@ -83,15 +88,25 @@ export const ch06: Chapter = {
         {
           type: 'list',
           items: [
-            '**ReLU** — zero for negative inputs, identity for positive ones; cheap and the default for hidden layers.',
-            '**tanh** — an S-curve squashing any number into $(-1, 1)$.',
-            '**sigmoid** (logistic) — the same S-shape squashed into $(0, 1)$; handy as an output that reads like a probability.',
+            '**[[relu|ReLU]]** — zero for negative inputs, identity for positive ones; cheap and the default for hidden layers.',
+            '**[[tanh]]** — an S-curve squashing any number into $(-1, 1)$.',
+            '**[[sigmoid]]** (logistic) — the same S-shape squashed into $(0, 1)$; handy as an output that reads like a probability.',
           ],
+        },
+        {
+          type: 'p',
+          md:
+            'Which to use where is not a matter of taste, and the deciding fact is not the shape of the curve but the size of its *derivative*. Backpropagation (next section) multiplies one derivative per layer on the way back, so any activation whose slope is reliably below 1 shrinks the learning signal a little at every layer it passes. The sigmoid’s slope never exceeds $0.25$: ten sigmoid layers and the gradient reaching the first one is at most a millionth of what left the output. Tanh does better, peaking at 1, but flattens beyond about $|z| = 3$. ReLU has slope exactly $1$ everywhere it is switched on, and multiplying by one costs nothing — which is most of the reason networks were able to get deep at all. That is the [[vanishing-gradient]] problem in miniature, and we will meet it properly in [the section on recurrent networks](sec:ch06-rnn).',
+        },
+        {
+          type: 'p',
+          md:
+            'So: **ReLU in the hidden layers unless you have a reason**, and the output activation chosen by the task rather than by preference — nothing squashing for [[regression|a real-valued target]], sigmoid for [[binary-classification|one yes/no answer]], and [[softmax]] across the units for [a choice among several classes](sec:ch07-beyond-two-classes). ReLU has one failure of its own worth knowing: a unit whose input is negative for *every* example outputs zero, receives zero gradient, and can never recover. Practitioners call it a dead unit, and leaky ReLU — a small slope on the negative side instead of a flat zero — exists to prevent it.',
         },
         {
           type: 'hint',
           md:
-            'Activations must be differentiable (at least almost everywhere) — gradient descent needs their derivatives to learn $\\mathbf{W}_l$ and $\\mathbf{b}_l$.',
+            'Activations must be [[differentiable]] (at least almost everywhere) — [gradient descent](sec:ch04-gradient-descent) needs their derivatives to learn $\\mathbf{W}_l$ and $\\mathbf{b}_l$. ReLU has a kink at zero and is used anyway: the code returns a derivative of 0 there, the input is exactly zero essentially never, and nothing bad has ever come of it.',
         },
         {
           type: 'quiz',
@@ -154,17 +169,58 @@ export const ch06: Chapter = {
         {
           type: 'p',
           md:
-            'Where do all those weights and biases come from? The same place as in linear and logistic regression: pick a cost function that measures how wrong the outputs are, then run **gradient descent** on every parameter at once. The only news is bookkeeping — a network has parameters spread across layers, and **backpropagation** is the efficient way to get all their gradients: apply the **chain rule** starting from the output error and pass the blame backwards, layer by layer. Backprop computes gradients; gradient descent spends them.',
+            'Where do all those weights and biases come from? The same place as in linear and logistic regression: pick a cost function that measures how wrong the outputs are, then run [gradient descent](sec:ch04-gradient-descent) on every parameter at once. The only news is bookkeeping — a network has parameters spread across layers, and **[[backpropagation]]** is the efficient way to get all their gradients: apply [the chain rule](sec:ch02-derivative-gradient) starting from the output error and pass the blame backwards, layer by layer. Backprop computes gradients; gradient descent spends them.',
         },
         {
           type: 'p',
           md:
-            'Here is the beautiful part. Each hidden unit is a tiny logistic-style model that learns to draw *one soft line* through the input plane — a **learned feature detector** that answers a yes-ish/no-ish question like “are we in the upper-left?”. The output unit never sees your raw features; it sees the hidden units’ answers and combines them. XOR-shaped data cannot be split by any single line, but *two* lines combined do it easily — which is exactly why the hidden layer is not optional there.',
+            '“It is the chain rule” is true and unhelpful, so let us actually run it through two layers. Take the smallest interesting network: two inputs, a hidden layer of three units with activation $g$, one output unit with no activation, and squared loss. Name the shapes, because the shapes are the whole trick — $\\mathbf{W}_1$ is $3\\times2$ and $\\mathbf{b}_1$ is a 3-vector; $\\mathbf{W}_2$ is $1\\times3$ and $b_2$ is a single number. The forward pass is four lines:',
+        },
+        {
+          type: 'math',
+          tex:
+            '\\mathbf{z}_1 = \\mathbf{W}_1\\mathbf{x} + \\mathbf{b}_1 \\quad\\rightarrow\\quad \\mathbf{h} = g(\\mathbf{z}_1) \\quad\\rightarrow\\quad \\hat{y} = \\mathbf{W}_2\\mathbf{h} + b_2 \\quad\\rightarrow\\quad \\mathcal{L} = (\\hat{y} - y)^2',
         },
         {
           type: 'p',
           md:
-            'Hidden-layer width is **capacity**. Two units can carve at most a couple of creases into the boundary; eight units can bend it into rings and spirals. Too little capacity underfits (the spiral defeats a 3-unit net no matter how long you train); too much capacity plus noisy data invites the overfitting you met in Chapter 5. Watch the loss sparkline too — descent sometimes stalls on a plateau before it finds the drop.',
+            'Now walk backwards. The rule the chain rule gives us is mechanical: at each stage, take the derivative that arrived from above and multiply by the derivative of the local step. Keep one quantity per stage — call it $\\delta$, the sensitivity of the loss to that stage’s pre-activation — and everything else falls out of it:',
+        },
+        {
+          type: 'list',
+          ordered: true,
+          items: [
+            'Start at the loss. $\\delta_2 = \\partial\\mathcal{L}/\\partial\\hat{y} = 2(\\hat{y} - y)$. **One number** — how much the loss cares about the output.',
+            'Second-layer weights. $\\partial\\mathcal{L}/\\partial\\mathbf{W}_2 = \\delta_2\\,\\mathbf{h}^\\top$: a number times a 3-vector, laid out as $1\\times3$ — *exactly the shape of* $\\mathbf{W}_2$. And $\\partial\\mathcal{L}/\\partial b_2 = \\delta_2$.',
+            'Hand the blame down. $\\partial\\mathcal{L}/\\partial\\mathbf{h} = \\mathbf{W}_2^\\top\\delta_2$, a **3-vector**: the transpose is what routes the single output error back to the three units in proportion to how strongly each fed it.',
+            'Cross the activation. $\\boldsymbol{\\delta}_1 = \\left(\\mathbf{W}_2^\\top\\delta_2\\right)\\odot g^{\\prime}(\\mathbf{z}_1)$, still a **3-vector**. The multiply is element-wise ($\\odot$) because $g$ was applied element-wise — unit 2’s activation never touched unit 3’s.',
+            'First-layer weights. $\\partial\\mathcal{L}/\\partial\\mathbf{W}_1 = \\boldsymbol{\\delta}_1\\mathbf{x}^\\top$: a $3\\times1$ times a $1\\times2$ gives $3\\times2$ — *exactly the shape of* $\\mathbf{W}_1$. And $\\partial\\mathcal{L}/\\partial\\mathbf{b}_1 = \\boldsymbol{\\delta}_1$.',
+          ],
+        },
+        {
+          type: 'p',
+          md:
+            'Two things to take from that. First, **every gradient has the shape of the thing it differentiates** — which is the fastest debugging check there is; if your gradient for a $3\\times2$ matrix is not $3\\times2$, you have a transpose in the wrong place. Second, steps 3 to 5 are the *same three operations* as steps 1 to 2, one layer down: multiply by $\\mathbf{W}^\\top$, multiply element-wise by $g^{\\prime}$, take an outer product with the layer’s input. A hundred-layer network is that loop run a hundred times, which is why one backward sweep costs about what one forward pass costs, regardless of how many parameters there are.',
+        },
+        {
+          type: 'p',
+          md:
+            'With numbers, on the thinnest possible slice — one input, one hidden unit, ReLU. Say $x = 2$, $w_1 = 3$, $b_1 = -1$, so $z_1 = 5$ and $h = \\mathrm{relu}(5) = 5$. Then $w_2 = 0.5$, $b_2 = 0$, so $\\hat{y} = 2.5$; the truth is $y = 1$, and the loss is $1.5^2 = 2.25$. Backwards: $\\delta_2 = 2(2.5 - 1) = 3$, so $\\partial\\mathcal{L}/\\partial w_2 = 3 \\times 5 = 15$. Passing down, $\\partial\\mathcal{L}/\\partial h = 0.5 \\times 3 = 1.5$; ReLU is switched on at $z_1 = 5$ so its derivative is 1 and $\\delta_1 = 1.5$; therefore $\\partial\\mathcal{L}/\\partial w_1 = 1.5 \\times 2 = 3$.',
+        },
+        {
+          type: 'p',
+          md:
+            'Look at the two gradients: $15$ for the output weight, $3$ for the hidden one. The later layer feels the error five times as strongly, so with a shared learning rate it moves five times as fast. That asymmetry is normal and mostly harmless here — but now imagine the activation had been a sigmoid instead. At $z_1 = 5$ the sigmoid’s slope is about $0.0067$, so $\\delta_1$ would be $1.5 \\times 0.0067 \\approx 0.01$ rather than $1.5$: a **150-fold shrink at a single layer**. Stack ten such layers and the first one is receiving nothing at all. That is the vanishing gradient, arriving here as arithmetic rather than as a warning.',
+        },
+        {
+          type: 'p',
+          md:
+            'Here is the beautiful part. Each hidden [[unit]] is a tiny logistic-style model that learns to draw *one soft line* through the input plane — a **learned feature detector** that answers a yes-ish/no-ish question like “are we in the upper-left?”. The output unit never sees your raw features; it sees the hidden units’ answers and combines them. XOR-shaped data cannot be split by any single line, but *two* lines combined do it easily — which is exactly why the hidden layer is not optional there.',
+        },
+        {
+          type: 'p',
+          md:
+            'Hidden-layer width is **[[model-capacity|capacity]]**. Two units can carve at most a couple of creases into the boundary; eight units can bend it into rings and spirals. Too little capacity [[underfitting|underfits]] (the spiral defeats a 3-unit net no matter how long you train); too much capacity plus noisy data invites the [overfitting you met in Chapter 5](sec:ch05-overfitting). Watch the loss sparkline too — descent sometimes stalls on a plateau before it finds the drop.',
         },
         {
           type: 'widget',
@@ -196,7 +252,7 @@ export const ch06: Chapter = {
               ],
               answer: 0,
               explain:
-                'Backprop is “just” the chain rule, organized cleverly: the output error flows backwards and each layer reuses the work of the layer after it, so one sweep yields the gradient of the cost with respect to *every* parameter. It computes gradients; it never updates anything — gradient descent spends them. Layer widths remain your choice.',
+                'Backprop is “just” the [[chain-rule|chain rule]], organized cleverly: the output error flows backwards and each layer reuses the work of the layer after it, so one sweep yields the gradient of the cost with respect to *every* parameter. It computes gradients; it never updates anything — [[gradient-descent|gradient descent]] spends them. Layer widths remain your choice.',
             },
             {
               kind: 'tf',
@@ -232,7 +288,7 @@ export const ch06: Chapter = {
         {
           type: 'p',
           md:
-            'Try to feed an image to an MLP and the arithmetic turns ugly. Every pixel is a feature, so a modest 100×100 photo is a 10,000-dimensional input; bolt on a layer of $size_l$ units after a layer of $size_{l-1}$ and you add $(size_{l-1}+1)\\cdot size_l$ parameters — a single 1000-unit layer can cost over a million. Optimizing that is slow, hungry, and usually unnecessary.',
+            'Try to feed an image to an [[multilayer-perceptron|MLP]] and the arithmetic turns ugly. Every pixel is a feature, so a modest 100×100 photo is a 10,000-dimensional input; bolt on a layer of $size_l$ units after a layer of $size_{l-1}$ and you add $(size_{l-1}+1)\\cdot size_l$ parameters — a single 1000-unit layer can cost over a million. Optimizing that is slow, hungry, and usually unnecessary.',
         },
         {
           type: 'p',
@@ -242,7 +298,7 @@ export const ch06: Chapter = {
         {
           type: 'p',
           md:
-            'The detector is a small matrix $\\mathbf{F}$ called a **filter** (or kernel), say 3×3. At each window position you take the patch $\\mathbf{P}$ under the window and compute the **convolution** — a moving dot product:',
+            'The detector is a small matrix $\\mathbf{F}$ called a **[[filter]]** (or kernel — nothing to do with the [[kernel-function|kernels]] of Chapter 3), say 3×3. At each window position you take the patch $\\mathbf{P}$ under the window and compute the **[[convolution]]** — a moving [[dot-product|dot product]]:',
         },
         {
           type: 'formula',
@@ -273,17 +329,53 @@ export const ch06: Chapter = {
         {
           type: 'p',
           md:
-            'The sum is big exactly when the patch *looks like* the filter — positive filter weights sitting on bright pixels, near-zero weights on the rest. Add a bias, apply a nonlinearity (usually ReLU), and the values collected across all window positions form a **feature map**: a picture of where the pattern lives. A convolution layer holds many filters, each producing its own map — and crucially the filters are **learned**, not hand-designed; the presets in the widget below are just intuition pumps.',
+            'The sum is big exactly when the patch *looks like* the filter — positive filter weights sitting on bright pixels, near-zero weights on the rest. Add a bias, apply a nonlinearity (usually [[relu|ReLU]]), and the values collected across all window positions form a **[[feature-map|feature map]]**: a picture of where the pattern lives. A convolution layer holds many filters, each producing its own map — and crucially the filters are **learned** by [[backpropagation]], not hand-designed; the presets in the widget below are just intuition pumps.',
         },
         {
           type: 'p',
           md:
-            'Two knobs control the sliding. **Stride** is the step size of the window — stride 2 skips every other position, so the output map shrinks. **Padding** surrounds the image with a ring of zeros so the filter can properly scan the borders, making the output bigger. And after convolving, CNNs often apply **pooling**: slide a small window that keeps only the max (or average) of each block. Pooling has *nothing to learn* — it is a fixed operator that shrinks the map and makes detection a bit more tolerant of small shifts.',
+            'Two knobs control the sliding. **[[stride|Stride]]** is the step size of the window — stride 2 skips every other position, so the output map shrinks. **[[padding|Padding]]** surrounds the image with a ring of zeros so the filter can properly scan the borders, making the output bigger. And after convolving, CNNs often apply **[[pooling]]**: slide a small window that keeps only the max (or average) of each block. Pooling has *nothing to learn* — it is a fixed operator that shrinks the map and makes detection a bit more tolerant of small shifts.',
         },
         {
           type: 'p',
           md:
-            'Stack these layers and magic compounds: the second layer convolves the whole *stack* of first-layer feature maps (a **volume**), detecting patterns *of patterns* — edges become corners, corners become eyes, eyes become faces. That is how CNNs read images with a fraction of an MLP’s parameters: small filters, reused at every position.',
+            'Those two knobs and the filter size decide the output size exactly, and it is worth being able to compute it rather than guess:',
+        },
+        {
+          type: 'formula',
+          tex: 'n_{\\text{out}} = \\left\\lfloor \\frac{n + 2p - k}{s} \\right\\rfloor + 1',
+          parts: [
+            { tex: 'n_{\\text{out}}', label: 'side length of the feature map' },
+            { tex: '=' },
+            { tex: '\\left\\lfloor \\frac{n + 2p - k}{s} \\right\\rfloor', label: 'how many extra steps the window can take' },
+            { tex: '+ 1', label: 'plus the first position it starts from' },
+          ],
+          terms: [
+            { tex: 'n', explain: 'side length of the incoming image or feature map' },
+            { tex: 'k', explain: 'side length of the filter — 3 for a 3×3' },
+            { tex: 'p', explain: 'how many rings of zero [[padding]] were added on each side' },
+            { tex: 's', explain: 'the [[stride]]: how far the window jumps between looks' },
+          ],
+        },
+        {
+          type: 'p',
+          md:
+            'Try it on the quiz case below: $n = 10$, $k = 3$, no padding, stride 1 gives $(10 - 3)/1 + 1 = 8$. Add one ring of padding and you get $10$ back — which is why $p = (k-1)/2$ is called *same* padding, and why filter sizes are nearly always odd. Without it, every $3\\times3$ layer costs two pixels of side, so a $32\\times32$ input runs out of image after fifteen layers.',
+        },
+        {
+          type: 'p',
+          md:
+            'Stack these layers and magic compounds: the second layer convolves the whole *stack* of first-layer feature maps (a **volume**), detecting patterns *of patterns* — edges become corners, corners become eyes, eyes become faces. That is how **[[convolutional-neural-network|CNNs]]** read images with a fraction of an MLP’s parameters: small filters, reused at every position.',
+        },
+        {
+          type: 'p',
+          md:
+            'Depth also buys *reach*. A unit in the first layer sees a 3×3 window of the image, and nothing more. A unit in the second layer sees a 3×3 window of those units — which between them covered 5×5 of the original pixels. A third layer reaches 7×7, and any stride along the way multiplies the growth rather than adding to it. This is the **receptive field**, and it explains a design choice that otherwise looks arbitrary: three stacked 3×3 layers reach as far as one 7×7 layer, cost $3 \\times 9 = 27$ weights per channel instead of $49$, and pass through two extra nonlinearities on the way. Small filters, stacked deep, beat large filters — and that is why almost every modern architecture is built out of 3×3s.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Count the saving on the 100×100 photo from the top of this section. A fully-connected layer of 1000 units cost $10^7$ weights. A convolution layer with 64 filters of size 3×3 over three colour channels costs $64 \\times (3 \\times 3 \\times 3 + 1) = 1792$ — five thousand times fewer, and *the number does not change if the photo gets bigger*. That is what weight sharing buys, and it is a regularizer as much as a saving: a pattern learned from examples in one corner of the image is available in every other corner for free.',
         },
         {
           type: 'widget',
@@ -355,12 +447,12 @@ export const ch06: Chapter = {
         {
           type: 'p',
           md:
-            'Sentences, audio, price histories — some data comes as a **sequence**: a matrix whose rows are feature vectors and whose *row order matters*. You might want a label for every element, one class for the whole sequence, or a brand-new output sequence. Feed-forward networks are stuck here: they gulp a fixed-size vector in one bite. **Recurrent neural networks** (RNNs) instead read the sequence one timestep at a time.',
+            'Sentences, audio, price histories — some data comes as a **sequence**: a matrix whose rows are feature vectors and whose *row order matters*. You might want [a label for every element](sec:ch07-sequences), one class for the whole sequence, or a brand-new output sequence. Feed-forward networks are stuck here: they gulp a fixed-size vector in one bite. **[[recurrent-neural-network|Recurrent neural networks]]** (RNNs) instead read the sequence one timestep at a time.',
         },
         {
           type: 'p',
           md:
-            'The trick is a loop. Each recurrent unit keeps a running **state** $\\mathbf{h}$ — its memory. At timestep $t$ the unit combines the current input $\\mathbf{x}^t$ with its *own state from the previous step*, and the very same parameters are reused at every timestep — **shared weights across time**:',
+            'The trick is a loop. Each recurrent unit keeps a running **[[hidden-state|state]]** $\\mathbf{h}$ — its memory. At timestep $t$ the unit combines the current input $\\mathbf{x}^t$ with its *own state from the previous step*, and the very same parameters are reused at every timestep — **shared weights across time**:',
         },
         {
           type: 'formula',
@@ -389,12 +481,76 @@ export const ch06: Chapter = {
         {
           type: 'p',
           md:
-            'To train this with backprop you **unroll** it: draw one copy of the unit per timestep, wired in a chain, all copies sharing the same $\\mathbf{W}, \\mathbf{U}, \\mathbf{b}$ — then run the chain rule through the whole thing (**backpropagation through time**). Now the catch: the longer the sequence, the *deeper* the unrolled network. With tanh-style activations each step multiplies the gradient by numbers smaller than one, so gradients from early timesteps shrink exponentially — the **vanishing gradient** problem. In practice the network “forgets” the start of long sequences: the cause–effect link between distant words gets lost.',
+            'To train this with backprop you **unroll** it: draw one copy of the unit per timestep, wired in a chain, all copies sharing the same $\\mathbf{W}, \\mathbf{U}, \\mathbf{b}$ — then run [the chain rule](sec:ch02-derivative-gradient) through the whole thing (**[[backpropagation-through-time|backpropagation through time]]**). Now the catch: the longer the sequence, the *deeper* the unrolled network. With tanh-style activations each step multiplies the gradient by numbers smaller than one, so gradients from early timesteps shrink exponentially — the **[[vanishing-gradient|vanishing gradient]]** problem. In practice the network “forgets” the start of long sequences: the cause–effect link between distant words gets lost.',
         },
         {
           type: 'p',
           md:
-            'The practical fix is **gated units** — the **LSTM** (long short-term memory) and the **GRU** (gated recurrent unit). They add *gates*: little sigmoid valves in $(0,1)$, themselves learned from data, that decide when to write into a memory cell, when to keep it untouched, and when to erase it. A cell that holds its value acts like the identity function — derivative 1 — so the gradient can travel across many timesteps without dying. That single idea is why gated RNNs became the workhorses for text and speech. (Bi-directional RNNs, attention, and sequence-to-sequence models extend the family — a story for another day.)',
+            'Put a number on it. A 40-word sentence unrolls into a 40-deep chain, and the gradient arriving at word 1 has been multiplied by one factor per step. If a typical factor is $0.9$ — an ordinary value for a tanh unit — the signal reaching the first word is $0.9^{40} \\approx 0.015$: one and a half percent of what left the output. Drop the factor to $0.7$ and it is under *one part in a million*. The network is not choosing to ignore the beginning of the sentence; the instruction to change never arrives at all. (The mirror problem, factors above 1, makes gradients explode instead — that one is easy, you clip the gradient’s length at some ceiling and carry on. Vanishing has no such patch, which is why it took decades to fix.)',
+        },
+        {
+          type: 'p',
+          md:
+            'The practical fix is **[[gated-unit|gated units]]** — the **[[lstm|LSTM]]** (long short-term memory) and the **[[gru|GRU]]** (gated recurrent unit). The word *gate* does a lot of unexplained work in most accounts, so here is what one actually is. A gate is a vector of numbers between 0 and 1, one per slot of the memory, produced by its own little [[sigmoid]] layer reading the current input and the previous state — and then applied by plain element-wise multiplication:',
+        },
+        {
+          type: 'formula',
+          tex: '\\mathbf{f}^{t} = \\sigma\\left(\\mathbf{W}_f\\mathbf{x}^{t} + \\mathbf{U}_f\\mathbf{h}^{t-1} + \\mathbf{b}_f\\right)',
+          parts: [
+            { tex: '\\mathbf{f}^{t}', label: 'one number in (0,1) per memory slot' },
+            { tex: '=' },
+            { tex: '\\sigma\\big(', label: 'squashed into (0,1) — so it reads as “how much”' },
+            { tex: '\\mathbf{W}_f\\mathbf{x}^{t}', label: 'what just arrived' },
+            { tex: '+' },
+            { tex: '\\mathbf{U}_f\\mathbf{h}^{t-1}', label: 'and what is already remembered' },
+            { tex: '+' },
+            { tex: '\\mathbf{b}_f\\big)', label: 'plus an offset' },
+          ],
+          terms: [
+            {
+              tex: '\\mathbf{f}^{t}',
+              explain:
+                'the forget gate: 1 in a slot means keep that memory exactly, 0 means wipe it, 0.5 means halve it — and the value is recomputed from scratch at every timestep',
+            },
+            {
+              tex: '\\mathbf{W}_f, \\mathbf{U}_f, \\mathbf{b}_f',
+              explain:
+                'the gate’s own weights, learned by [[backpropagation-through-time|backprop through time]] like everything else — nobody hand-writes the rule for when to forget',
+            },
+            {
+              tex: '\\sigma',
+              explain: 'the [[sigmoid]], whose whole job here is to produce a number between 0 and 1 that can act as a valve',
+            },
+          ],
+        },
+        {
+          type: 'p',
+          md:
+            'An LSTM keeps a memory **cell** $\\mathbf{c}$ alongside the state it reports, and runs three such gates over it. The **forget** gate $\\mathbf{f}$ decides what of the old cell survives. The **input** gate $\\mathbf{i}$ decides how much of the freshly computed candidate $\\tilde{\\mathbf{c}}$ gets written in. The **output** gate $\\mathbf{o}$ decides how much of the cell is revealed to the rest of the network this step. The update is one line, and its shape is the point:',
+        },
+        {
+          type: 'math',
+          tex: '\\mathbf{c}^{t} = \\mathbf{f}^{t} \\odot \\mathbf{c}^{t-1} + \\mathbf{i}^{t} \\odot \\tilde{\\mathbf{c}}^{t} \\qquad \\mathbf{h}^{t} = \\mathbf{o}^{t} \\odot \\tanh\\left(\\mathbf{c}^{t}\\right)',
+        },
+        {
+          type: 'p',
+          md:
+            'Compare that with the plain unit’s $\\mathbf{h}^{t} = g(\\mathbf{W}\\mathbf{x}^{t} + \\mathbf{U}\\mathbf{h}^{t-1} + \\mathbf{b})$. There, the old memory is matrix-multiplied and squashed at *every* step — two operations that shrink things, applied 40 times over. Here the old memory is multiplied by $\\mathbf{f}$ and **added to**. If the forget gate sits near 1 for some slot, that slot’s contents pass through untouched: $\\partial\\mathbf{c}^{t}/\\partial\\mathbf{c}^{t-1}$ is near 1, and multiplying the gradient by 1, forty times, changes nothing. The network has learned to build itself a gradient highway for whatever it decided was worth carrying.',
+        },
+        {
+          type: 'p',
+          md:
+            'Concretely, on the sentence *“the **keys** that I left on the table by the door **are** gone”*: to conjugate *are* the network must still know, eight words later, that the subject was plural. A gated unit can devote one slot of its cell to that fact, set the forget gate near 1 on that slot so it survives the intervening clause, hold the input gate near 0 there so the clause cannot overwrite it, and open the output gate when the verb finally arrives. A plain RNN has no way to say *keep this one thing and leave it alone* — every step rewrites everything.',
+        },
+        {
+          type: 'p',
+          md:
+            'A GRU makes the same bargain with fewer parts: one **update** gate does the jobs of forget and input together, so whatever it lets in, it makes room for by pushing out exactly that much, and there is no separate cell — the state is the memory. About a quarter fewer parameters, usually indistinguishable in accuracy, occasionally worse on the very longest dependencies. The choice between them is a [[hyperparameter]], not a principle.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Gating is one instance of a more general trick: give the gradient a path with derivative 1. **[[skip-connection|Skip connections]]** do the same thing with a bare wire instead of a learned valve, adding a layer’s input to its output so the layer only has to learn the correction — that is what lets image networks run to a hundred layers. Gates learn *when* to keep; skip connections always keep. (Bi-directional RNNs, [[attention]], and [sequence-to-sequence models](sec:ch07-sequences) extend the family — and attention eventually replaced recurrence altogether for text, by letting every step look directly at every other one instead of relaying memories down a chain.)',
         },
         {
           type: 'quiz',

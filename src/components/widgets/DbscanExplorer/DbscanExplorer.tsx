@@ -86,6 +86,50 @@ export function DbscanExplorer({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Grow clusters by density"
+      intro={
+        <>
+          DBSCAN reruns on every slider move. Tap or hover a point to see its ε-circle. Small ×
+          marks are noise — points no dense region wanted.
+        </>
+      }
+      guide={[
+        {
+          control: 'blobs',
+          what: 'Three round clumps — the easy case, and the one k-means also handles. Use it to get a feel for what the two sliders do before switching.',
+        },
+        {
+          control: 'rings',
+          what: 'Two concentric rings, the shape that breaks centroid-based clustering. The challenge asks for exactly 2 clusters here with at most 3 noise points.',
+        },
+        {
+          control: 'ε',
+          what: 'How far apart two points can be and still count as neighbours — see [[dbscan]]. Too small and everything becomes noise; too large and separate clusters merge into one.',
+        },
+        {
+          control: 'minPts',
+          what: 'How many neighbours within ε a point needs to be a [[core-point]] and grow a cluster from itself. Raising it thins the clusters to their dense spines and pushes the edges out to noise.',
+        },
+        {
+          control: 'tap or hover a point',
+          what: 'Draws that point’s ε-circle, which is the neighbourhood the algorithm actually counts. Move ε with a point selected and you can see the radius that decides everything.',
+        },
+        {
+          control: 'reset',
+          what: 'Back to the blobs at ε = 0.60 and minPts = 3.',
+        },
+        {
+          control: 'the × marks',
+          what: 'Noise: points that are neither core nor within ε of one. Unlike [[k-means]], DBSCAN is allowed to leave points unassigned.',
+        },
+        {
+          control: 'Clusters found',
+          what: 'How many density-connected groups came out. You never asked for this number — it is a consequence of ε and minPts, which is the whole difference from k-means.',
+        },
+        {
+          control: 'noise points',
+          what: 'How many points ended up unassigned. Watch it spike as ε shrinks: at some point every cluster dissolves into noise.',
+        },
+      ]}
       onReset={() => {
         setDataset('blobs');
         setEps(0.6);
@@ -95,10 +139,6 @@ export function DbscanExplorer({ challenge }: WidgetProps) {
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        DBSCAN reruns on every slider move. Tap or hover a point to see its ε-circle. Small ×
-        marks are noise — points no dense region wanted.
-      </p>
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10 }}>
         <button
           className={dataset === 'blobs' ? 'primary' : 'ghost'}

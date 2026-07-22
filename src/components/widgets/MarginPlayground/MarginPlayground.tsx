@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { makeFrame, Axes, Dot, PlotSvg } from '../Plot';
@@ -37,9 +37,77 @@ interface Fit {
 }
 
 /**
+ * The three datasets are three different problems, the two mode buttons fit two
+ * different models, and each mode leaves one slider inert — none of which the
+ * plot says out loud, so the guide has to.
+ */
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'separable',
+    what: 'Two clean blobs with a gap between them, the easy case: a straight line can split them and still keep room on both sides. Start here to see what a healthy [[margin]] looks like before anything goes wrong.',
+  },
+  {
+    control: 'moons',
+    what: 'Two interleaving crescents that genuinely overlap, so no straight line gets every point right. This is the dataset where `C` has a real decision to make.',
+  },
+  {
+    control: 'rings',
+    what: 'One class enclosed by the other. A straight line cannot cut a circle, so `linear` is stuck no matter how you set `C` — this is the dataset the challenge wants you to hand to `RBF kernel`.',
+  },
+  {
+    control: 'linear',
+    what: 'Fits a soft-margin SVM: one straight boundary, placed to hold the widest corridor it can while paying for the points that violate it. The `C` slider is live in this mode and `γ` is not.',
+  },
+  {
+    control: 'RBF kernel',
+    what: 'Throws the straight line away and builds the boundary out of one Gaussian bump per active point — see [[kernel-trick]] and [[rbf-kernel]]. The boundary can now curve and close around a cluster, which is what the rings need.',
+  },
+  {
+    control: 'C',
+    what: 'The strictness dial of the straight-line fit — see [[svm-c]]. Drag it left and watch `margin 2/‖w‖` grow while `misclassified` creeps up; drag it right and the line contorts to catch stragglers. It greys out under `RBF kernel`, which fits a kernel perceptron with no slack budget for `C` to size.',
+  },
+  {
+    control: 'γ',
+    what: 'How tightly each Gaussian bump hugs its own point — see [[gamma-rbf]]. Small γ gives broad, smooth blobs; large γ shrinks them until the boundary wraps individual points and starts memorizing noise. It greys out under `linear`, where there is no kernel to shape.',
+  },
+  {
+    control: 'the shading',
+    what: 'The lighter half of the plot is the side the model calls $+1$, the plain paper half is $-1$, and the darker band between them is the strip where the score sits near zero. It dims for a moment while a new fit is being computed.',
+  },
+  {
+    control: 'dashed rings',
+    what: 'A ring marks a point the boundary actually leans on: a [[support-vector]] under `linear`, a point with a non-zero weight under `RBF kernel`. Every unringed point could be moved a little without shifting the boundary at all.',
+  },
+  {
+    control: '‖w‖',
+    what: 'The length of the weight vector — the one number the corridor width depends on. A big ‖w‖ means a steep, decisive score function and therefore a narrow corridor.',
+  },
+  {
+    control: 'margin 2/‖w‖',
+    what: 'The width of the corridor between the two classes, measured in the plot’s own feature units. This is the quantity the SVM is trying to make large, and the quantity `C` makes you give away.',
+  },
+  {
+    control: 'hinge Σ',
+    what: 'The total [[hinge-loss]] the fit is paying: each point adds $\\max(0,\\ 1 - y_i(\\mathbf{w}\\mathbf{x}_i - b))$, so a point safely outside the corridor adds nothing and a point on the wrong side adds more than 1. Zero here means every point clears the corridor with room to spare.',
+  },
+  {
+    control: 'on margin',
+    what: 'How many points sit on or inside the corridor — the ringed ones, the [[support-vector|support vectors]]. A handful is normal; a large number means `C` is low enough that the model is tolerating a wide, crowded corridor.',
+  },
+  {
+    control: 'active kernels',
+    what: 'Under `RBF kernel`, how many points carry a non-zero weight $\\alpha_i$ and so contribute a bump to the boundary. These are the ringed points, and the rest of the data has no say in where the boundary runs.',
+  },
+  {
+    control: 'misclassified',
+    what: 'Points currently on the wrong side of the boundary, out of the whole dataset. The challenge is to get this to 0 on `rings` with `RBF kernel` switched on.',
+  },
+];
+
+/**
  * Soft margins and kernels, hands on: pick a dataset, trade errors for margin
  * with C, then switch on the RBF kernel and watch the boundary bend. The
- * readout underneath shows the objective you are actually minimising.
+ * readout underneath shows the objective you are actually minimizing.
  */
 export function MarginPlayground({ challenge }: WidgetProps) {
   const { done, complete } = useChallenge(challenge);
@@ -222,15 +290,18 @@ export function MarginPlayground({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Margins, noise and kernels"
+      intro={
+        <>
+          The shaded region is one class’s side; the darker band hugs the decision boundary.
+          Points with a dashed ring are the ones holding the boundary up. Slide C to trade
+          margin width against mistakes — then hand the rings to the RBF kernel.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        The shaded region is one class’s side; the darker band hugs the decision boundary.
-        Points with a dashed ring are the ones holding the boundary up. Slide C to trade
-        margin width against mistakes — then hand the rings to the RBF kernel.
-      </p>
       <div
         style={{
           display: 'flex',

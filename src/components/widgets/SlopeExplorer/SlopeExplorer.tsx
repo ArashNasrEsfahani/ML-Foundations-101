@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { makeFrame, Axes, PlotSvg } from '../Plot';
@@ -34,6 +34,37 @@ const LEVELS = [0.5, 1.5, 3, 5, 7.5, 10.5];
 
 const START1 = -0.8;
 const START2 = { x: 3.6, y: 2.5 };
+
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'the dot on the curve',
+    what: 'Drag it left and right; it stays glued to the curve and the dashed tangent re-aims itself at every position. The challenge is to park it where the tangent goes flat.',
+  },
+  {
+    control: 'the dashed tangent',
+    what: 'The straight line that matches the curve’s direction at the dot, and its steepness *is* the derivative there. It turns solid when the slope is close enough to zero to count as flat.',
+  },
+  {
+    control: 'slope',
+    what: 'The number the tangent is showing: positive means the curve rises as x grows, negative means it falls, and the size says how steeply. Gradient descent moves against this sign, which is why a slope of zero is where it stops.',
+  },
+  {
+    control: 'the dot on the contour map',
+    what: 'Drag it anywhere in the right-hand panel — this surface has two inputs, so the dot is free in both directions. The arrow redraws itself from wherever you drop it.',
+  },
+  {
+    control: 'the contour rings',
+    what: 'Each ring joins the points where $g(x,y)$ has one fixed value, the way height lines work on a walking map. Rings packed close together mean steep ground, and the small dot at the centre is the bottom of the bowl.',
+  },
+  {
+    control: 'the arrow',
+    what: 'The gradient drawn at the dot: it points along the steepest way *uphill*, always square to the ring it sits on. Its length grows with the steepness, which is why it shrinks to nothing at the centre.',
+  },
+  {
+    control: 'gradient = [·, ·], length',
+    what: 'The two partial derivatives — how fast $g$ climbs if you move in x alone, then in y alone — and the overall steepness they add up to. Training walks in the opposite direction, $-\\nabla g$.',
+  },
+];
 
 /**
  * Left: drag a point along f(x) and watch the tangent's slope.
@@ -114,6 +145,14 @@ export function SlopeExplorer({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Slopes and gradients"
+      intro={
+        <>
+          The same idea at two sizes: on the left a function of one input, where the direction of
+          travel is a single number, and on the right a function of two, where it takes an arrow.
+          Drag either dot and watch what the tangent and the arrow do.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}

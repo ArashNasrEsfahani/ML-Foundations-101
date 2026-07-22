@@ -17,12 +17,12 @@ export const ch09: Chapter = {
         {
           type: 'p',
           md:
-            'Everything so far assumed labels. Now they are gone. **Unsupervised learning** works with bare feature vectors $\\{\\mathbf{x}_i\\}_{i=1}^N$ — and without labels there is no solid reference point to say how good your model is. That is why this chapter sticks to methods whose results can still be judged against the *data itself* rather than against human opinion.',
+            'Everything so far assumed labels. Now they are gone. **[[unsupervised-learning|Unsupervised learning]]** works with bare [[feature-vector|feature vectors]] $\\{\\mathbf{x}_i\\}_{i=1}^N$ — and without labels there is no solid reference point to say how good your model is. Every score you have leaned on since [the metrics section](sec:ch05-metrics) compared a prediction against a truth; here there is no truth to compare against. That is why this chapter sticks to methods whose results can still be judged against the *data itself* rather than against human opinion.',
         },
         {
           type: 'p',
           md:
-            'The first such task is **density estimation**: reconstruct the probability density function (pdf) of the unknown distribution your dataset was drawn from. A good density model tells you which inputs are *typical* and which are not — the backbone of novelty and intrusion detection. One option is **parametric**: assume the data is, say, a multivariate normal and fit its parameters. But that assumption is a gamble — if the real distribution looks nothing like a Gaussian, your model is doomed from the start. The **nonparametric** alternative lets the data speak: place a little smooth bump (a **kernel**) on every training example and add the bumps up.',
+            'The first such task is **[[density-estimation]]**: reconstruct the [[probability-density-function|probability density function]] (pdf) of the unknown distribution your dataset was drawn from. A good density model tells you which inputs are *typical* and which are not — the backbone of novelty and intrusion detection. One option is **parametric**: assume the data is, say, a multivariate normal and fit its parameters. But that assumption is a gamble — if the real distribution looks nothing like a Gaussian, your model is doomed from the start. The **nonparametric** alternative lets the data speak: place a little smooth bump (a **kernel**) on every training example and add the bumps up. That is **[[kernel-density-estimation|kernel density estimation]]**, and the formula for it is shorter than the description:',
         },
         {
           type: 'formula',
@@ -42,19 +42,29 @@ export const ch09: Chapter = {
             { tex: 'x_i', explain: 'a training example; each one contributes a bump centered on itself' },
             {
               tex: 'b',
-              explain: 'the bandwidth: how wide each bump is — the single knob controlling bias vs. variance',
+              explain: 'the [[bandwidth]]: how wide each bump is — the single knob controlling bias vs. variance',
             },
           ],
         },
         {
           type: 'p',
           md:
-            'Everything hinges on the bandwidth $b$. Make it tiny and the estimate turns into nervous spikes hugging each training point — **overfitting**. Make it huge and the bumps smear into one featureless mound that hides real structure — **underfitting**. Somewhere in between sits a curve that tracks the true pdf closely.',
+            'Everything hinges on the bandwidth $b$. Make it tiny and the estimate turns into nervous spikes hugging each training point — **[[overfitting]]**. Make it huge and the bumps smear into one featureless mound that hides real structure — **[[underfitting]]**. Somewhere in between sits a curve that tracks the true pdf closely. This is [the same trade-off you met in Chapter 5](sec:ch05-overfitting) wearing different clothes: $b$ is the capacity dial. A small $b$ is a flexible model chasing every wobble of the sample; a large $b$ is a rigid one that has stopped listening.',
+        },
+        {
+          type: 'p',
+          md:
+            'Watch it happen on three points sitting at $1$, $2$ and $8$. With $b = 0.3$ the estimate is three separate needles, and the flat ground between them reads as impossible — a future observation at $1.5$ would be assigned a density near zero, which three points give you no warrant to claim. With $b = 3$ the bumps merge into one broad hill centered near $3.7$, a value no observation is anywhere close to. Around $b = 0.8$ you get what the data actually said: a lump over $1$–$2$ and a smaller one out at $8$. The estimator never changed. Only the width did.',
+        },
+        {
+          type: 'p',
+          md:
+            'If the machinery looks familiar, it should. This is [kernel regression](sec:ch07-beyond-two-classes) with the targets taken away. There, each neighbor contributed its own $y_i$ weighted by how near it was, and the weights were normalized to sum to one so the result was an average. Here there is no $y$ to average, so the weights themselves *are* the answer — how much neighbor is stacked over this spot. One smoothing idea, two jobs, and the same bandwidth trap in both.',
         },
         {
           type: 'hint',
           md:
-            'How to pick $b$ without seeing the true pdf? Minimize the **mean integrated squared error** (MISE) — the continuous cousin of MSE — whose data-only estimate uses **leave-one-out cross-validation**: score each candidate $b$ from a grid, keep the minimizer. For $D$-dimensional data, just replace $x - x_i$ with the Euclidean distance $\\lVert\\mathbf{x} - \\mathbf{x}_i\\rVert$.',
+            'How to pick $b$ without seeing the true pdf? Minimize the **[[mean-integrated-squared-error|mean integrated squared error]]** (MISE) — the continuous cousin of MSE — whose data-only estimate uses **[[leave-one-out-cross-validation]]**: score each candidate $b$ from a grid, keep the minimizer. Why leave-one-out rather than plain training likelihood? Because a bump centered on $x_i$ is guaranteed to score $x_i$ highly, so training likelihood is maximized by $b \\to 0$ — infinitely tall spikes and nothing in between. Removing the point first breaks that self-congratulation, and removing one bump from a sum of bumps is subtraction rather than retraining, so the whole sweep is cheap. For $D$-dimensional data, replace $x - x_i$ with the Euclidean distance $\\lVert\\mathbf{x} - \\mathbf{x}_i\\rVert$.',
         },
         {
           type: 'quiz',
@@ -123,12 +133,12 @@ export const ch09: Chapter = {
         {
           type: 'p',
           md:
-            '**Clustering** assigns a group id to every example using only the unlabeled data. The most famous recipe, **k-means**, is a two-step dance. First choose $k$, the number of clusters, and drop $k$ points called **centroids** into feature space. Then loop: **assign** every example to its closest centroid (using, say, Euclidean distance), and **update** every centroid to the average of the examples just assigned to it. Repeat until the assignments stop changing. The final model is exactly that list of centroid ids, one per example.',
+            '**[[clustering|Clustering]]** assigns a group id to every example using only the unlabeled data. The most famous recipe, **[[k-means]]**, is a two-step dance. First choose $k$, the number of clusters, and drop $k$ points called **[[centroid|centroids]]** into feature space. Then loop: **assign** every example to its closest centroid (using, say, Euclidean distance), and **update** every centroid to the average of the examples just assigned to it. Repeat until the assignments stop changing. The final model is exactly that list of centroid ids, one per example.',
         },
         {
           type: 'p',
           md:
-            'A handy score for a k-means state is the **inertia** — the total squared distance from each point to its own centroid. Every assign step and every update step can only lower it (or leave it alone), which is why the loop must settle down:',
+            'A handy score for a k-means state is the **[[inertia]]** — the total squared distance from each point to its own centroid. Every assign step and every update step can only lower it (or leave it alone), which is why the loop must settle down:',
         },
         {
           type: 'formula',
@@ -152,7 +162,17 @@ export const ch09: Chapter = {
         {
           type: 'p',
           md:
-            'Two warnings. The starting positions of the centroids matter: two runs with different random starts can settle into two different clusterings, so k-means finds *a* local optimum, not *the* best one (smarter variants seed the centroids using properties of the data). And $k$ itself is a **hyperparameter** — the algorithm never questions your choice; ask for 5 clusters in 3 blobs and it will dutifully carve up something.',
+            'Two warnings. The starting positions of the centroids matter: two runs with different random starts can settle into two different clusterings, so k-means finds *a* local optimum, not *the* best one. And $k$ itself is a **[[hyperparameter]]** — the algorithm never questions your choice; ask for 5 clusters in 3 blobs and it will dutifully carve up something.',
+        },
+        {
+          type: 'p',
+          md:
+            'There is a third warning the two-step dance hides, and it is about *shape*. Because a point joins whichever centroid is nearest, the territory of each cluster is bounded by the perpendicular bisectors between centroids — straight lines. K-means can therefore only ever draw convex, roughly round cells. Two long parallel bands, or one ring around another, are not shapes it can express at any value of $k$, and it will not fail loudly; it will return a confident, wrong answer. That limitation is the entire motivation for the next section.',
+        },
+        {
+          type: 'hint',
+          md:
+            'The standard cure for the initialization lottery is **k-means++**: put the first centroid on a random example, then draw each next one with probability proportional to its squared distance from the nearest centroid already placed. Far-flung regions are therefore likely to get a seed of their own, which is precisely what uniform random placement keeps failing at. Two other habits pay for themselves — [standardize the features](sec:ch05-feature-engineering) first, since centroids live in the data’s own units and a column measured in thousands will decide every assignment, and run the whole thing a dozen times and keep the clustering with the lowest [[inertia]].',
         },
         {
           type: 'widget',
@@ -214,7 +234,7 @@ export const ch09: Chapter = {
               ],
               answer: 0,
               explain:
-                'The algorithm takes k as given and never questions it — ask for five clusters in three blobs and it will carve up something. Techniques for choosing k exist (prediction strength, gap statistic, elbow, silhouette) but none is provably optimal.',
+                'The algorithm takes k as given and never questions it — ask for five clusters in three blobs and it will carve up something. Techniques for choosing k exist ([[prediction-strength]], the [[gap-statistic|gap statistic]], elbow, silhouette) but none is provably optimal.',
             },
           ],
         },
@@ -228,12 +248,27 @@ export const ch09: Chapter = {
         {
           type: 'p',
           md:
-            'K-means is *centroid-based*: its clusters are blobs around centers. **DBSCAN** is *density-based*: instead of guessing a cluster count, you set two knobs — a radius $\\epsilon$ and a threshold $n$. Pick an unvisited example and count how many examples sit within distance $\\epsilon$ of it. If there are at least $n$, it is a **core point**: it founds a cluster and pulls its whole $\\epsilon$-neighborhood in. Every member is then examined in turn — any member that is itself core keeps expanding the cluster through *its* neighborhood. When the chain runs dry, pick a fresh unvisited example and start cluster two. Points that end up in no chain are **outliers** (noise); points inside a cluster that lack $n$ neighbors of their own are **border points** — included, but not expanding.',
+            'K-means is *centroid-based*: its clusters are blobs around centers. **[[dbscan|DBSCAN]]** is *density-based*. Instead of guessing a cluster count you set two knobs — a radius $\\epsilon$ and a threshold $n$ — and the count falls out of the data on its own. Draw a circle of radius $\\epsilon$ around an example and count who is inside: that circle is its **[[epsilon-neighborhood|ε-neighborhood]]**, and if at least $n$ examples sit in it, the point is standing in a crowd. Such a point is called a **[[core-point|core point]]**, and only core points are allowed to build anything.',
         },
         {
           type: 'p',
           md:
-            'Because clusters grow by hopping between dense neighbors, they can trace **arbitrary shapes** — rings, arcs, snakes — that no centroid-based method can express. The cost: choosing a good $\\epsilon$ is genuinely hard, and one fixed $\\epsilon$ cannot serve clusters of different densities at once. **HDBSCAN** fixes exactly that — it drops $\\epsilon$ entirely, copes with varying density, and keeps only the intuitive knob $n$ (the smallest group you would call a cluster). It is fast enough for millions of examples; modern k-means implementations are faster still, but HDBSCAN is a superb first thing to try on new data.',
+            'Now the growing, which is the part that makes the shapes. Take any core point nobody has visited and start a cluster with it, tipping its whole ε-neighborhood into a queue. Pop a point off the queue and add it to the cluster. If that point is *itself* core, tip its neighborhood into the queue as well — the stain spreads. If it is not core, it joins and the chain stops there: it is a **[[border-point|border point]]**, a passenger on the edge. When the queue empties, the cluster is finished; go and find another unvisited core point, and that starts cluster two. Points no chain ever reached belong to nothing at all and are labeled **noise** — DBSCAN’s built-in [[outlier-detection|outlier flag]], and one of the few clustering algorithms honest enough to say "this one belongs nowhere" instead of forcing it into the nearest blob.',
+        },
+        {
+          type: 'p',
+          md:
+            'Notice what that procedure never does: it never measures anything from a center. A cluster is defined only by the chain of overlapping crowded circles that traced it out, so it can bend, fork and curl. That is why DBSCAN handles **arbitrary shapes** — rings, arcs, snakes — that no centroid-based method can express. Notice also where it will break. Two genuinely separate clusters joined by a thin bridge of points that are dense enough to be core will be merged into one, and a cluster whose points are just below the $n$ threshold vanishes into noise entirely. Both failures come from the same place: $\\epsilon$ and $n$ jointly encode one fixed density, and the whole dataset is judged against it.',
+        },
+        {
+          type: 'p',
+          md:
+            'That fixed density is DBSCAN’s real weakness — one $\\epsilon$ cannot serve a tight cluster and a diffuse one at the same time — and choosing it is genuinely hard. **[[hdbscan|HDBSCAN]]** fixes exactly that. It drops $\\epsilon$ entirely, running the whole family of radii at once and keeping the clusters that survive longest as the radius shrinks, so clusters of different densities coexist. Only the intuitive knob $n$ remains, the smallest group you would still call a cluster. It is fast enough for millions of examples; modern k-means implementations are faster still, but HDBSCAN is a superb first thing to try on new data.',
+        },
+        {
+          type: 'hint',
+          md:
+            'If you do have to set $\\epsilon$ by hand, the usual diagnostic is a k-distance plot: for every point measure the distance to its $n$-th nearest neighbor, sort those distances and plot the curve. It stays low and flat across the points inside clusters, then turns sharply upward as it reaches the stragglers — and the knee is a defensible $\\epsilon$. The same caution applies as for [[k-nearest-neighbors|kNN]]: $\\epsilon$ is a fixed radius in the raw feature space, so unscaled features wreck it before you begin.',
         },
         {
           type: 'widget',
@@ -247,12 +282,35 @@ export const ch09: Chapter = {
         {
           type: 'p',
           md:
-            'And how many clusters *does* your data have? For 2D you can look; beyond three dimensions you cannot. **Prediction strength** answers with a supervised-flavored trick: split the data into training and test sets, cluster both with the same $k$, and check consistency — for each test cluster, what fraction of its point *pairs* also fall into a common region of the training clustering? The score $ps(k)$ is the worst such fraction over test clusters. If $k$ is right, both clusterings tell the same story and $ps(k)$ stays high; experiments suggest keeping the largest $k$ with $ps(k) > 0.8$. For randomness-sensitive algorithms like k-means, average the score over several runs.',
+            'And how many clusters *does* your data have? For 2D you can look; beyond three dimensions you cannot. **[[prediction-strength]]** answers with a supervised-flavored trick: split the data into training and test sets, cluster both with the same $k$, and check consistency — for each test cluster, what fraction of its point *pairs* also fall into a common region of the training clustering? The score $ps(k)$ is the worst such fraction over test clusters. If $k$ is right, both clusterings tell the same story and $ps(k)$ stays high; experiments suggest keeping the largest $k$ with $ps(k) > 0.8$. For randomness-sensitive algorithms like k-means, average the score over several runs.',
+        },
+        {
+          type: 'p',
+          md:
+            'One more family, because it changes what a cluster *is*. K-means and DBSCAN both commit each point to exactly one group. **[[soft-clustering|Soft clustering]]** hands every point a set of membership scores instead — 0.9 here, 0.1 there — which is far more honest about the points that genuinely sit between two groups. The standard vehicle is the **[[gaussian-mixture-model|Gaussian mixture model]]**: assume the data was produced by $k$ bell-shaped generators, each with its own center, its own width *and its own tilt*, plus a weight saying how often it fires. Because every cluster carries a full covariance matrix rather than a single radius, GMM clusters are stretched ellipses where k-means can only draw spheres.',
+        },
+        {
+          type: 'p',
+          md:
+            'Fitting it is a chicken-and-egg problem — knowing the Gaussians would tell you which one made each point, and knowing which one made each point would tell you the Gaussians. **[[expectation-maximization]]** breaks the deadlock in exactly the way k-means does, with two alternating steps:',
+        },
+        {
+          type: 'list',
+          ordered: true,
+          items: [
+            '**E step** — the *assign* step, softened. Hold the Gaussians fixed and work out, for every point, how likely each Gaussian is to have produced it. K-means answers this with a single winner; EM answers with a set of fractions summing to one, called the *responsibilities*.',
+            '**M step** — the *update* step, weighted. Hold the responsibilities fixed and refit each Gaussian to the data, except that every point now counts toward every cluster in proportion to its responsibility. K-means averages the points it owns outright; EM takes a weighted average over *all* of them.',
+          ],
+        },
+        {
+          type: 'p',
+          md:
+            'Repeat, and the likelihood of the data climbs every round until it stops climbing. Same structure as k-means, same local-optimum caveat, same sensitivity to where you start — and k-means is literally the limiting case, the one you get by shrinking every Gaussian to a sphere and rounding every responsibility to 0 or 1. What the extra arithmetic buys is uncertainty: a point whose responsibilities come out near 0.5 and 0.5 is the model telling you not to trust its label.',
         },
         {
           type: 'hint',
           md:
-            'Hard vs **soft clustering**: k-means and DBSCAN commit each point to one cluster. A **Gaussian mixture model** instead gives every point a membership *score* in each cluster — it fits a weighted sum of Gaussians via **expectation maximization**, and its clusters can be stretched ellipses rather than k-means’ circles. Spectral and hierarchical clustering also exist, but k-means, HDBSCAN and GMM cover most practical needs. Other k-pickers: **gap statistic**, elbow, average silhouette.',
+            'Other ways to pick $k$: the **[[gap-statistic|gap statistic]]** compares your [[inertia]] against the inertia of structureless random data spread over the same region, and keeps the $k$ where your data wins by the widest margin; the elbow method looks for the bend in the inertia curve; average silhouette scores how much better each point fits its own cluster than the next-best one. For a GMM you can be stricter still — fit one mixture per candidate $k$ and keep whichever makes a held-out set most probable. Spectral and hierarchical clustering are worth knowing about, but k-means, HDBSCAN and GMM cover most of what comes up.',
         },
         {
           type: 'quiz',
@@ -324,12 +382,12 @@ export const ch09: Chapter = {
         {
           type: 'p',
           md:
-            'Modern models shrug at millions of features, so **dimensionality reduction** is used less than it once was — but it still has two killer applications. The first is **visualization**: humans cannot read a plot with more than three axes. The second is **interpretability**: if you are restricted to simple, explainable models, fewer (and less redundant, less noisy) features can make them viable.',
+            'Modern models shrug at millions of features, so **[[dimensionality-reduction]]** is used less than it once was — but it still has two killer applications. The first is **visualization**: humans cannot read a plot with more than three axes. The second is **interpretability**: if you are restricted to simple, explainable models, fewer (and less redundant, less noisy) features can make them viable.',
         },
         {
           type: 'p',
           md:
-            '**Principal component analysis** (PCA) is the classic. Imagine rotating a new coordinate system inside your cloud of points: the first axis — the **first principal component** — points in the direction where the data varies *most*. The second is perpendicular to it and captures the most of what remains, and so on. To go from $D$ dimensions down to $D_{new}$, keep the top $D_{new}$ components and **project** each point onto them: in the 2D-to-1D case every point is replaced by a single coordinate — its shadow on the first component. With high-dimensional data it often happens that two or three components hold most of the variation, so a flat plot can honestly display a very tall dataset.',
+            '**[[principal-component-analysis|Principal component analysis]]** (PCA) is the classic. Imagine rotating a new coordinate system inside your cloud of points: the first axis — the **[[principal-component|first principal component]]** — points in the direction where the data varies *most*. The second is perpendicular to it and captures the most of what remains, and so on. To go from $D$ dimensions down to $D_{new}$, keep the top $D_{new}$ components and **project** each point onto them: in the 2D-to-1D case every point is replaced by a single coordinate — its shadow on the first component. With high-dimensional data it often happens that two or three components hold most of the variation, so a flat plot can honestly display a very tall dataset.',
         },
         {
           type: 'formula',
@@ -351,6 +409,16 @@ export const ch09: Chapter = {
           ],
         },
         {
+          type: 'p',
+          md:
+            'That formula answers "how spread out are the shadows along $\\mathbf{u}$" — but it does not yet say where the winning $\\mathbf{u}$ comes from, and PCA does not go looking for it. Maximize $\\mathbf{u}^{\\top}\\boldsymbol{\\Sigma}\\mathbf{u}$ subject to $\\mathbf{u}$ having length one, and the condition that drops out is $\\boldsymbol{\\Sigma}\\mathbf{u} = \\lambda\\mathbf{u}$: the eigenvector equation. The principal components *are* the **eigenvectors** of the covariance matrix, and each one’s **eigenvalue** is precisely the variance captured along it. So sorting the eigenvalues from largest to smallest sorts the components, keeping the top $D_{new}$ of them is the entire algorithm, and the variance you threw away is the sum of the eigenvalues you dropped. No search, no iteration — one eigendecomposition.',
+        },
+        {
+          type: 'p',
+          md:
+            'Two consequences worth carrying away. First, a covariance matrix is symmetric, and the eigenvectors of a symmetric matrix are mutually perpendicular — so "the second axis is perpendicular to the first" is not a rule anyone imposed, it is something the algebra hands you. Second, PCA chases *raw* variance and is therefore at the mercy of your units: the same length recorded in millimeters has a million times the variance it has in meters, and will monopolize PC1 for no reason worth having. [Standardize first](sec:ch05-feature-engineering) unless the features already share a scale — and always center, because the covariance matrix assumes the mean has been subtracted.',
+        },
+        {
           type: 'widget',
           id: 'PcaProjector',
           challenge: {
@@ -362,7 +430,12 @@ export const ch09: Chapter = {
         {
           type: 'p',
           md:
-            'PCA is linear — it can only rotate and flatten. The modern nonlinear tools built for visualization, **UMAP** and t-SNE, think differently: they design a similarity score between examples that respects *local* structure (how dense the data is around each point), then search — by gradient descent — for low-dimensional coordinates whose similarities match the high-dimensional ones as closely as possible. On a benchmark like handwritten digits, UMAP separates the classes visually far better than PCA, without ever seeing a label. Speed-wise it sits between PCA (fastest) and autoencoders (slowest) — and recall from Chapter 7 that an autoencoder’s **bottleneck layer** is itself a learned low-dimensional representation.',
+            'PCA is linear — it can only rotate and flatten, so a curved structure such as a spiral comes out as a smear. The modern nonlinear tools built for visualization, **[[umap|UMAP]]** and t-SNE, think differently: they design a similarity score between examples that respects *local* structure (how dense the data is around each point), then search — by [[gradient-descent]] — for low-dimensional coordinates whose similarities match the high-dimensional ones as closely as possible. On a benchmark like handwritten digits, UMAP separates the classes visually far better than PCA, without ever seeing a label. Speed-wise it sits between PCA (fastest) and autoencoders (slowest) — and recall from [Chapter 7](sec:ch07-few-labels) that an autoencoder’s **[[bottleneck-layer|bottleneck layer]]** is itself a learned low-dimensional representation.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Read a UMAP or t-SNE plot with care, because two things on it mean less than they appear to. The *size* of a cluster is not meaningful — the layout stretches sparse regions and compresses dense ones by design. The *distance between* two clusters is only loosely meaningful, since the objective is dominated by getting neighborhoods right, not by getting the global arrangement right. What you can trust is the neighborhoods themselves: points drawn together really were close. Treat the picture as a sketch worth investigating, never as coordinates worth modeling on.',
         },
         {
           type: 'quiz',
@@ -431,12 +504,22 @@ export const ch09: Chapter = {
         {
           type: 'p',
           md:
-            '**Outlier detection** asks: which examples in the dataset look nothing like a typical example? Three tools you already own solve it. **Density**: fit $\\hat{f}_b$ and flag inputs where the estimated density is tiny — they live where the data does not. **Reconstruction**: train an autoencoder on the dataset; because its bottleneck only memorizes the *common* structure, it rebuilds typical examples faithfully and butchers outliers — a large reconstruction error is the alarm. **One-class classification**: train a model of the single class “normal” and let it answer *belongs / does not belong* for any new input.',
+            '**[[outlier-detection|Outlier detection]]** asks: which examples in the dataset look nothing like a typical example? Three tools you already own solve it. **Density**: fit $\\hat{f}_b$ and flag inputs where the estimated density is tiny — they live where the data does not. **Reconstruction**: train an [[autoencoder]] on the dataset; because its bottleneck only memorizes the *common* structure, it rebuilds typical examples faithfully and butchers outliers — a large reconstruction error is the alarm. **[[one-class-classification|One-class classification]]**: train a model of the single class “normal” and let it answer *belongs / does not belong* for any new input.',
         },
         {
           type: 'p',
           md:
             'Which to choose? Density estimates shine when you also want probabilities; autoencoders scale to images and other rich inputs; one-class models give you a crisp decision boundary. All three share the same philosophy: model what *typical* looks like, then measure the distance from typical.',
+        },
+        {
+          type: 'p',
+          md:
+            'All three also hand you a *score* rather than a verdict, so somebody still has to draw the line. The usual move is to assume a contamination rate — say you believe 1% of the data is junk — and put the threshold at the 1st percentile of the training scores. Notice what that fixes: how many false alarms you are willing to hear, not how many anomalies you will catch. Evaluating the result is the genuinely awkward part, because with no labels there is no [recall to measure](sec:ch05-metrics). What happens in practice is that a person inspects the top of the ranking and the threshold moves until the inspection stops being a waste of their afternoon.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Two jobs hide under one name. *Outlier detection* cleans a dataset you already hold, so the training data itself contains the contamination you are hunting. *Novelty detection* screens new arrivals against a training set you assume is clean. The models are the same; the assumption is not, and getting it backwards is why a detector sometimes learns that fraud is normal — it was trained on data full of it.',
         },
         {
           type: 'quiz',

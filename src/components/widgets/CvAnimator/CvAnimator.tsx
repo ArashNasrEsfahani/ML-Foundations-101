@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { WidgetFrame } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
+import { useTicker } from '../../../hooks/useRaf';
+import { useSpeed, SpeedControl } from '../SpeedControl';
 import { mulberry32 } from '../../../lib/rng';
 
 const N = 20;
@@ -37,6 +39,8 @@ export function CvAnimator({ challenge }: WidgetProps) {
 
   const [k, setK] = useState(5);
   const [foldsRun, setFoldsRun] = useState(0);
+  const [auto, setAuto] = useState(false);
+  const speed = useSpeed();
 
   const foldOf = (i: number) => Math.floor((i * k) / N);
 
@@ -59,13 +63,28 @@ export function CvAnimator({ challenge }: WidgetProps) {
   }, [goalMet]);
 
   const activeFold = foldsRun - 1; // the fold currently shown as held out
+  const nextFold = () => setFoldsRun((f) => Math.min(k, f + 1));
+
+  // 1 s a fold: the band has to slide across and the dots re-pop left to right
+  // before the next fold is held out, or the sweep reads as a flicker
+  useTicker(
+    () => {
+      if (foldsRun + 1 >= k) setAuto(false); // the round is over — drop back to Run
+      nextFold();
+    },
+    auto && !roundComplete,
+    speed.ms(1000),
+  );
+
   const pickK = (nk: number) => {
     setK(nk);
     setFoldsRun(0);
+    setAuto(false);
   };
   const reset = () => {
     setK(5);
     setFoldsRun(0);
+    setAuto(false);
   };
 
   // pixel span of a fold (for labels and separators)
@@ -77,16 +96,51 @@ export function CvAnimator({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Cross-validation, fold by fold"
+      intro={
+        <>
+          20 labeled examples, not enough for a separate validation set. Split them into{' '}
+          <strong>k folds</strong>; each round trains on the filled dots and validates on the open
+          ones. Switching k restarts the round.
+        </>
+      }
+      guide={[
+        {
+          control: '3 · 5 · 10',
+          what: 'How many folds the 20 examples are cut into — the *k* of [[cross-validation]]. Larger k trains on more data each round but costs more rounds; k = 10 leaves only 2 examples to validate on.',
+        },
+        {
+          control: 'Step: hold out fold n',
+          what: 'Runs one round by hand: fold *n* becomes the open circles, the model trains on the rest, and its score lands in the table.',
+        },
+        {
+          control: 'Run folds / Pause',
+          what: 'Walks through the remaining rounds on a timer and stops when every fold has been held out once.',
+        },
+        {
+          control: 'speed',
+          what: 'Time per round: 5 s on *slow*, 1 s on *normal*, 250 ms on *fast*. Slow is worth it once, to watch which examples move out of training each round.',
+        },
+        {
+          control: 'reset',
+          what: 'Back to k = 5 with no rounds run.',
+        },
+        {
+          control: 'F1 … Fk',
+          what: 'The folds, left to right. A ✓ marks a fold that has already served as the [[validation-set|validation set]]; the bold one is held out right now.',
+        },
+        {
+          control: 'validation score',
+          what: 'What the model trained on this round scored on its held-out fold. The numbers differ because each round trains on a different 80% of the data — that spread is the point of the exercise.',
+        },
+        {
+          control: 'all',
+          what: 'Mean ± standard deviation across the folds. The mean is the estimate you would report; the ± says how much it depends on which examples happened to be held out.',
+        },
+      ]}
       onReset={reset}
       challenge={challenge}
       challengeDone={challengeDone}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        20 labeled examples, not enough for a separate validation set. Split them into{' '}
-        <strong>k folds</strong>; each round trains on the filled dots and validates on the open
-        ones. Switching k restarts the round.
-      </p>
-
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
         <span style={{ fontSize: '0.95rem' }}>k =</span>
         {KS.map((nk) => (
@@ -106,7 +160,11 @@ export function CvAnimator({ challenge }: WidgetProps) {
           </button>
         ))}
         <span style={{ flex: 1 }} />
-        <button className="primary" onClick={() => setFoldsRun((f) => Math.min(k, f + 1))} disabled={roundComplete}>
+        <SpeedControl value={speed.speed} onChange={speed.setSpeed} />
+        <button className="ghost" onClick={() => setAuto((a) => !a)} disabled={roundComplete}>
+          {auto ? 'Pause' : 'Run folds'}
+        </button>
+        <button className="primary" onClick={nextFold} disabled={roundComplete || auto}>
           {foldsRun === 0 ? 'Step: hold out fold 1' : roundComplete ? 'Round complete' : `Step: hold out fold ${foldsRun + 1}`}
         </button>
       </div>

@@ -5,6 +5,7 @@ import type { WidgetProps } from '../registry';
 import { makeFrame, Axes, PlotSvg } from '../Plot';
 import { useSvgDrag } from '../../../hooks/useDrag';
 import { useTicker } from '../../../hooks/useRaf';
+import { useSpeed, SpeedControl } from '../SpeedControl';
 import { blobs3 } from '../../../content/datasets/blobs3';
 import {
   assignPoints,
@@ -73,6 +74,7 @@ export function KmeansStepper({ challenge }: WidgetProps) {
   const [phase, setPhase] = useState<'assign' | 'update'>('assign');
   const [converged, setConverged] = useState(false);
   const [auto, setAuto] = useState(false);
+  const speed = useSpeed();
   const grabbed = useRef<number | null>(null);
   // animation bookkeeping: bump a generation counter so the marks re-play their
   // entrance, and remember which centroid travelled furthest so it can pulse.
@@ -124,7 +126,9 @@ export function KmeansStepper({ challenge }: WidgetProps) {
   };
 
   const step = () => (phase === 'assign' ? doAssign() : doUpdate());
-  useTicker(step, auto && !converged, 600);
+  // 600 ms leaves the assignment wave and the centroid glide time to land
+  // before the next half-step starts
+  useTicker(step, auto && !converged, speed.ms(600));
 
   // challenge: converged with k = 3 and the partition matching the true blobs ≥ 95%
   const accuracy = useMemo(() => {
@@ -181,15 +185,59 @@ export function KmeansStepper({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="k-means, one step at a time"
+      intro={
+        <>
+          Pick <em>k</em>, scatter the × centroids (or drag them anywhere), then alternate{' '}
+          <strong>Assign</strong> and <strong>Update</strong> until nothing moves. Shades and shapes
+          show cluster membership.
+        </>
+      }
+      guide={[
+        {
+          control: 'k',
+          what: 'How many [[centroid|centroids]] the algorithm is allowed to place — [[k-means]] never discovers this number, you assert it. Moving the slider scatters a fresh set and restarts the run.',
+        },
+        {
+          control: 'Scatter centroids',
+          what: 'Throws the × marks down at new random positions, same *k*. The end state depends on where they land, so re-scattering is the honest way to see the algorithm reach a different answer on identical data.',
+        },
+        {
+          control: 'Assign',
+          what: 'The first half of Lloyd’s loop: every point takes the shade of its nearest centroid. Nothing moves yet — only the labels change.',
+        },
+        {
+          control: 'Update',
+          what: 'The second half: each × jumps to the mean of the points that claimed it in the Assign step. The longest jump gets a one-shot ring.',
+        },
+        {
+          control: 'Auto-run / Pause',
+          what: 'Alternates Assign and Update on a timer until the centroids stop moving. It stops itself at [[convergence]].',
+        },
+        {
+          control: 'speed',
+          what: 'Time between half-steps: 3 s on *slow*, 600 ms on *normal*, 150 ms on *fast*. On slow you can see which half of the loop you are watching.',
+        },
+        {
+          control: 'drag a × centroid',
+          what: 'Hand-place any centroid on the plot. It clears the current assignment, so you can set up a bad start on purpose and watch it recover — or not.',
+        },
+        {
+          control: 'reset',
+          what: 'Back to k = 3 with the original scatter — the run every visitor starts from.',
+        },
+        {
+          control: 'Inertia',
+          what: 'The [[inertia]]: total squared distance from every point to its own centroid. Both halves of the loop can only push it down, so a value that stops falling means the run has converged.',
+        },
+        {
+          control: 'shades and shapes',
+          what: 'Cluster membership — filled, open, gray, square, triangle. They carry no order; two points sharing a mark chose the same centroid, nothing more.',
+        },
+      ]}
       onReset={() => reinit(3, kmeansInit(pts, 3, 41))}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Pick <em>k</em>, scatter the × centroids (or drag them anywhere), then alternate{' '}
-        <strong>Assign</strong> and <strong>Update</strong> until nothing moves. Shades and shapes
-        show cluster membership.
-      </p>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10 }}>
         <label style={{ fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           k = {k}
@@ -225,6 +273,7 @@ export function KmeansStepper({ challenge }: WidgetProps) {
         <button className="ghost" style={{ padding: '5px 10px' }} disabled={converged} onClick={() => setAuto((a) => !a)}>
           {auto ? 'Pause' : 'Auto-run'}
         </button>
+        <SpeedControl value={speed.speed} onChange={speed.setSpeed} />
       </div>
       <PlotSvg frame={frame} {...dragProps}>
         <Axes frame={frame} xLabel="feature 1" yLabel="feature 2" />

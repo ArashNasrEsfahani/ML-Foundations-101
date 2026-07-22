@@ -108,6 +108,39 @@ export function OverfitLab({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="The capacity dial"
+      intro={
+        <>
+          Filled dots are <strong>training</strong> points, open dots are <strong>validation</strong>{' '}
+          points the fit never sees. Slide the polynomial degree from one end to the other and
+          watch the two error curves come apart.
+        </>
+      }
+      guide={[
+        {
+          control: 'degree',
+          what: 'The [[model-capacity|capacity]] of the fit: degree 1 is a straight line, degree 12 a curve with twelve bends available. Every position is a separate fit, precomputed, so the two error curves below never change — only the marker on them.',
+        },
+        {
+          control: 'reset',
+          what: 'Back to degree 1 and forgets which degrees you have visited.',
+        },
+        {
+          control: 'train RMSE',
+          what: 'Typical error on the 14 points the curve was fitted to, in the units of *y*. It falls all the way to zero given enough degrees, which is exactly why it cannot be trusted.',
+        },
+        {
+          control: 'validation RMSE',
+          what: 'The same measure on points held out of the fit — the honest judge. Its lowest point is the capacity that matches the data; past that you are watching [[overfitting]] happen.',
+        },
+        {
+          control: 'the error pane',
+          what: 'Both errors against degree: solid is train, dashed is validation, and the vertical dashed line is where the slider sits. The gap between the curves is the price of the extra capacity.',
+        },
+        {
+          control: '↑',
+          what: 'A validation error too large to fit the pane — the fit has gone wild between the training points. High degrees on the right are usually all arrows.',
+        },
+      ]}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
@@ -116,10 +149,6 @@ export function OverfitLab({ challenge }: WidgetProps) {
         @keyframes mlw-curve-out { from { opacity: 0.55; } to { opacity: 0; } }
         .mlw-curve-out { animation: mlw-curve-out 0.34s ease-out both; }
       `}</style>
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Filled dots are <strong>training</strong> points, open dots are <strong>validation</strong>{' '}
-        points the fit never sees. Slide the polynomial degree and watch both error curves.
-      </p>
       <PlotSvg frame={fitFrame}>
         <defs>
           <clipPath id="overfitlab-clip">

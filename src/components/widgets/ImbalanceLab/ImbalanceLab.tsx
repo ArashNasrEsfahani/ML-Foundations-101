@@ -135,16 +135,52 @@ export function ImbalanceLab({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Rescue the minority class"
+      intro={
+        <>
+          95 open circles (majority) vs 5 filled dots (minority). The classifier is refit for each
+          strategy; the shaded wash is the region it would call “minority”. Predicting majority
+          everywhere already scores 95% accuracy — that’s the trap.
+        </>
+      }
+      guide={[
+        {
+          control: 'none',
+          what: 'Train on the [[imbalanced-dataset]] as it stands. The five minority points are outvoted everywhere, so the wash collapses and recall sits at zero.',
+        },
+        {
+          control: 'oversample ×8',
+          what: 'Duplicates each minority point eight times before training — see [[oversampling]]. No new information arrives; the same five points now carry eight votes each.',
+        },
+        {
+          control: 'undersample',
+          what: 'Throws away most of the majority class instead, keeping about 15% of it. Faded circles are the ones dropped: the balance improves and a lot of real data goes in the bin.',
+        },
+        {
+          control: 'class weights ×19',
+          what: 'Keeps every point but makes one minority point count as 19 majority ones — see [[class-weights]]. Same rebalancing, no copying and no discarding.',
+        },
+        {
+          control: 'reset',
+          what: 'Back to the untouched, unbalanced training set.',
+        },
+        {
+          control: 'the shaded wash',
+          what: 'Where the classifier would predict the minority class. Under *none* it barely exists; each strategy inflates it, and too much inflation is what costs accuracy.',
+        },
+        {
+          control: 'overall accuracy',
+          what: 'Share of all 100 points labelled correctly, always scored on the original data — resampling changes what the model trains on, never the truth. 95% here means nothing on its own.',
+        },
+        {
+          control: 'minority recall',
+          what: 'Of the 5 real minority points, how many were caught — see [[recall]]. This is the number the whole exercise is about; the goal is 0.8 or better without letting accuracy fall under 70%.',
+        },
+      ]}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
       <style>{`.mlw-imb-dot circle { transition: opacity 0.35s ease; }`}</style>
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        95 open circles (majority) vs 5 filled dots (minority). The classifier is refit for each
-        strategy; the shaded wash is the region it would call “minority”. Predicting majority
-        everywhere already scores 95% accuracy — that’s the trap.
-      </p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
         {STRATEGIES.map((s) => (
           <button

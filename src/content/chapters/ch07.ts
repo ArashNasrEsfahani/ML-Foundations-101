@@ -17,7 +17,7 @@ export const ch07: Chapter = {
         {
           type: 'p',
           md:
-            'Straight lines don’t fit curvy data. In one dimension you could throw a polynomial at the problem, but with a $D$-dimensional input and $D > 3$, guessing the right polynomial becomes hopeless. **Kernel regression** sidesteps the guessing: it is **non-parametric**, meaning there are *no parameters to learn* — the model is the training data itself, kNN-style. To predict at a point $x$, it averages *all* training labels, weighted by how similar each $x_i$ is to $x$:',
+            'Straight lines don’t fit curvy data. In one dimension you could throw a polynomial at the problem, but with a $D$-dimensional input and $D > 3$, guessing the right polynomial becomes hopeless. **[[kernel-regression|Kernel regression]]** sidesteps the guessing: it is **[[non-parametric-model|non-parametric]]**, meaning there are *no parameters to learn* — the model is the training data itself, [kNN-style](sec:ch03-knn). To predict at a point $x$, it averages *all* training labels, weighted by how similar each $x_i$ is to $x$:',
         },
         {
           type: 'formula',
@@ -35,40 +35,60 @@ export const ch07: Chapter = {
             },
           ],
           terms: [
-            { tex: 'k(\\cdot)', explain: 'the kernel — a similarity function; the closer x_i is to x, the larger the weight' },
+            { tex: 'k(\\cdot)', explain: 'the [[kernel-function|kernel]] — a similarity function; the closer x_i is to x, the larger the weight' },
             { tex: 'w_i', explain: 'how much training label y_i counts toward the prediction at x' },
-            { tex: 'b', explain: 'the bandwidth hyperparameter, tuned on the validation set' },
+            { tex: 'b', explain: 'the [[bandwidth]] — how wide a neighborhood each prediction listens to; tuned on the validation set' },
           ],
         },
         {
           type: 'p',
           md:
-            'The most popular kernel is the Gaussian, $k(z) = \\frac{1}{\\sqrt{2\\pi}}\\exp(-z^2/2)$. The bandwidth $b$ controls the trade-off you already know: a large $b$ gives a smooth, calm curve; a tiny $b$ gives a jittery curve that chases every noisy point — overfitting in kernel clothing. For multi-dimensional inputs, replace the differences $x_i - x$ with Euclidean distances $\\|\\mathbf{x}_i - \\mathbf{x}\\|$.',
+            'The most popular kernel is the Gaussian, $k(z) = \\frac{1}{\\sqrt{2\\pi}}\\exp(-z^2/2)$. The **[[bandwidth]]** $b$ controls [the trade-off you already know](sec:ch05-overfitting): a large $b$ gives a smooth, calm curve; a tiny $b$ gives a jittery curve that chases every noisy point — overfitting in kernel clothing. For multi-dimensional inputs, replace the differences $x_i - x$ with Euclidean distances $\\|\\mathbf{x}_i - \\mathbf{x}\\|$.',
         },
         {
           type: 'p',
           md:
-            'Next problem: **multiclass classification**, where $y \\in \\{1, \\dots, C\\}$. Some algorithms handle many classes natively. Decision trees predict the majority label in a leaf. kNN looks at the $k$ nearest neighbors and returns the most frequent class among them. Logistic regression swaps its sigmoid for the **softmax function** and outputs a probability per class. SVM, however, is stubbornly binary.',
-        },
-        {
-          type: 'p',
-          md:
-            'For binary-only algorithms there’s **one versus rest**: turn one $C$-class problem into $C$ binary problems — “class 1 vs everything”, “class 2 vs everything”, and so on. To classify a new input, run all $C$ models and keep the *most certain* non-zero prediction. Certainty is the model’s score: a probability near 1 for logistic regression, or, for SVM, the distance $d = \\frac{\\mathbf{w}^*\\mathbf{x} + b^*}{\\|\\mathbf{w}\\|}$ from the input to the decision boundary — farther means surer.',
-        },
-        {
-          type: 'p',
-          md:
-            'Sometimes you only *have* one class. Think of a secure network: piles of normal-traffic examples, almost no attack examples. **One-class classification** learns what the one class looks like and flags everything else — the machinery behind outlier, anomaly and novelty detection. The **one-class Gaussian** fits a multivariate normal distribution to the data by maximum likelihood (learning a mean vector $\\boldsymbol{\\mu}$ and a covariance matrix $\\boldsymbol{\\Sigma}$) and calls any input whose likelihood falls below a threshold an outlier. Cousins: **one-class k-means**, **one-class kNN**, and **one-class SVM**, which either separates the data from the origin or wraps it in the smallest possible hypersphere.',
-        },
-        {
-          type: 'p',
-          md:
-            'Finally, one input can deserve *several* labels at once — a photo can be “conifer”, “mountain” *and* “road”. That’s **multi-label classification**. The workhorse approach: use any model that returns a per-label score and add a **threshold** hyperparameter — every label scoring above it gets predicted. Neural networks do this natively: one sigmoid output unit per label, trained with binary cross-entropy. When each label has only a few possible values, there’s a second trick: create one *fake class per combination* of real labels (2 values × 3 values = 6 fake classes) and solve it as plain multiclass. Its quiet superpower is keeping labels **correlated** — it can learn that `[spam, priority]` is a combination that should never happen.',
+            'Put numbers on it. Three training points sit at $x = 0$, $x = 1$ and $x = 10$, with labels $2$, $4$ and $30$, and you want a prediction at $x = 0.5$. With $b = 1$, the Gaussian gives the two near points equal weight and the far one a weight of roughly $e^{-45}$ — indistinguishable from zero — so the answer is the average of 2 and 4, namely **3**. Widen to $b = 10$ and the distant point picks up about a quarter of the total weight, dragging the answer up to **9.5**, most of the way to the global mean of 12. Same data, same query, same kernel: $b$ alone decides how much of the dataset each prediction is allowed to hear.',
         },
         {
           type: 'hint',
           md:
-            'The multi-label threshold is a genuine hyperparameter: choose it on the **validation set**, exactly like $b$ in kernel regression.',
+            'Kernel regression and [[k-nearest-neighbors|kNN]] are the same instinct with different manners. kNN draws a hard circle, counts the $k$ points inside it and ignores everything else, which makes its predictions jump as a point crosses the rim. Kernel regression lets every point vote with a weight that fades smoothly to nothing, so the fitted curve is continuous. What $k$ is to one, $b$ is to the other.',
+        },
+        {
+          type: 'p',
+          md:
+            'Next problem: **multiclass classification**, where $y \\in \\{1, \\dots, C\\}$. Some algorithms handle many classes natively. [Decision trees](sec:ch03-decision-trees) predict the majority label in a leaf. kNN looks at the $k$ nearest neighbors and returns the most frequent class among them. Logistic regression swaps its sigmoid for the **[[softmax|softmax function]]** and outputs a probability per class. SVM, however, is stubbornly binary.',
+        },
+        {
+          type: 'p',
+          md:
+            'For binary-only algorithms there’s **[[one-versus-rest|one versus rest]]**: turn one $C$-class problem into $C$ binary problems — “class 1 vs everything”, “class 2 vs everything”, and so on. To classify a new input, run all $C$ models and keep the *most certain* non-zero prediction. Certainty is the model’s score: a probability near 1 for logistic regression, or, for [SVM](sec:ch03-svm), the distance $d = \\frac{\\mathbf{w}^*\\mathbf{x} + b^*}{\\|\\mathbf{w}\\|}$ from the input to the decision boundary — farther means surer.',
+        },
+        {
+          type: 'p',
+          md:
+            'There is a crack in that plan worth seeing. The $C$ models are trained separately, on separate problems, so their scores were never calibrated against each other — model 3 may be an incurable optimist and model 5 a pessimist, and comparing their confidences is comparing two rulers with different markings. Each sub-problem is also **[[imbalanced-dataset|lopsided]]** by construction: one class against the other $C-1$ combined, so with 20 classes every model trains on data that is 5% positive. The standard alternative, *one versus one*, trains a classifier for every **pair** of classes — $\\frac{C(C-1)}{2}$ of them — and lets them vote. More models, but each one is balanced, small, and never asked about a class it has not seen.',
+        },
+        {
+          type: 'p',
+          md:
+            'Sometimes you only *have* one class. Think of a secure network: piles of normal-traffic examples, almost no attack examples. **[[one-class-classification|One-class classification]]** learns what the one class looks like and flags everything else — the machinery behind outlier, anomaly and novelty detection. The **one-class Gaussian** fits a multivariate normal distribution to the data by maximum likelihood (learning a mean vector $\\boldsymbol{\\mu}$ and a covariance matrix $\\boldsymbol{\\Sigma}$) and calls any input whose likelihood falls below a threshold an outlier. Cousins: **one-class k-means**, **one-class kNN**, and **[[one-class-svm|one-class SVM]]**, which either separates the data from the origin or wraps it in the smallest possible hypersphere.',
+        },
+        {
+          type: 'hint',
+          md:
+            'The hard part of a one-class method is not the model but the cutoff. With no examples of the other class there is nothing to measure a miss rate against, so you cannot tune the threshold the way you would tune anything else. In practice it is set at whatever quantile of the training scores you can afford to see flagged — “alarm on the strangest 1% of traffic” — and revisited when the false alarms start costing more than the misses.',
+        },
+        {
+          type: 'p',
+          md:
+            'Finally, one input can deserve *several* labels at once — a photo can be “conifer”, “mountain” *and* “road”. That’s **[[multi-label-classification|multi-label classification]]**. The workhorse approach: use any model that returns a per-label score and add a **[[decision-threshold|threshold]]** hyperparameter — every label scoring above it gets predicted. Neural networks do this natively: one sigmoid output unit per label, trained with binary cross-entropy. When each label has only a few possible values, there’s a second trick: create one *fake class per combination* of real labels (2 values × 3 values = 6 fake classes) and solve it as plain multiclass. Its quiet superpower is keeping labels **correlated** — it can learn that `[spam, priority]` is a combination that should never happen.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Notice why a sigmoid per label and not a **[[softmax]]**. Softmax shares out a fixed pot of probability, so raising one label must lower another — the classes compete. Multi-label needs them to be able to fire together, or not at all, so each output gets its own independent sigmoid. And the threshold is a genuine hyperparameter: choose it on the [validation set](sec:ch05-three-sets), exactly like $b$ in kernel regression.',
         },
         {
           type: 'quiz',
@@ -150,22 +170,37 @@ export const ch07: Chapter = {
         {
           type: 'p',
           md:
-            'The fundamental algorithms are simple, and simplicity has a price: sometimes the model just isn’t accurate enough. Deep networks could help — if you have mountains of labeled data. **Ensemble learning** takes the opposite road: instead of one heroic, super-accurate model, train a *large number* of cheap, low-accuracy models and merge their predictions into one high-accuracy **meta-model**.',
+            'The fundamental algorithms are simple, and simplicity has a price: sometimes the model just isn’t accurate enough. [Deep networks](sec:ch06-neural-networks) could help — if you have mountains of labeled data. **[[ensemble-learning|Ensemble learning]]** takes the opposite road: instead of one heroic, super-accurate model, train a *large number* of cheap, low-accuracy models and merge their predictions into one high-accuracy **meta-model**.',
         },
         {
           type: 'p',
           md:
-            'The cheap models come from **weak learners** — algorithms that can’t express complex boundaries but train and predict fast. The favorite is a decision tree stopped after just a few splits: shallow, biased, individually unimpressive. The magic condition is **diversity**: if each weak model is at least slightly better than a coin flip *and their mistakes land on different examples*, a council of hundreds of them votes the errors away. Good models tend to agree on the right answer; bad ones disagree on their wrong ones.',
+            'The cheap models come from **[[weak-learner|weak learners]]** — algorithms that can’t express complex boundaries but train and predict fast. The favorite is a [decision tree](sec:ch03-decision-trees) stopped after just a few splits: shallow, biased, individually unimpressive. The magic condition is **diversity**: if each weak model is at least slightly better than a coin flip *and their mistakes land on different examples*, a council of hundreds of them votes the errors away. Good models tend to agree on the right answer; bad ones disagree on their wrong ones.',
         },
         {
           type: 'p',
           md:
-            '**Bagging** manufactures the diversity. Build $B$ “copies” of the training set by **sampling with replacement**: draw $N$ examples at random from the original $N$, so each copy has duplicates and omissions. Train one tree per copy. To predict: average the $B$ outputs (regression) or take the **majority vote** (classification).',
+            '**[[bagging|Bagging]]** manufactures the diversity. Build $B$ “copies” of the training set by **[[bootstrap-sample|sampling with replacement]]**: draw $N$ examples at random from the original $N$, so each copy has duplicates and omissions. Train one tree per copy. To predict: average the $B$ outputs (regression) or take the **[[majority-vote|majority vote]]** (classification).',
         },
         {
           type: 'p',
           md:
-            '**Random forest** is bagging plus one clever tweak: at every split, each tree may only consider a *random subset of the features*. Why hobble the trees? Because if one or two features are dominant predictors, every tree would pick them and the forest would collapse into near-identical, **correlated** trees — and correlated models make the *same* mistakes, which no vote can fix. Random subsets decorrelate the trees. The payoff is reduced **variance**: by averaging over many resampled views of the data, the quirks of any single sample — noise, outliers, unlucky draws — get diluted, which means less overfitting. The knobs to tune: the number of trees $B$ and the feature-subset size.',
+            'Why should reshuffling the *same* data produce different trees? Because a bootstrap sample is not a reshuffle. Draw 1,000 examples with replacement out of 1,000 and roughly **632** distinct originals turn up, several of them twice or three times over; the remaining 368 are absent from that copy altogether. A [decision tree](sec:ch03-decision-trees) is exquisitely sensitive to that. Change which points sit near a candidate threshold and the winning split at the root can jump to a different feature altogether — and every split below it is then chosen on different data, in a different order, against different rivals. Two bootstrap copies of the same dataset routinely produce two trees that share almost no structure. That divergence is the raw material; the vote is only the machine that cashes it in.',
+        },
+        {
+          type: 'p',
+          md:
+            'Which errors get cancelled, and which survive? Split each tree’s error into the part it shares with all the others and the part peculiar to it. Averaging leaves the shared part exactly where it was and shrinks the peculiar part in proportion to the number of trees. So the more the trees have in common, the less averaging buys — with perfectly correlated trees it buys nothing at all, and a hundred of them predict what one predicted. That is why **diversity** is the whole game rather than a nice-to-have. It also says what bagging can never do: if every tree leans the same way because the model is too rigid for the problem, averaging preserves that lean untouched. Bagging is a cure for [variance, not for bias](sec:ch05-overfitting).',
+        },
+        {
+          type: 'p',
+          md:
+            '**[[random-forest|Random forest]]** is bagging plus one clever tweak: at every split, each tree may only consider a *random subset of the features*. Why hobble the trees? Because if one or two features are dominant predictors, every tree would pick them and the forest would collapse into near-identical, **correlated** trees — and correlated models make the *same* mistakes, which no vote can fix. Random subsets decorrelate the trees. The payoff is reduced **[[model-variance|variance]]**: by averaging over many resampled views of the data, the quirks of any single sample — noise, outliers, unlucky draws — get diluted, which means less overfitting. The knobs to tune: the number of trees $B$ and the feature-subset size.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Bagging hands you a validation set for free. Each tree never saw about 37% of the data — its *out-of-bag* examples — so scoring every tree on precisely the examples it missed gives a held-out estimate without holding anything out. Most random-forest implementations will report it on request, which is why forests are often tuned without a separate [holdout](sec:ch05-three-sets) at all.',
         },
         {
           type: 'widget',
@@ -214,7 +249,7 @@ export const ch07: Chapter = {
               prompt: 'Bagging mainly reduces the *variance* of the final model, which means less overfitting.',
               answer: true,
               explain:
-                'Averaging over many bootstrap resamples dilutes the effect of noise, outliers and unlucky sampling artifacts — the ingredients of variance.',
+                'Averaging over many bootstrap resamples dilutes the effect of noise, outliers and unlucky sampling artifacts — the ingredients of [[model-variance|variance]]. The bias each tree carries survives the average untouched.',
             },
           ],
         },
@@ -228,12 +263,17 @@ export const ch07: Chapter = {
         {
           type: 'p',
           md:
-            'Bagging builds its weak models in parallel, each blind to the others. **Boosting** builds them *in sequence*: every new weak model is trained to repair the mistakes the ensemble has made so far. The final model is a weighted combination of all the weak models built along the way.',
+            '[Bagging](sec:ch07-ensembles-bagging) builds its weak models in parallel, each blind to the others. **[[boosting|Boosting]]** builds them *in sequence*: every new weak model is trained to repair the mistakes the ensemble has made so far. The final model is a weighted combination of all the weak models built along the way.',
         },
         {
           type: 'p',
           md:
-            'The classic version, **AdaBoost**, keeps a weight on every training example. Start uniform. Train a stump, then *raise* the weights of the examples it got wrong — the next stump literally cannot ignore them, because it minimizes *weighted* error. Each stump $t$ also earns a say in the final vote based on its weighted error $\\epsilon_t$:',
+            'The two schemes cure different diseases, and it pays to be precise about which. Bagging starts from a learner that is already flexible enough — an unpruned tree can carve the training set into as many pieces as it likes — whose trouble is that it carves a *different* set of pieces every time the data wobbles. Averaging steadies it. Boosting starts from the opposite complaint: a stump is far too rigid to describe the boundary at all, and averaging a thousand stumps will never produce a shape none of them can draw. So boosting does not average equals, it **adds**. Each round appends a new stump aimed at exactly the region the running sum still gets wrong, and the sum itself grows more flexible as the rounds pile up. One steadies a shape that is roughly right; the other builds a shape that was not there to begin with — which is all that "[bagging fights variance, boosting fights bias](sec:ch05-overfitting)" means underneath.',
+        },
+        {
+          type: 'p',
+          md:
+            'The classic version, **[[adaboost|AdaBoost]]**, keeps a weight on every training example. Start uniform. Train a stump, then *raise* the weights of the examples it got wrong — the next stump literally cannot ignore them, because it minimizes *weighted* error. Each stump $t$ also earns a say in the final vote based on its weighted error $\\epsilon_t$:',
         },
         {
           type: 'formula',
@@ -259,7 +299,22 @@ export const ch07: Chapter = {
         {
           type: 'p',
           md:
-            '**Gradient boosting** applies the same “fix the leftovers” spirit to regression. Start with the laziest possible model: a constant, $f_0 = \\frac{1}{N}\\sum_i y_i$. Then compute what’s left to explain — the **residuals** — and relabel the training set with them:',
+            'But what does raising a weight actually *do* to the next stump? A stump picks its split to minimize weighted error, so the weights are nothing more than the exchange rate between one mistake and another. Work an example. A hundred training points, each starting at weight $0.01$; the first stump gets 20 of them wrong, so $\\epsilon_1 = 0.2$ and $\\alpha_1 = \\tfrac{1}{2}\\ln 4 = \\ln 2$. AdaBoost multiplies each of the 20 mistakes by $e^{\\alpha_1} = 2$ and each of the 80 successes by $\\tfrac{1}{2}$, then renormalizes — and the arithmetic lands somewhere very deliberate. The 20 troublemakers now carry **half** of all the weight in the dataset, and the 80 easy points split the other half. To stump number two, those 20 examples matter exactly as much as the other 80 put together, so it will happily sacrifice several easy points to win them.',
+        },
+        {
+          type: 'p',
+          md:
+            'That balance is no accident. The formula for $\\alpha_t$ is chosen to be precisely the value that leaves the *previous* stump scoring 50% — a coin flip — on the reweighted data. Everything the last stump knew has been spent; on this new view of the problem it has nothing left to say. So the next learner cannot get anywhere by rediscovering the same split, and the diversity that bagging buys with random resampling, boosting extracts deliberately, round by round.',
+        },
+        {
+          type: 'hint',
+          md:
+            'The same compounding is AdaBoost’s notorious weakness. A mislabeled example can never be got right, so its weight doubles, and doubles again, until a single typo dominates the training set and the ensemble contorts itself around it. On noisy labels, gradient boosting with a robust loss — or plain [bagging](sec:ch07-ensembles-bagging) — is the safer bet.',
+        },
+        {
+          type: 'p',
+          md:
+            '**[[gradient-boosting|Gradient boosting]]** applies the same “fix the leftovers” spirit to regression. Start with the laziest possible model: a constant, $f_0 = \\frac{1}{N}\\sum_i y_i$. Then compute what’s left to explain — the **[[residual|residuals]]** — and relabel the training set with them:',
         },
         {
           type: 'math',
@@ -268,12 +323,17 @@ export const ch07: Chapter = {
         {
           type: 'p',
           md:
-            'Train a new tree to predict those residuals, add it to the model scaled by a learning rate $\\alpha$, recompute residuals, repeat $M$ times. Why “gradient”? No gradient is ever computed — but the residuals *play the role of one*: they point in the direction the model must move to shrink its error, and the learning rate is the cautious step size, exactly like gradient descent. It can be shown that training on residuals optimizes the model for mean squared error.',
+            'Train a new tree to predict those residuals, add it to the model scaled by a learning rate $\\alpha$, recompute residuals, repeat $M$ times. Why “gradient”? No gradient is ever computed — but the residuals *play the role of one*: they point in the direction the model must move to shrink its error, and the learning rate is the cautious step size, exactly like [gradient descent](sec:ch04-gradient-descent). It can be shown that training on residuals optimizes the model for mean squared error.',
         },
         {
           type: 'p',
           md:
-            'Where bagging fights **variance**, boosting fights **bias** (underfitting) — so it *can* overfit, but tuning the tree depth, the number of trees and the learning rate keeps it in check. Gradient-boosted trees are among the strongest algorithms available for tabular data — the engine inside libraries like **XGBoost** and LightGBM — usually edging out random forests in accuracy, at the cost of slower, inherently sequential training.',
+            'And this is where the bias reduction actually happens. A residual is a map of the model’s ignorance: wherever the running sum is systematically too low, the residuals in that region are positive, and a tree fitted to them hands back a positive correction in exactly that region. Round after round the model grows a bump where it was too flat and a dip where it overshot, until the residuals hold no pattern a shallow tree can still find. Bagging cannot work this way, because its members are all chasing the *same* target: a hundred stumps trained on a hundred resamples mostly choose the same split, and their average is barely more expressive than one of them. Boosting’s members each chase a *different* target, and it is that sequence of moving targets that lets a pile of rigid pieces add up to a flexible whole.',
+        },
+        {
+          type: 'p',
+          md:
+            'Where bagging fights **[[model-variance|variance]]**, boosting fights **[[model-bias|bias]]** (underfitting) — so it *can* overfit, but tuning the tree depth, the number of trees and the learning rate keeps it in check. Those last two trade directly against each other: halve the learning rate and you need roughly twice as many trees to travel the same distance, but the smaller steps generalize better, which is why the standard advice is to set the rate as low as your patience allows and stop on the [validation set](sec:ch05-three-sets). Gradient-boosted trees are among the strongest algorithms available for tabular data — the engine inside libraries like **[[xgboost|XGBoost]]** and LightGBM — usually edging out random forests in accuracy, at the cost of slower, inherently sequential training.',
         },
         {
           type: 'widget',
@@ -346,17 +406,37 @@ export const ch07: Chapter = {
         {
           type: 'p',
           md:
-            'Sequences are everywhere — sentences, genes, stock prices, your last hundred clicks. **Sequence labeling** assigns a label to *every element*: the training example is a pair of equal-length lists $(\\mathbf{X}, \\mathbf{Y})$, like the words [“big”, “beautiful”, “car”] paired with [adjective, adjective, noun]. An RNN handles this directly, emitting one label per time step. The feature-engineering alternative is the **Conditional Random Field** (CRF) — think of it as logistic regression generalized to sequences. CRFs shine when you can handcraft informative features (for **named entity extraction**: “starts with a capital letter”, “appears in a list of city names”), but they train slowly, struggle with huge datasets, and have largely been outperformed by bidirectional gated RNNs — which happen to *love* huge datasets.',
+            'Sequences are everywhere — sentences, genes, stock prices, your last hundred clicks. **[[sequence-labeling|Sequence labeling]]** assigns a label to *every element*: the training example is a pair of equal-length lists $(\\mathbf{X}, \\mathbf{Y})$, like the words [“big”, “beautiful”, “car”] paired with [adjective, adjective, noun]. [An RNN](sec:ch06-rnn) handles this directly, emitting one label per time step. The feature-engineering alternative is the **[[conditional-random-field|Conditional Random Field]]** (CRF) — think of it as logistic regression generalized to sequences. CRFs shine when you can handcraft informative features (for **named entity extraction**: “starts with a capital letter”, “appears in a list of city names”), but they train slowly, struggle with huge datasets, and have largely been outperformed by bidirectional gated RNNs — which happen to *love* huge datasets.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Why score the whole tag sequence at once instead of each word on its own? Because some sequences are impossible. In the usual entity-tagging scheme, an *inside-of-a-person-name* tag can only follow a *beginning-of-a-person-name* tag — and a per-word classifier has no way of knowing that, so it will cheerfully emit the second without the first. A CRF puts a probability on the entire sequence of tags, so an illegal ordering scores near zero and never wins.',
         },
         {
           type: 'p',
           md:
-            '**Sequence-to-sequence** (seq2seq) learning drops the equal-length requirement: input and output can differ in length, which is exactly what machine translation, chatbots, summarization and spelling correction need. The architecture has two halves. An **encoder** reads the input step by step and compresses its *meaning* into a vector (or matrix) of numbers — the **embedding**. A **decoder** takes that embedding, receives a start-of-sequence token, and generates outputs one at a time, feeding each output back in as its own next input until it decides to stop. Both halves are trained together: errors at the decoder’s mouth backpropagate all the way into the encoder.',
+            '**[[sequence-to-sequence|Sequence-to-sequence]]** (seq2seq) learning drops the equal-length requirement: input and output can differ in length, which is exactly what machine translation, chatbots, summarization and spelling correction need. The architecture has two halves. An **[[encoder-decoder|encoder]]** reads the input step by step and compresses its *meaning* into a vector (or matrix) of numbers — the **[[embedding]]**. A **decoder** takes that embedding, receives a start-of-sequence token, and generates outputs one at a time, feeding each output back in as its own next input until it decides to stop. Both halves are trained together: errors at the decoder’s mouth backpropagate all the way into the encoder.',
         },
         {
           type: 'p',
           md:
-            'The weak link is that single fixed-size embedding — a long input has to squeeze through it like luggage through a mail slot. **Attention** fixes this with an extra set of learned parameters that let the decoder combine information from *all* encoder time steps at *every* output step — effectively learning where to look in the input while producing each output word. It preserves long-range dependencies better than gated units or bidirectional RNNs alone. An honest postscript: this mechanism turned out to be the seed of the transformer architectures behind today’s large language models — the book was written just before that avalanche.',
+            'That generation loop has two habits worth knowing, because between them they explain most of what goes wrong with these models. The first: during training the decoder is fed the *true* previous word rather than the one it actually produced — *teacher forcing*. It keeps training fast and stable, since a decoder that wandered off at word two would otherwise learn nothing from the rest of the sentence. But at inference there is no true previous word, so the model must condition on its own output, mistakes included, in a situation it never once met while learning. That mismatch is called exposure bias, and it is why a translation can open beautifully and then unravel. The second habit: taking the single best word at each step is *not* the same as producing the best sentence, because a mediocre opening word can lead somewhere excellent. Beam search keeps a handful of competing part-sentences alive and scores them whole, which is why nearly every deployed system runs it.',
+        },
+        {
+          type: 'p',
+          md:
+            'The weak link is that single fixed-size embedding — a long input has to squeeze through it like luggage through a mail slot. **[[attention|Attention]]** fixes this with an extra set of learned parameters that let the decoder combine information from *all* encoder time steps at *every* output step — effectively learning where to look in the input while producing each output word. It preserves long-range dependencies better than gated units or bidirectional RNNs alone.',
+        },
+        {
+          type: 'p',
+          md:
+            'Concretely: at each output step, attention scores every encoder state against the decoder’s current state, pushes those scores through a **[[softmax]]** so they become fractions summing to one, and mixes the encoder states in exactly those proportions. Producing the third French word, the decoder might draw 70% of its context from the sixth English word, 20% from the seventh and the rest from everywhere else — and nobody wrote those fractions down; they fall out of training. Two things follow. Any input position is now **one step** away from any output position instead of a long walk down the recurrent chain, so the [signal that used to fade](sec:ch06-rnn) on long inputs stops fading. And the fractions can be printed: laid out as a grid with the input along one edge and the output along the other, they show a word-by-word alignment between the two languages that no human ever labeled.',
+        },
+        {
+          type: 'hint',
+          md:
+            'An honest postscript. Someone then asked what happens if you keep the attention and throw the recurrence away entirely — and the answer was the transformer, and after it every large language model in use today. The book was written a breath before that avalanche, which is why this section reads as a footnote to RNNs rather than the other way round.',
         },
         {
           type: 'quiz',
@@ -415,17 +495,27 @@ export const ch07: Chapter = {
         {
           type: 'p',
           md:
-            'Labels are often the expensive part — a radiologist’s hour costs more than a GPU’s. **Active learning** stretches a labeling budget by letting the model choose *which* examples a human expert should annotate next. The classic recipe is uncertainty-driven: apply the current model to the unlabeled pool and score each example by **density × uncertainty** — how typical it is, times how unsure the model feels about it. Uncertainty is the score being close to 0.5 for a sigmoid classifier, the example sitting closest to the hyperplane for SVM, or maximum **entropy** over the class probabilities in the multiclass case. Send the top scorer to the expert, add the fresh label, retrain, repeat until the budget runs out. A related strategy, *query by committee*, trains several different models and asks the expert about the examples they disagree on most.',
+            'Labels are often the expensive part — a radiologist’s hour costs more than a GPU’s. **[[active-learning|Active learning]]** stretches a labeling budget by letting the model choose *which* examples a human expert should annotate next. The classic recipe is uncertainty-driven: apply the current model to the unlabeled pool and score each example by **density × uncertainty** — how typical it is, times how unsure the model feels about it. Uncertainty is the score being close to 0.5 for a sigmoid classifier, the example sitting closest to the hyperplane for SVM, or maximum **[[entropy]]** over the class probabilities in the multiclass case. Send the top scorer to the expert, add the fresh label, retrain, repeat until the budget runs out. A related strategy, *query by committee*, trains several different models and asks the expert about the examples they disagree on most.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Why multiply by density at all — why not send the single most uncertain example straight to the expert? Because the most uncertain point in a large pool is usually a freak: a corrupted scan, a form filled in wrong, a photograph of somebody’s thumb. Its label is expensive and teaches the model nothing it will ever need again. Weighting by how *typical* a point is keeps the budget on examples that stand in for thousands of others.',
         },
         {
           type: 'p',
           md:
-            '**Semi-supervised learning** faces the same mix — few labels, many unlabeled examples — but with no expert on call. The frequently cited method is **self-learning**: train on the labeled data, apply the model to the unlabeled pool, and *adopt* the predictions the model is most confident about as if they were real labels; retrain and repeat. Improvements are usually modest, and the model can even get worse — confident nonsense is still nonsense. Why can unlabeled data help at all? Because a larger sample sketches the underlying data distribution more faithfully, and a good algorithm can exploit that shape. Neural methods pushed this far: the **ladder network** — a denoising **autoencoder** (an hourglass network with a bottleneck embedding, trained to reconstruct its own input) whose bottleneck simultaneously predicts the label — reached near-perfect MNIST accuracy from just 10 labeled examples per class.',
+            '**[[semi-supervised-learning|Semi-supervised learning]]** faces the same mix — few labels, many unlabeled examples — but with no expert on call. The frequently cited method is **[[self-learning]]**: train on the labeled data, apply the model to the unlabeled pool, and *adopt* the predictions the model is most confident about as if they were real labels; retrain and repeat. Improvements are usually modest, and the model can even get worse — confident nonsense is still nonsense, and once adopted there is nothing left in the loop that could ever contradict it. Why can unlabeled data help at all? Because a larger sample sketches the underlying data distribution more faithfully: a boundary running straight through a dense crowd of examples is probably in the wrong place, and unlabeled points are what show you where the crowds are.',
         },
         {
           type: 'p',
           md:
-            '**One-shot learning** is the face-recognition setting: decide whether two photos show the *same* person. Training a two-input binary classifier would double the network and starve on scarce positive pairs. The elegant fix is a **siamese neural network**: a *single* network $f$ that maps one image to an embedding vector, trained so that same-person embeddings sit close together and different-person embeddings sit far apart. Training uses triplets — an anchor $A$, a positive $P$ (same person), a negative $N$ (someone else) — and the **triplet loss**:',
+            'Neural methods pushed the idea a long way, and the vehicle was the **[[autoencoder]]** — worth unpacking, because Chapter 9 leans on it again. Picture a network shaped like an hourglass: wide at both ends, pinched in the middle, and trained on nothing but the instruction *reproduce your own input*. With no pinch the task is trivial, since copying each number straight through scores perfectly and learns nothing. The pinch is what makes it hard. To squeeze a 784-pixel digit through a 30-number waist and rebuild it, the network has to discover that handwritten digits are not arbitrary pixel soup but a few strokes with a few degrees of freedom. What sits in the waist afterwards is a compact description of the input, learned without a single label. The **ladder network** adds one move: it asks that same waist to *also* name the digit. The unlabeled images teach the shape of the data, the labeled ones only have to attach names to shapes that are already separated — which is how it reached near-perfect MNIST accuracy from ten labeled examples per class.',
+        },
+        {
+          type: 'p',
+          md:
+            '**[[one-shot-learning|One-shot learning]]** is the face-recognition setting: decide whether two photos show the *same* person. Training a two-input binary classifier would double the network and starve on scarce positive pairs. The elegant fix is a **[[siamese-network|siamese neural network]]**: a *single* network $f$ that maps one image to an embedding vector, trained so that same-person embeddings sit close together and different-person embeddings sit far apart. Training uses triplets — an anchor $A$, a positive $P$ (same person), a negative $N$ (someone else) — and the **[[triplet-loss|triplet loss]]**:',
         },
         {
           type: 'formula',
@@ -449,17 +539,32 @@ export const ch07: Chapter = {
         {
           type: 'p',
           md:
-            'Training goes faster with *hard* negatives — candidates the current model finds confusingly similar to the anchor — rather than random strangers the network tells apart instantly. Despite the name, training uses many photos per person; “one-shot” describes deployment: your phone stores **one** photo of you, and unlocking is just checking $\\|f(A) - f(\\hat{A})\\|^2 < \\tau$ for a threshold $\\tau$.',
+            'The word *siamese* is doing real work here: there are not two networks, there is one network used twice. Train two separate networks, one per photo, and each would invent its own coordinate system — the same face could land in opposite corners of the two spaces and the distance between them would mean nothing at all. Sharing every weight forces both photos into the *same* space, and it means a single triplet updates one set of parameters three times over. Think of it as a ruler the network is being taught to build. The training signal never says “this is Ada”; it only ever says “these two belong closer together than those two”, and what comes out the far end is a general-purpose measure of facial similarity that works on people the network has never seen.',
         },
         {
           type: 'p',
           md:
-            '**Zero-shot learning** aims even higher: predict labels that never appeared in training. The trick is to embed the *outputs* too. Word embeddings give every English word a vector whose dimensions capture aspects of meaning — a cartoon version: *mammalness*, *orangeness*, *stripeness*. Replace each training label with its word embedding and train the model to predict embeddings instead of classes. Show it a tiger — a class it never saw — and it can still detect “orange + striped + mammal” from the pixels, because zebras and clownfish taught it those pieces; the nearest word embedding to its output is, with luck, *tiger*.',
+            'Look at the loss again and notice what happens to an *easy* triplet. If the stranger already sits much farther away than your second photo, the expression inside the max is negative, the loss is zero — and a zero loss has a zero gradient. That triplet contributes literally nothing to the update. Since most randomly drawn strangers are easy, a naively sampled batch can be almost entirely inert, which is why training goes faster with *hard* negatives: candidates the current model finds confusingly similar to the anchor. Despite the name, training uses many photos per person; “one-shot” describes deployment: your phone stores **one** photo of you, and unlocking is a comparison, $\\|f(A) - f(\\hat{A})\\|^2 < \\tau$, against a threshold $\\tau$ set by how often you are prepared to let a stranger in.',
         },
         {
           type: 'hint',
           md:
-            'Word embeddings are compared with **cosine similarity**, and Chapter 10 shows how they are learned from a text corpus.',
+            'The margin $\\alpha$ is not decoration. Drop it and the network has a perfect, useless solution available: send *every* image to the same point, so all distances are zero and the loss is zero everywhere. Demanding a gap the negative has to clear makes that collapse expensive and forces the embedding to spread out.',
+        },
+        {
+          type: 'p',
+          md:
+            '**[[zero-shot-learning|Zero-shot learning]]** aims even higher: predict labels that never appeared in training. The trick is to embed the *outputs* too. [Word embeddings](sec:ch10-embeddings) give every English word a vector whose dimensions capture aspects of meaning — a cartoon version: *mammalness*, *orangeness*, *stripeness*. Replace each training label with its word embedding and train the model to predict embeddings instead of classes. Show it a tiger — a class it never saw — and it can still detect “orange + striped + mammal” from the pixels, because zebras and clownfish taught it those pieces; the nearest word embedding to its output is, with luck, *tiger*.',
+        },
+        {
+          type: 'p',
+          md:
+            'State the move plainly, because it is the whole idea: stop predicting *which of these ten classes* and start predicting *a point in a space where meanings live*. A [[softmax]] can never do zero-shot — its output units are fixed the moment training begins, so a class that was not on the list has no unit to light up. Predicting a 300-number vector instead changes the arithmetic completely. At test time you take the model’s output, compare it against the vector of every word you care about, and return the nearest; and that list of words can be extended years after training without touching a single weight. The known failure is unglamorous — a handful of vectors turn out to be the nearest neighbor of almost everything, and the model keeps drifting back toward the classes it actually saw.',
+        },
+        {
+          type: 'hint',
+          md:
+            'Word embeddings are compared with **[[cosine-similarity|cosine similarity]]**, and [Chapter 10](sec:ch10-embeddings) shows how they are learned from a text corpus — nobody hand-wrote *mammalness*.',
         },
         {
           type: 'quiz',
@@ -670,7 +775,7 @@ export const ch07: Chapter = {
       ],
       answer: 0,
       explain:
-        'Averaging over resampled models dilutes noise and unlucky draws — that is variance, so bagging tames overfitting. Boosting instead stacks error-fixers onto an underfitting weak learner, which is bias — and is exactly why boosting *can* overfit if you push the depth or the number of rounds.',
+        'Averaging over resampled models dilutes noise and unlucky draws — that is [[model-variance|variance]], so bagging tames [overfitting](sec:ch05-overfitting). Boosting instead stacks error-fixers onto an underfitting weak learner, which is [[model-bias|bias]] — and is exactly why boosting *can* overfit if you push the depth or the number of rounds.',
     },
     {
       kind: 'numeric',

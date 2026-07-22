@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { TeX } from '../../lesson/TeX';
@@ -73,6 +73,38 @@ const PRESETS: Preset[] = [
   },
 ];
 
+/** four presets that differ in exactly one way each, so each pill earns a row */
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'sum',
+    what: 'The plain $\\sum$: add the four entries of the vector one after another. This is the shape every other preset is a variation on.',
+  },
+  {
+    control: 'sum of squares',
+    what: 'The same $\\sum$, but each entry is squared *before* it is added. The subscript still runs over the same four positions — only the thing being added changed.',
+  },
+  {
+    control: 'product',
+    what: 'A $\\prod$ instead of a $\\sum$: multiply rather than add, which is why the running total starts at 1 and not 0. Watch how fast it grows compared with the plain sum.',
+  },
+  {
+    control: 'average',
+    what: 'A $\\sum$ with a $\\tfrac{1}{4}$ in front of it. The division happens once, after the last term, which is why the running number does not look like an average until the expansion finishes.',
+  },
+  {
+    control: 'expand the first term',
+    what: 'Writes out one more term of the expression, replacing the $\\cdots$ with concrete numbers. It reads **add next term** from the second press onward and greys out once all four are written.',
+  },
+  {
+    control: 'running sum / running product',
+    what: 'The value of the part that is written out so far, not of the whole expression. For **average** it is still just the sum, since the division has not been applied yet.',
+  },
+  {
+    control: 'the ✓ on a pill',
+    what: 'Marks an expression you have already expanded all the way to its final value. The challenge asks for three different pills carrying one.',
+  },
+];
+
 /**
  * Pick a Σ/Π expression and unroll it one concrete term at a time.
  * Challenge: fully expand 3 different expressions.
@@ -124,16 +156,18 @@ export function SigmaExpander({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Unroll the Σ and Π"
+      intro={
+        <>
+          Every expression below runs over the same little vector{' '}
+          <TeX tex="\mathbf{x} = [2,\, 5,\, 1,\, 4]" />. Pick one, then unroll it one concrete
+          term at a time.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Every expression below runs over the same little vector{' '}
-        <TeX tex="\mathbf{x} = [2,\, 5,\, 1,\, 4]" />. Pick one, then unroll it one concrete
-        term at a time.
-      </p>
-
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
         {PRESETS.map((q) => {
           const active = q.id === presetId;

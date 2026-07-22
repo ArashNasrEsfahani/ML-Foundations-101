@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TeX } from './TeX';
+import { renderInline } from './inline';
 
 /** the same wobbly stroke the map uses for progress — drawn, not ruled */
 function SketchUnderline() {
@@ -137,7 +138,7 @@ export function FormulaBlock({
           {active !== null && (
             <p style={{ margin: '10px 2px 2px', fontSize: '0.95rem', color: 'var(--ink)' }}>
               <TeX tex={terms[active].tex} />
-              <span style={{ color: 'var(--graphite)' }}> — {terms[active].explain}</span>
+              <span style={{ color: 'var(--graphite)' }}> — {renderInline(terms[active].explain)}</span>
             </p>
           )}
           {active === null && (

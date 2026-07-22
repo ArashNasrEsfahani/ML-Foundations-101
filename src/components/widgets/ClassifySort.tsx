@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { WidgetFrame } from './WidgetFrame';
+import { WidgetFrame, type GuideEntry } from './WidgetFrame';
 import { useChallenge } from './ChallengeChip';
 import type { Challenge } from '../../content/schema';
 import { SketchIcon } from '../sketch/SketchIcon';
@@ -11,16 +11,41 @@ export interface SortCard {
 }
 
 /**
+ * The two-tap mechanic is identical in every ClassifySort, so it explains
+ * itself here; a caller only has to describe what its own piles mean.
+ */
+const MECHANIC_GUIDE: GuideEntry[] = [
+  {
+    control: 'the cards on top',
+    what: 'Tap one to pick it up — it darkens to show it is the card being placed. Tapping it again puts it back down, and cards you have already sorted leave this row.',
+  },
+  {
+    control: 'the dashed piles',
+    what: 'Tap the pile a picked-up card belongs to. They stay greyed out until a card is in hand, because a pile is a destination and not a thing to read.',
+  },
+  {
+    control: 'the sorted cards',
+    what: 'Every placement is scored the moment you make it: a tick means the card landed in the right pile, a cross means it did not. Wrong cards stay where you put them so you can see the mistake you actually made.',
+  },
+];
+
+/**
  * Generic tap-to-sort game: pick a card, tap the bucket it belongs to.
  * Green/red feedback per placement (this is answer feedback, so the colors are allowed).
  */
 export function ClassifySort({
   title,
+  intro,
+  guide,
   buckets,
   cards,
   challenge,
 }: {
   title: string;
+  /** one or two sentences on what is being sorted and why */
+  intro?: React.ReactNode;
+  /** rows describing this game's own piles, appended after the shared mechanic */
+  guide?: GuideEntry[];
   buckets: string[];
   cards: SortCard[];
   challenge?: Challenge;
@@ -59,7 +84,14 @@ export function ClassifySort({
   };
 
   return (
-    <WidgetFrame title={title} onReset={reset} challenge={challenge} challengeDone={challengeDone}>
+    <WidgetFrame
+      title={title}
+      intro={intro}
+      guide={[...MECHANIC_GUIDE, ...(guide ?? [])]}
+      onReset={reset}
+      challenge={challenge}
+      challengeDone={challengeDone}
+    >
       {/* card being sorted */}
       <div style={{ minHeight: 64, marginBottom: 12 }}>
         {remaining.length > 0 ? (

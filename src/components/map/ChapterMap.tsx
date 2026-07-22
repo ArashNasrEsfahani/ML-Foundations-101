@@ -566,6 +566,23 @@ export function ChapterMap() {
 
       {/* the source this whole course is built on */}
       <div className="anim-fade" style={{ marginTop: 34 }}>
+        <PaperCard padding={20} seed={57} dashed style={{ marginBottom: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <SketchIcon name="question" size={30} strokeWidth={1.3} />
+            <div style={{ flex: 1, minWidth: 230 }}>
+              <div style={{ fontFamily: 'var(--font-hand)', fontSize: '1.3rem', fontWeight: 700 }}>
+                Lost a word somewhere?
+              </div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--graphite)' }}>
+                Every term in the course, explained in plain words, then a little deeper, then in
+                full maths. The same cards open by hovering an underlined term in any lesson.
+              </div>
+            </div>
+            <Link to="/glossary" style={{ textDecoration: 'none' }}>
+              <button className="ghost">Open the glossary</button>
+            </Link>
+          </div>
+        </PaperCard>
         <PaperCard padding={20} seed={83} dashed>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <SketchIcon name="book" size={30} strokeWidth={1.3} />

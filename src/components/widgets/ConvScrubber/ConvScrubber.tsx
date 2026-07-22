@@ -3,6 +3,7 @@ import { WidgetFrame } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { useTicker } from '../../../hooks/useRaf';
+import { useSpeed, SpeedControl } from '../SpeedControl';
 import { mulberry32 } from '../../../lib/rng';
 
 const N = 10; // input image is N×N
@@ -79,6 +80,7 @@ export function ConvScrubber({ challenge }: WidgetProps) {
   const [sweeping, setSweeping] = useState(false);
   const [showPool, setShowPool] = useState(false);
   const [inspect, setInspect] = useState<{ r: number; c: number } | null>(null);
+  const speed = useSpeed();
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   // full 8×8 feature map for the current filter (cheap: 64 dot products)
@@ -118,7 +120,8 @@ export function ConvScrubber({ challenge }: WidgetProps) {
     });
   };
 
-  // sweep animation: row-major scan, one output cell per tick
+  // sweep animation: row-major scan, one output cell per tick. 220 ms is about
+  // as fast as the nine products can be read as they change.
   useTicker(
     () => {
       const { r, c } = pos;
@@ -127,7 +130,7 @@ export function ConvScrubber({ challenge }: WidgetProps) {
       else setSweeping(false);
     },
     sweeping,
-    55,
+    speed.ms(220),
   );
 
   const applyPreset = (key: string) => {
@@ -220,13 +223,69 @@ export function ConvScrubber({ challenge }: WidgetProps) {
   const outShade = (v: number): string => mix(0.5 - v / (2 * maxAbs));
 
   return (
-    <WidgetFrame title="Convolution scrubber" onReset={reset} challenge={challenge} challengeDone={done}>
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        The image hides a bright vertical bar and a dark diagonal. Drag over it (or use the
-        arrows) to slide the 3×3 filter; each stop multiplies patch and filter cell by cell
-        and sums — one value of the feature map. Tap a filter cell to cycle −1 / 0 / 1.
-      </p>
-
+    <WidgetFrame
+      title="Convolution scrubber"
+      intro={
+        <>
+          The image hides a bright vertical bar and a dark diagonal. Drag over it (or use the
+          arrows) to slide the 3×3 filter; each stop multiplies patch and filter cell by cell
+          and sums — one value of the feature map.
+        </>
+      }
+      guide={[
+        {
+          control: 'filter preset',
+          what: 'Loads one of four hand-built 3×3 [[filter|filters]]. Each responds to a different thing, so switch presets and compare which one lights up on the bar and which on the diagonal.',
+        },
+        {
+          control: 'the filter grid (tap to edit)',
+          what: 'Tapping a cell cycles its value −1 → 0 → 1. A [[convolution]] filter is nothing but these nine numbers; changing one clears the feature map, because every value in it was computed with the old numbers.',
+        },
+        {
+          control: '◀ ▲ ▼ ▶',
+          what: 'Moves the window one output cell at a time — the [[stride]] here is 1. Arrow keys do the same once the image has focus.',
+        },
+        {
+          control: 'drag over the image',
+          what: 'Slides the window straight to wherever you point, and reads out the pixel under the pointer. Fastest way to compare a patch on the bright bar with one on the dim background.',
+        },
+        {
+          control: 'Sweep / Stop',
+          what: 'Scans the window over every position in row-major order, filling the [[feature-map]] as it goes. Stop freezes it wherever it is.',
+        },
+        {
+          control: 'speed',
+          what: 'Time per window position while sweeping: about 1.1 s on *slow*, 220 ms on *normal*, 55 ms on *fast*. Slow is the setting where you can still read the nine products as they change.',
+        },
+        {
+          control: '2×2 max-pool',
+          what: 'Collapses the 8×8 map to 4×4 by keeping the largest value in each 2×2 block — see [[pooling]]. Available only once the map is complete, since it needs every value.',
+        },
+        {
+          control: 'reset',
+          what: 'Back to the horizontal-edge filter at the top-left corner, with an empty feature map.',
+        },
+        {
+          control: 'patch × filter, cell by cell',
+          what: 'The nine products being summed at the current position. The sum of these nine numbers is exactly the one output value below them.',
+        },
+        {
+          control: 'output(r,c)',
+          what: 'The value the filter produces at the window’s current position — the dot product of patch and filter. Large positive means the patch looks like the filter, large negative means it looks like its opposite.',
+        },
+        {
+          control: '8×8 feature map',
+          what: 'One cell per window position, filled in as you visit it; the counter says how many of the 64 exist so far. Dark = strong positive response, light = negative, so an edge shows up as a dark stripe next to a light one.',
+        },
+        {
+          control: 'input(r,c)',
+          what: 'The brightness of the last pixel you touched, from 0 (ink) to 1 (paper). The bright bar sits near 0.95, the background near 0.3.',
+        },
+      ]}
+      onReset={reset}
+      challenge={challenge}
+      challengeDone={done}
+    >
       {/* controls */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 10 }}>
         <label style={{ fontSize: '0.88rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -277,6 +336,7 @@ export function ConvScrubber({ challenge }: WidgetProps) {
         >
           {showPool ? 'Hide 2×2 max-pool' : '2×2 max-pool'}
         </button>
+        <SpeedControl value={speed.speed} onChange={speed.setSpeed} />
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-start' }}>
@@ -365,7 +425,7 @@ export function ConvScrubber({ challenge }: WidgetProps) {
                 const text = `${fmt(IMAGE[pos.r + i][pos.c + j])}·${fmt(f)}`;
                 return (
                   // each product pops when its value changes — muted during a sweep,
-                  // where 9 cells changing every 55ms would just be noise
+                  // where nine cells re-popping several times a second is noise
                   <div
                     key={sweeping ? `${i}-${j}` : `${i}-${j}-${text}`}
                     className={sweeping ? undefined : 'anim-bump'}

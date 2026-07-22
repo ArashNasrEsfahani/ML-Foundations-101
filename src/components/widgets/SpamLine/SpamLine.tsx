@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { makeFrame, Axes, Dot, PlotSvg } from '../Plot';
@@ -14,11 +14,38 @@ const H = 340;
 // starts cutting straight through the spam cloud so the player has real work to do
 const START = { h1: { x: 0.6, y: 7 }, h2: { x: 9.4, y: 7 } };
 
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'the ◇ handles',
+    what: 'Drag either one anywhere in the plot; the boundary is the infinite line through both of them. Grab the one nearer your finger to swing the line, and move both the same way to slide it across without turning it.',
+  },
+  {
+    control: 'dashed rings',
+    what: 'One ring per point currently on the wrong side of the line. They are the errors the count below is counting, so aim to drag until none are left.',
+  },
+  {
+    control: 'the dashed band',
+    what: 'A pair of lines parked at the distance of the closest point, so the gap between them is the room your boundary has to spare. It is drawn faintly until nothing is misclassified, because a corridor around a wrong answer means nothing.',
+  },
+  {
+    control: '‖w‖',
+    what: 'The length of the weight vector. Here it is fixed at 1 because the widget uses the unit normal of your line, which is what lets the margin be read as a plain distance.',
+  },
+  {
+    control: 'margin',
+    what: 'The distance from the line to the nearest point, in the plot’s own units. Two different lines can both separate the data perfectly and still have very different margins — the bigger one is the safer classifier.',
+  },
+  {
+    control: 'misclassified',
+    what: 'How many of the emails the line currently gets wrong. Zero completes the challenge.',
+  },
+];
+
 /**
  * Drag a straight line to separate spam (filled) from normal mail (open).
  *
  * The two handles define a direction d; the boundary's normal is w = (−d.y, d.x)
- * normalised, and b = w·h1, so the line is exactly w⁽¹⁾x⁽¹⁾ + w⁽²⁾x⁽²⁾ − b = 0.
+ * normalized, and b = w·h1, so the line is exactly w⁽¹⁾x⁽¹⁾ + w⁽²⁾x⁽²⁾ − b = 0.
  * The widget scores whichever of the two labelings is better, and flips (w, b)
  * together when the flipped one wins — so the printed equation can never
  * disagree with the picture.
@@ -144,14 +171,17 @@ export function SpamLine({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Draw the decision boundary"
+      intro={
+        <>
+          Filled dots are spam, open dots are normal mail. Drag the two square handles until the
+          line separates them — the equation underneath is the line you are drawing.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Filled dots are spam, open dots are normal mail. Drag the two square handles until the
-        line separates them — the equation underneath is the line you are drawing.
-      </p>
       <PlotSvg frame={frame} {...dragProps}>
         <defs>
           <clipPath id="spamline-clip">

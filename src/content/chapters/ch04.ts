@@ -12,7 +12,7 @@ export const ch04: Chapter = {
     {
       id: 'ch04-building-blocks',
       title: 'Three Building Blocks',
-      minutes: 5,
+      minutes: 7,
       blocks: [
         {
           type: 'p',
@@ -23,30 +23,40 @@ export const ch04: Chapter = {
           type: 'list',
           ordered: true,
           items: [
-            'a **loss function** — a per-example penalty measuring how badly the model missed on one training pair;',
-            'an **optimization criterion** built from that loss — typically a *cost function* such as the average loss over the whole training set;',
-            'an **optimization routine** that uses the training data to find the parameter values that optimize the criterion.',
+            'a **[[loss-function|loss function]]** — a per-example penalty measuring how badly the model missed on one training pair;',
+            'an **[[optimization-criterion|optimization criterion]]** built from that loss — typically a *cost function* such as the average loss over the whole training set;',
+            'an **[[optimization-routine|optimization routine]]** that uses the training data to find the parameter values that optimize the criterion.',
           ],
         },
         {
           type: 'p',
           md:
-            'Concretely: linear regression uses the **squared loss** $(y_i - (wx_i + b))^2$; averaging it over all $N$ examples yields the criterion, **mean squared error**, which you can minimize with a closed-form formula *or* iteratively. Logistic regression maximizes the **likelihood** of the observed labels (equivalently, minimizes negative log-likelihood). SVM charges **hinge loss** for landing on the wrong side of the margin.',
+            'Concretely: [linear regression](sec:ch03-linear-regression) uses the **[[squared-loss|squared loss]]** $(y_i - (wx_i + b))^2$; averaging it over all $N$ examples yields the criterion, **mean squared error**, which you can minimize with a closed-form formula *or* iteratively. [Logistic regression](sec:ch03-logistic-regression) maximizes the **likelihood** of the observed labels (equivalently, minimizes negative log-likelihood). [SVM](sec:ch03-svm) charges **[[hinge-loss|hinge loss]]** for landing on the wrong side of the margin.',
         },
         {
           type: 'p',
           md:
-            'Not every algorithm plays this cleanly. **kNN** and **decision tree learning** are old-timers, invented from intuition and experiment: they optimize their criteria only *implicitly*, and the formal criteria were worked out afterwards to explain why they work — science often runs in that order.',
+            'The distinction between the first block and the second looks like pedantry until you change one without the other. Keep the squared loss and change the criterion — add a penalty on the size of the weights themselves — and you have ridge regression, the [regularization](sec:ch05-regularization) of Chapter 5, from the same loss. Keep the criterion as an average and change the loss, and you swap out what "wrong" means: the square chases the worst-missed examples hardest, while hinge loss stops caring about a point the moment it is comfortably right. Loss and criterion are two dials, not one.',
         },
         {
           type: 'p',
           md:
-            'Whenever the criterion is **differentiable**, two workhorse routines dominate modern practice: **gradient descent** and its cousin **stochastic gradient descent**. Gradient descent hunts for a *local* minimum of a function: start at some point, then repeatedly step **proportional to the negative of the gradient** at wherever you currently stand.',
+            'Not every algorithm plays this cleanly. [kNN](sec:ch03-knn) and [decision tree learning](sec:ch03-decision-trees) are old-timers, invented from intuition and experiment: they optimize their criteria only *implicitly*, and the formal criteria were worked out afterwards to explain why they work — science often runs in that order.',
+        },
+        {
+          type: 'p',
+          md:
+            'Whenever the criterion is **[[differentiable]]**, two workhorse routines dominate modern practice: **[[gradient-descent|gradient descent]]** and its cousin **[[stochastic-gradient-descent|stochastic gradient descent]]**. Gradient descent hunts for a *local* minimum of a function: start at some point, then repeatedly step **proportional to the negative of the [gradient](sec:ch02-derivative-gradient)** at wherever you currently stand.',
+        },
+        {
+          type: 'p',
+          md:
+            'Differentiability is a heavier constraint than it sounds, and it explains an oddity that trips up every newcomer: **nobody optimizes the thing they actually want**. What you want from a classifier is a low count of mistakes. But a count is a staircase — nudge a weight a hair and the count does not budge, nudge it a hair more and it jumps by one. Flat everywhere it is defined and vertical where it is not: the gradient is either zero or missing, so there is no downhill direction to read off it anywhere. The losses in the list above are therefore **surrogates**, picked because they are smooth stand-ins that fall when the mistake count falls. You minimize squared error or negative log-likelihood because you *can*, and then you measure accuracy — a [different quantity entirely](sec:ch05-metrics) — to find out whether it worked.',
         },
         {
           type: 'hint',
           md:
-            'For linear regression, logistic regression and SVM the criterion is **convex** — one bowl, one minimum, and it is global. Neural-network criteria are not convex, but in practice finding a good local minimum is usually enough.',
+            'For linear regression, logistic regression and SVM the criterion is **[[convex]]** — one bowl, one minimum, and it is global. Neural networks are not convex, and the reason is almost silly: swap two hidden units and you get a different set of parameters with exactly the same loss, so there are at least two equally deep valleys, and a bowl has only one. In practice a good local minimum is usually enough.',
         },
         {
           type: 'quiz',
@@ -99,7 +109,7 @@ export const ch04: Chapter = {
               ],
               answer: 0,
               explain:
-                'Differentiability is what matters. Convexity is a separate property: on non-convex criteria (neural networks) gradient descent still runs — it just promises only a *local* minimum. A count of errors is a step function: its gradient is zero almost everywhere, so there is nothing to descend.',
+                'Differentiability is what matters. [[convex|Convexity]] is a separate property: on non-convex criteria (neural networks) gradient descent still runs — it just promises only a *local* minimum. A count of errors is a step function: its gradient is zero almost everywhere, so there is nothing to descend.',
             },
           ],
         },
@@ -108,12 +118,12 @@ export const ch04: Chapter = {
     {
       id: 'ch04-gradient-descent',
       title: 'Gradient Descent',
-      minutes: 8,
+      minutes: 12,
       blocks: [
         {
           type: 'p',
           md:
-            'Time to watch the machinery run. The demo problem: predict a company’s **units sold** from its **radio-ad spendings** (in millions). One feature, so the model is $f(x) = wx + b$ with exactly two parameters to learn. Linear regression has a closed-form solution, so gradient descent is not *needed* here — which is precisely why it makes the perfect glass-box demo. The criterion is the **mean squared error**:',
+            'Time to watch the machinery run. The demo problem: predict a company’s **units sold** from its **radio-ad spendings** (in millions). One feature, so the model is $f(x) = wx + b$ with exactly two parameters to learn. Linear regression has a [closed-form solution](sec:ch03-linear-regression), so gradient descent is not *needed* here — which is precisely why it makes the perfect glass-box demo: you can check every step against an answer you already know. [Logistic regression](sec:ch03-logistic-regression) is where the need becomes real, because setting its gradient to zero produces equations no one can solve algebraically. The criterion is the **[[mean-squared-error|mean squared error]]**:',
         },
         {
           type: 'formula',
@@ -134,7 +144,8 @@ export const ch04: Chapter = {
             },
             {
               tex: '(\\;\\cdot\\;)^2',
-              explain: 'squaring removes the sign and punishes big misses far more than small ones',
+              explain:
+                'the [[squared-loss|squared loss]]: squaring removes the sign and punishes big misses far more than small ones',
             },
             {
               tex: '\\frac{1}{N}\\sum_{i=1}^{N}',
@@ -145,7 +156,7 @@ export const ch04: Chapter = {
         {
           type: 'p',
           md:
-            'Gradient descent begins by asking, for each parameter separately: *if I nudge you a little, how does the loss change?* The answers are the **partial derivatives**. For the squared term you apply the **chain rule**: differentiate the outer square (giving $2\\times$ the residual), then multiply by the derivative of the residual with respect to the parameter — $-x_i$ for $w$, and $-1$ for $b$.',
+            'Gradient descent begins by asking, for each parameter separately: *if I nudge you a little, how does the loss change?* The answers are the **[[partial-derivative|partial derivatives]]** from [Chapter 2](sec:ch02-derivative-gradient). For the squared term you apply the **[[chain-rule|chain rule]]**: differentiate the outer square (giving $2\\times$ the residual), then multiply by the derivative of the residual with respect to the parameter — $-x_i$ for $w$, and $-1$ for $b$.',
         },
         {
           type: 'formula',
@@ -199,7 +210,7 @@ export const ch04: Chapter = {
         {
           type: 'p',
           md:
-            'The routine initializes $w \\leftarrow 0$, $b \\leftarrow 0$ and proceeds in **epochs**: one epoch uses the *entire* training set to update each parameter once. The size of the update is set by the **learning rate** $\\alpha$:',
+            'The routine initializes $w \\leftarrow 0$, $b \\leftarrow 0$ and proceeds in **[[epoch|epochs]]**: one epoch uses the *entire* training set to update each parameter once. The size of the update is set by the **[[learning-rate|learning rate]]** $\\alpha$:',
         },
         {
           type: 'formula',
@@ -217,7 +228,7 @@ export const ch04: Chapter = {
             {
               tex: '\\alpha',
               explain:
-                'the learning rate: scales the step. Too small = a slow crawl over thousands of epochs; too large = overshoot and divergence',
+                'the [[learning-rate|learning rate]]: scales the step. Too small = a slow crawl over thousands of epochs; too large = overshoot and [[divergence]]',
             },
             {
               tex: '- \\alpha \\frac{\\partial l}{\\partial w}',
@@ -233,12 +244,27 @@ export const ch04: Chapter = {
         {
           type: 'p',
           md:
-            'Why *subtract*? A derivative is a growth meter. If it is positive, the loss climbs as the parameter increases — so walk the other way. If it is negative, subtracting a negative moves the parameter right, again downhill. Repeat epoch after epoch, recomputing the derivatives with the fresh $w, b$; when the two values barely change any more, gradient descent has **converged** and you stop.',
+            'Why *subtract*? A derivative is a growth meter. If it is positive, the loss climbs as the parameter increases — so walk the other way. If it is negative, subtracting a negative moves the parameter right, again downhill. Repeat epoch after epoch, recomputing the derivatives with the fresh $w, b$; when the two values barely change any more, gradient descent has **[[convergence|converged]]** and you stop.',
         },
         {
           type: 'p',
           md:
-            'The learning rate is a knife’s edge. Too small and the loss shrinks glacially. Too large and each step leaps clean over the valley floor, landing *higher* on the far wall than where it started: the loss grows every epoch and the parameters fly off toward infinity. That failure mode is called **divergence** — you will manufacture it yourself in the widget below.',
+            'The learning rate is a knife’s edge, and it is worth being precise about *why* the wrong side of it is so violent. The step you take is proportional to the slope where you are standing. Inside a bowl, the slope gets steeper the further you are from the bottom. So if a step carries you past the bottom and further up the opposite wall than you began, the ground there is steeper — and the **next** step, being proportional to that steeper slope, is longer still. Each epoch amplifies the last. The parameters do not wander off; they are catapulted, and the loss grows geometrically until a floating-point number gives up. That is **[[divergence]]** — you will manufacture it yourself in the widget below.',
+        },
+        {
+          type: 'p',
+          md:
+            'Numbers make the edge visible. Take the simplest possible bowl, $l(w) = (w - 3)^2$, whose derivative is $2(w - 3)$. One update leaves the distance from the answer multiplied by exactly $|1 - 2\\alpha|$, every time. At $\\alpha = 0.1$ that factor is $0.8$: start at $w = 0$, three units out, and after ten epochs you are $0.32$ out — steady, unspectacular. At $\\alpha = 0.5$ the factor is $0$ and the very first step lands on $w = 3$ exactly. At $\\alpha = 1$ the factor is exactly $1$ and the parameter bounces between $0$ and $6$ for ever, making no progress and doing no harm. At $\\alpha = 1.1$ the factor is $1.2$, so the distance *grows* a fifth every epoch: three units out becomes eighteen after ten epochs, and roughly a hundred and seventy thousand after sixty. Nothing about the problem changed across those four runs — only the stride.',
+        },
+        {
+          type: 'p',
+          md:
+            'The lesson generalizes past that toy bowl. The safe range for $\\alpha$ is set by the **curvature** of your criterion — how fast the slope itself changes — and you do not know that number in advance for any interesting model. Which is why nobody guesses α to three decimal places: they try $0.1$, $0.01$, $0.001$, watch the first few epochs, and keep whichever one goes down fastest without going up.',
+        },
+        {
+          type: 'hint',
+          md:
+            'The nastiest version of this failure has nothing to do with α being obviously silly. Give one feature values in the millions and another values in the hundredths, and the criterion becomes a canyon: violently steep along one axis, nearly flat along the other. A single α has to serve both, so it is either too large for the steep axis (divergence) or too small for the flat one (a crawl). [Rescaling the features](sec:ch05-feature-engineering) before training is not cosmetic tidying — it is what makes a single learning rate possible at all.',
         },
         {
           type: 'code',
@@ -273,7 +299,36 @@ for epoch in range(150):
         {
           type: 'p',
           md:
-            'Plain gradient descent touches every example in every epoch — sluggish on big datasets. **Minibatch stochastic gradient descent (SGD)** speeds this up by estimating the gradient from small random subsets (batches) of the data. SGD itself has popular upgrades: **Momentum** accelerates the descent and damps oscillation, **Adagrad** scales $\\alpha$ per parameter using the history of gradients, and **RMSProp** and **Adam** are everyday choices for training neural networks. One thing to keep straight: none of these are machine learning algorithms. They are generic *minimizers* for any function that has a gradient.',
+            'Plain gradient descent touches every example before it moves a muscle. On five data points that is nothing; on five hundred thousand it means half a million residuals computed for one update of two numbers. **Minibatch [[stochastic-gradient-descent|stochastic gradient descent]] (SGD)** breaks the deadlock by estimating the gradient from a small random handful — a **[[minibatch|batch]]** — and stepping immediately.',
+        },
+        {
+          type: 'p',
+          md:
+            'Put numbers on it. With $N = 50{,}000$ examples, one epoch costs $50{,}000$ gradient evaluations *whichever* method you use — that is what an epoch means. What differs is how many steps you get for the money. Full batch: **one** update. Batches of 32: **1,563** updates. One example at a time: **50,000**. Same data read, same arithmetic done, three orders of magnitude more chances to improve — and the first useful move happens after 32 examples rather than after all fifty thousand.',
+        },
+        {
+          type: 'p',
+          md:
+            'What you give up is exactness: a gradient measured on 32 examples points in roughly the right direction, not the right one, so the loss curve comes out jagged rather than smooth. Two things make that a good bargain. The error shrinks as the square root of the batch size, so a batch of 32 is already about six times steadier than a single example while costing a fraction of the full sweep. And the leftover noise is not purely a tax — it jostles the parameters, which helps a non-convex criterion shake free of narrow crevices and behaves, in practice, a little like [regularization](sec:ch05-overfitting).',
+        },
+        {
+          type: 'p',
+          md:
+            'SGD then acquired a family of upgrades, each invented to fix one specific way plain descent wastes time:',
+        },
+        {
+          type: 'list',
+          items: [
+            '**[[momentum|Momentum]]** gives the walker weight. It keeps a fraction of the previous step and adds the new gradient to it, so a direction you are pushed in repeatedly builds up speed while a direction that keeps reversing cancels itself out. The problem it solves is the *ravine*: a valley steep across and shallow along, where plain descent bounces off the walls and barely advances along the floor.',
+            '**[[adagrad|Adagrad]]** gives every parameter its own α, shrinking it in proportion to how much that parameter has already been pushed. It was built for gradients of wildly different sizes — the weight on a common word gets a gradient from nearly every example, the weight on a rare word from a handful, and no single α suits both. Its flaw is that the shrinking never stops, so long runs slowly seize up.',
+            '**[[rmsprop|RMSProp]]** is Adagrad with a short memory: a decaying average of recent squared gradients instead of a running total of all of them. The per-parameter scaling survives; the seizing up does not. That matters on non-convex problems, where the terrain at epoch 50 has nothing to do with the terrain at epoch 1.',
+            '**[[adam|Adam]]** combines the two — momentum for the direction, RMSProp for the per-parameter stride. The division by the gradient’s own scale makes it nearly indifferent to what units your loss is measured in, which is why one default setting works across wildly different models and why it is what most people reach for without thinking.',
+          ],
+        },
+        {
+          type: 'p',
+          md:
+            'One thing to keep straight: none of these are machine learning algorithms. They are generic *minimizers* for any function that has a gradient — the same Adam that trains a language model will happily fit a curve to your electricity bill.',
         },
         {
           type: 'quiz',
@@ -308,7 +363,7 @@ for epoch in range(150):
               prompt: 'Increasing the learning rate $\\alpha$ always makes gradient descent converge faster.',
               answer: false,
               explain:
-                'Only up to a point. Past it, each step overshoots the minimum, the loss grows every epoch, and the parameters diverge to infinity.',
+                'Only up to a point. Past it each step overshoots the minimum and lands somewhere steeper, so the next step is longer still: the loss grows every epoch and the parameters run off to infinity. On the bowl $l(w) = (w-3)^2$ that point is exactly $\\alpha = 1$.',
             },
             {
               kind: 'mcq',
@@ -331,12 +386,17 @@ for epoch in range(150):
     {
       id: 'ch04-engineers-and-particularities',
       title: 'Engineers, Libraries, and Particularities',
-      minutes: 5,
+      minutes: 7,
       blocks: [
         {
           type: 'p',
           md:
-            'Here is a working secret: unless you are a research scientist at a deep-pocketed lab, you **almost never implement learning algorithms yourself** — and you don’t hand-roll gradient descent either. You use **libraries**: open-source collections of algorithms engineered for stability and efficiency. The most used one is **scikit-learn**, written in Python and C. Training linear regression there is one real line, `model = LinearRegression().fit(x, y)`, and predicting is another, `model.predict(x_new)`.',
+            'Here is a working secret: unless you are a research scientist at a deep-pocketed lab, you **almost never implement learning algorithms yourself** — and you don’t hand-roll gradient descent either. You use **libraries**: open-source collections of algorithms engineered for stability and efficiency. The most used one is **[[scikit-learn]]**, written in Python and C. Training linear regression there is one real line, `model = LinearRegression().fit(x, y)`, and predicting is another, `model.predict(x_new)`.',
+        },
+        {
+          type: 'hint',
+          md:
+            '"Engineered for stability" sounds like marketing until you write the naïve version. Compute a logistic model’s log-likelihood the obvious way and the moment the model is confident about an example, $\\sigma(z)$ rounds to exactly $1$, so $\\log(1 - \\sigma(z))$ becomes $\\log 0 = -\\infty$ and the whole sum is ruined; the library rearranges the algebra so that never happens. Solve linear regression by literally inverting $\\mathbf{X}^\\top\\mathbf{X}$ and two correlated features will hand you nonsense; the library factorizes instead. Your version and theirs implement the same equations. Theirs survives real data.',
         },
         {
           type: 'p',
@@ -346,7 +406,7 @@ for epoch in range(150):
         {
           type: 'p',
           md:
-            'What the library will *not* forgive is malformed input. Most algorithms — SVM, linear and logistic regression, kNN with Euclidean or cosine metrics — require **numerical** features, and every example must be a vector of the **same fixed length**, where position $j$ means the same thing for every example. Decision trees are the easygoing exception: a categorical feature like color = red/yellow/green can stay as it is. (How to turn categories into numbers is a Chapter 5 story.)',
+            'What the library will *not* forgive is malformed input. Most algorithms — SVM, linear and logistic regression, kNN with Euclidean or cosine metrics — require **numerical** features, and every example must be a vector of the **same fixed length**, where position $j$ means the same thing for every example. Decision trees are the easygoing exception: a categorical feature like color = red/yellow/green can stay as it is. (How to turn categories into numbers is [a Chapter 5 story](sec:ch05-feature-engineering).)',
         },
         {
           type: 'p',
@@ -355,17 +415,22 @@ for epoch in range(150):
         {
           type: 'list',
           items: [
-            '**Hyperparameters:** $C$ in SVM, $\\epsilon$ and $d$ in ID3 — and the solvers have their own, like $\\alpha$ in gradient descent.',
-            '**Class weighting:** some algorithms (SVM among them) let you make mistakes on a chosen class extra costly — precious when that class is rare in your training data.',
-            '**Scores vs. classes:** logistic regression and decision trees return a number between 0 and 1 readable as confidence; plain SVM and kNN just name the class.',
-            '**Batch vs. online:** many algorithms (SVM, decision trees, logistic regression) build the model from the whole dataset and must be retrained from scratch when new data arrives; others — Naïve Bayes, scikit-learn’s `SGDClassifier`/`SGDRegressor`, the `PassiveAggressive` family — can update **incrementally**, one batch at a time.',
+            '**[[hyperparameter|Hyperparameters]]:** $C$ in SVM, $\\epsilon$ and $d$ in ID3 — and the solvers have their own, like $\\alpha$ in gradient descent.',
+            '**Class weighting:** some algorithms (SVM among them) let you make mistakes on a chosen class extra costly — precious when that class is [rare in your training data](sec:ch08-imbalanced).',
+            '**Scores vs. classes:** logistic regression and decision trees return a number between 0 and 1 readable as confidence; plain SVM and kNN just name the class. A score is worth more than it looks — it lets you [move the threshold afterwards](sec:ch05-metrics) instead of retraining.',
+            '**Batch vs. online:** many algorithms (SVM, decision trees, logistic regression) build the model from the whole dataset and must be retrained from scratch when new data arrives; others — Naïve Bayes, scikit-learn’s `SGDClassifier`/`SGDRegressor` (the [[stochastic-gradient-descent|SGD]] of the previous section, wrapped as an estimator), the `PassiveAggressive` family — can update **incrementally**, one batch at a time.',
             '**One task or both:** decision trees, SVM and kNN handle classification *and* regression; many algorithms solve only one of the two.',
           ],
         },
         {
           type: 'p',
           md:
-            'So the everyday loop of an ML engineer looks like this: shape raw data into fixed-length numeric feature vectors, pick a candidate algorithm and hyperparameter values, call `fit`, measure quality on held-out data, adjust, and repeat — and when fresh labeled examples arrive, either update the model incrementally or retrain, depending on what the algorithm supports. The library’s documentation tells you what problems each algorithm solves, what inputs it accepts, what its model outputs, and which hyperparameters it exposes.',
+            'The first bullet deserves more than a bullet. A **parameter** is something training discovers — $w$ and $b$ came out of gradient descent, and you never touched them. A **hyperparameter** is something you decide *before* training starts, and nothing in the training run can tell you whether you decided well, because every one of them can be pushed in the direction that makes the training loss smaller. Set $C$ high enough, let ID3 grow deep enough, and the model will recite the training set back to you perfectly and be worthless on anything new. That is [overfitting](sec:ch05-overfitting), and it is why hyperparameters have to be judged on data the model has never been fitted to. [Chapter 5](sec:ch05-tuning) turns that principle into an actual procedure.',
+        },
+        {
+          type: 'p',
+          md:
+            'So the everyday loop of an ML engineer looks like this: shape raw data into fixed-length numeric feature vectors, pick a candidate algorithm and hyperparameter values, call `fit`, measure quality on [held-out data](sec:ch05-three-sets), adjust, and repeat — and when fresh labeled examples arrive, either update the model incrementally or retrain, depending on what the algorithm supports. The library’s documentation tells you what problems each algorithm solves, what inputs it accepts, what its model outputs, and which hyperparameters it exposes.',
         },
         {
           type: 'quiz',
@@ -584,12 +649,12 @@ for epoch in range(150):
       id: 'ch04-boss-14',
       prompt: 'Match each SGD upgrade to its trick:',
       pairs: [
-        ['Momentum', 'accelerates descent and damps oscillation by keeping direction'],
-        ['Adagrad', 'scales α per parameter based on the history of its gradients'],
-        ['Adam', 'a go-to SGD variant for training neural networks'],
+        ['Momentum', 'keeps part of the previous step, so a steady direction gathers speed'],
+        ['Adagrad', 'scales α per parameter by the sum of its past squared gradients'],
+        ['Adam', 'momentum for the direction, per-parameter scaling for the stride'],
       ],
       explain:
-        'All three tweak how the raw gradient turns into a step; RMSProp belongs to the same family.',
+        'All three change how the raw gradient becomes a step. RMSProp is Adagrad with a decaying memory instead of a running total, and Adam is what you get by bolting momentum onto RMSProp.',
     },
     {
       kind: 'tf',

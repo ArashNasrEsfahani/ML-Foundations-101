@@ -162,6 +162,61 @@ export function WordSpace({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Arithmetic with meanings"
+      intro={
+        mode === 'explore' ? (
+          <>
+            Every word is a point. Tap one to light up its five nearest neighbors — similar words
+            live close together.
+          </>
+        ) : (
+          <>
+            Tap three words to build A − B + C. The dashed arrow is the B→C offset; the solid arrow
+            carries it from A to the ★ landing point.
+          </>
+        )
+      }
+      guide={[
+        {
+          control: 'explore',
+          what: 'Tapping a word underlines its five nearest neighbours by [[cosine-similarity]]. This is what [[word-embeddings]] buy you: distance on the page stands for similarity in meaning.',
+        },
+        {
+          control: 'analogy',
+          what: 'Switches to arithmetic mode, where three taps build A − B + C. A fourth tap starts a new triple.',
+        },
+        {
+          control: 'tap a word',
+          what: 'In explore mode it selects that word; in analogy mode it fills the next slot of the expression. The counter under the expression says which slot you are on.',
+        },
+        {
+          control: 'king − man + woman',
+          what: 'Loads the classic analogy without hunting for the words. The offset from *man* to *woman* is roughly the same vector everywhere in this space, which is why the sum lands on *queen*.',
+        },
+        {
+          control: 'paris − france + italy',
+          what: 'The same trick along a different direction — the capital-of offset instead of the gender one. One space, many meaningful directions.',
+        },
+        {
+          control: 'reset',
+          what: 'Clears the picks and returns to explore mode.',
+        },
+        {
+          control: 'the dashed arrow',
+          what: 'The offset from B to C, drawn where it lives. It is the vector about to be added to A.',
+        },
+        {
+          control: 'the solid arrow and ★',
+          what: 'That same offset transported to A, and where it lands. The landing point is almost never exactly on a word — the answer is whichever word is nearest.',
+        },
+        {
+          control: 'the ring',
+          what: 'The nearest word to the ★. Solid means the landing point sits practically on top of it and the analogy counts; dashed means the closest word is still some way off.',
+        },
+        {
+          control: 'Analogies solved',
+          what: 'How many distinct triples have landed on a word so far. Two clears the challenge.',
+        },
+      ]}
       onReset={() => {
         setMode('explore');
         setSelected(null);
@@ -189,11 +244,6 @@ export function WordSpace({ challenge }: WidgetProps) {
           animation: mlw-underline 0.3s cubic-bezier(0.22, 0.8, 0.3, 1) both;
         }
       `}</style>
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        {mode === 'explore'
-          ? 'Every word is a point. Tap one to light up its five nearest neighbors — similar words live close together.'
-          : 'Tap three words to build A − B + C. The dashed arrow is the B→C offset; the solid arrow carries it from A to the ★ landing point.'}
-      </p>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10 }}>
         <button
           className={mode === 'explore' ? 'primary' : 'ghost'}

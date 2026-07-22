@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { WidgetFrame } from '../WidgetFrame';
+import { WidgetFrame, type GuideEntry } from '../WidgetFrame';
 import { useChallenge } from '../ChallengeChip';
 import type { WidgetProps } from '../registry';
 import { makeFrame, Axes, PlotSvg } from '../Plot';
 import { EquationReadout, fmt, texSum } from '../EquationReadout';
+import { useSpeed, SpeedControl } from '../SpeedControl';
 import { useRaf } from '../../../hooks/useRaf';
 import { mulberry32 } from '../../../lib/rng';
 import { sigmoid, logLikelihood, ascentStep, type Point1D } from '../../../lib/ml/logreg';
@@ -16,7 +17,10 @@ const W_MAX = 3;
 const B_MIN = -15;
 const B_MAX = 5;
 const START = { w: 0.3, b: 0 };
-const CLIMB_FRAMES = 90; // one animation frame per tick, 4 ascent steps each
+/** the whole climb, counted in ascent steps so the speed setting changes the
+ *  pace and not the destination */
+const CLIMB_STEPS = 360;
+const STEPS_PER_FRAME = 3; // at normal speed: 1 at slow, 12 at fast
 
 /** 12 seeded 1D points labeled by a threshold, with the 2 nearest-to-threshold labels flipped. */
 function makeData(): Point1D[] {
@@ -35,6 +39,41 @@ function makeData(): Point1D[] {
   return pts;
 }
 
+const GUIDE: GuideEntry[] = [
+  {
+    control: 'w',
+    what: 'How sharp the curve is — see [[sigmoid]]. Near 0 it flattens into a horizontal line that gives every example the same probability; large values turn it into a near-vertical step that commits hard on both sides.',
+  },
+  {
+    control: 'b',
+    what: 'Slides the whole curve sideways without changing its shape, which moves the point where it crosses 0.5. This is the only control that decides *where* the split happens.',
+  },
+  {
+    control: 'gradient ascent',
+    what: 'Lets [[logistic-regression]] tune $w$ and $b$ for you by climbing the log-likelihood, starting from wherever the sliders are now. The sliders lock while it runs and unlock when it finishes.',
+  },
+  {
+    control: 'speed',
+    what: 'How much of the climb each animation frame is allowed to do; the run covers the same ground either way. On *slow* you can see the curve steepening and sliding as two separate effects.',
+  },
+  {
+    control: 'σ = 0.5',
+    what: 'The dashed vertical line where the curve crosses one-half — the actual [[decision-threshold]]. Everything to its right is predicted 1, everything to its left 0.',
+  },
+  {
+    control: 'filled vs open dots',
+    what: 'Filled means the curve currently puts that example on the right side of 0.5, open means it does not. Two of the twelve labels are deliberately wrong, so a couple of open dots is the best anyone can do.',
+  },
+  {
+    control: 'log-lik.',
+    what: 'How much probability the curve assigns to the labels that actually occurred, summed in logs, so it is always negative and closer to 0 is better. It rewards being confident and right and punishes being confident and wrong, which a plain correct-count cannot do.',
+  },
+  {
+    control: 'σ = 0.5 at x',
+    what: 'The feature value where the split falls, computed as $-b/w$. It reads as a dash when $w$ is flat enough that the curve never crosses 0.5 inside the plot.',
+  },
+];
+
 /**
  * Bend the sigmoid over noisy 1D data and watch the log-likelihood climb.
  * Filled dots are currently classified correctly; open dots are mistakes, and
@@ -45,7 +84,8 @@ export function SigmoidExplorer({ challenge }: WidgetProps) {
   const pts = useMemo(() => makeData(), []);
   const [wb, setWb] = useState(START);
   const [fitting, setFitting] = useState(false);
-  const framesLeft = useRef(0);
+  const speed = useSpeed();
+  const stepsLeft = useRef(0);
 
   const frame = makeFrame(W, H, [0, 10], [-0.18, 1.18]);
   const ll = logLikelihood(pts, wb.w, wb.b);
@@ -56,19 +96,22 @@ export function SigmoidExplorer({ challenge }: WidgetProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hit]);
 
-  // gradient ascent, one frame per tick so the curve sweeps instead of hopping
+  // gradient ascent, one frame per tick so the curve sweeps instead of hopping;
+  // the speed setting decides how many steps that frame is allowed to consume,
+  // and the run always ends after the same CLIMB_STEPS of ascent
   useRaf(() => {
+    const n = Math.min(speed.steps(STEPS_PER_FRAME), stepsLeft.current);
     setWb((cur) => {
       let { w, b } = cur;
-      for (let i = 0; i < 4; i++) ({ w, b } = ascentStep(pts, w, b, 0.01));
+      for (let i = 0; i < n; i++) ({ w, b } = ascentStep(pts, w, b, 0.01));
       return { w: clamp(w, W_MIN, W_MAX), b: clamp(b, B_MIN, B_MAX) };
     });
-    framesLeft.current -= 1;
-    if (framesLeft.current <= 0) setFitting(false);
+    stepsLeft.current -= n;
+    if (stepsLeft.current <= 0) setFitting(false);
   }, fitting);
 
   const climb = () => {
-    framesLeft.current = CLIMB_FRAMES;
+    stepsLeft.current = CLIMB_STEPS;
     setFitting(true);
   };
 
@@ -94,7 +137,7 @@ export function SigmoidExplorer({ challenge }: WidgetProps) {
 
   const reset = () => {
     setFitting(false);
-    framesLeft.current = 0;
+    stepsLeft.current = 0;
     setWb(START);
   };
 
@@ -137,15 +180,19 @@ export function SigmoidExplorer({ challenge }: WidgetProps) {
   return (
     <WidgetFrame
       title="Squash the line into a probability"
+      intro={
+        <>
+          Each dot is one example: bottom row means label 0, top row means label 1. The curve is
+          σ(wx + b). <strong>Filled</strong> dots are classified correctly right now,{' '}
+          <strong>open</strong> dots are not. Two of the twelve labels are noisy — no curve gets
+          everything.
+        </>
+      }
+      guide={GUIDE}
       onReset={reset}
       challenge={challenge}
       challengeDone={done}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--graphite)' }}>
-        Each dot is one example: bottom row means label 0, top row means label 1. The curve is
-        σ(wx + b). <strong>Filled</strong> dots are classified correctly right now, <strong>open</strong>{' '}
-        dots are not. Two of the twelve labels are noisy — no curve gets everything.
-      </p>
       <PlotSvg frame={frame}>
         <Axes frame={frame} xLabel="feature x" yLabel="p(y = 1)" />
         {/* 0.5 threshold guide */}
@@ -243,6 +290,7 @@ export function SigmoidExplorer({ challenge }: WidgetProps) {
       >
         <span style={{ color: 'var(--graphite)' }}>{correctCount}/12 classified correctly</span>
         <span style={{ flex: 1 }} />
+        <SpeedControl value={speed.speed} onChange={speed.setSpeed} />
         <button onClick={climb} disabled={fitting}>
           <span key={fitting ? 'go' : 'idle'} className="anim-pop" style={{ display: 'inline-block' }}>
             {fitting ? 'climbing…' : 'gradient ascent'}
